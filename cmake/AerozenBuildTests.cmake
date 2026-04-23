@@ -88,14 +88,14 @@ macro(aerozen_build_tests)
       aerozen_build_executables(
         PREFIX "${TEST_TYPE}_"
         SOURCES ${aerozen_build_tests_SOURCES}
-        LIB_DEPS gtest gtest_main ${aerozen_build_tests_LIB_DEPS}
+        LIB_DEPS gtest_main gtest ${aerozen_build_tests_LIB_DEPS}
         INCLUDE_DIRS ${aerozen_build_tests_INCLUDE_DIRS}
         EXEC_LIST test_list)
     else()
       aerozen_build_executables(
         PREFIX "${TEST_TYPE}_"
         SOURCES ${aerozen_build_tests_SOURCES}
-        LIB_DEPS gtest gtest_main ${aerozen_build_tests_LIB_DEPS}
+        LIB_DEPS gtest_main gtest ${aerozen_build_tests_LIB_DEPS}
         INCLUDE_DIRS ${aerozen_build_tests_INCLUDE_DIRS}
         EXEC_LIST test_list
         EXCLUDE_PROJECT_LIB)
@@ -138,8 +138,13 @@ macro(aerozen_build_tests)
       if(Python3_Interpreter_FOUND)
         # Check that the test produced a result and create a failure if it didn't.
         # Guards against crashed and timed out tests.
-        add_test(check_${target_name} ${Python3_EXECUTABLE} ${AEROZEN_CMAKE_TOOLS_DIR}/check_test_ran.py
-          ${CMAKE_BINARY_DIR}/test_results/${target_name}.xml)
+        if(DEFINED AEROZEN_CMAKE_TOOLS_DIR AND
+           EXISTS "${AEROZEN_CMAKE_TOOLS_DIR}/check_test_ran.py")
+          add_test(check_${target_name} ${Python3_EXECUTABLE} ${AEROZEN_CMAKE_TOOLS_DIR}/check_test_ran.py
+            ${CMAKE_BINARY_DIR}/test_results/${target_name}.xml)
+        else()
+          message(WARNING "check_test_ran.py not found; skipping check_${target_name} helper test")
+        endif()
       endif()
     endforeach()
 

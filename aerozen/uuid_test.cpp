@@ -19,7 +19,7 @@
 #include <sstream>
 #include <string>
 
-#include "aerozen/uuid.hh"
+#include "aerozen/uuid.hpp"
 #include "gtest/gtest.h"
 
 namespace aerozen {

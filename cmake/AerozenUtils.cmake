@@ -249,15 +249,19 @@ macro(_aerozen_add_library_or_component)
     # Configure the public-facing header for exporting and deprecating. This
     # header provides commentary for the macros so that developers can know their
     # purpose.
-    configure_file(
-      "${AEROZEN_CMAKE_DIR}/Export.hh.in"
-      "${binary_include_dir}/Export.hh")
+    if(EXISTS "${AEROZEN_CMAKE_DIR}/Export.hh.in")
+      configure_file(
+        "${AEROZEN_CMAKE_DIR}/Export.hh.in"
+        "${binary_include_dir}/Export.hh")
 
-    # Configure the installation of the public-facing header.
-    install(
-      FILES "${binary_include_dir}/Export.hh"
-      DESTINATION "${install_include_dir}"
-      COMPONENT headers)
+      # Configure the installation of the public-facing header.
+      install(
+        FILES "${binary_include_dir}/Export.hh"
+        DESTINATION "${install_include_dir}"
+        COMPONENT headers)
+    else()
+      message(WARNING "Export.hh.in not found at ${AEROZEN_CMAKE_DIR}; skipping public Export.hh generation.")
+    endif()
 
     set_target_properties(
       ${lib_name}

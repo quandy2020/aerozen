@@ -27,10 +27,19 @@ namespace aerozen {
 
 using portable_uuid_t = uuid_t;
 
-// A portable wrapper for a UUID value.
+/**
+ * @brief A portable wrapper for a UUID value.
+ */
 class Uuid {
  public:
+  /**
+   * @brief Constructs a UUID with a generated value.
+   */
   Uuid();
+
+  /**
+   * @brief Default destructor.
+   */
   ~Uuid() = default;
 
   Uuid(const Uuid&) = default;
@@ -38,7 +47,13 @@ class Uuid {
   Uuid(Uuid&&) = default;
   Uuid& operator=(Uuid&&) = default;
 
-  // Returns the canonical UUID string (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).
+  /**
+   * @brief Returns the canonical UUID string.
+   *
+   * The format is `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
+   *
+   * @return Canonical UUID string representation.
+   */
   std::string ToString() const;
 
   friend std::ostream& operator<<(std::ostream& out, const Uuid& uuid) {
@@ -47,7 +62,9 @@ class Uuid {
   }
 
  private:
-  // UUID string length including null terminator.
+  /**
+   * @brief UUID string length including null terminator.
+   */
   static constexpr int kUuidStringLength = 37;
 
   portable_uuid_t data_;

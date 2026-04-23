@@ -142,13 +142,16 @@ macro(aerozen_configure_build)
       list(INSERT aerozen_configure_build_COMPONENTS 0 core)
 
     else()
-
-      add_subdirectory(src)
+      if(EXISTS "${CMAKE_SOURCE_DIR}/src/CMakeLists.txt")
+        add_subdirectory(src)
+      elseif(EXISTS "${CMAKE_SOURCE_DIR}/src")
+        message(WARNING "Skipping src directory because src/CMakeLists.txt was not found")
+      endif()
       _aerozen_find_include_script()
 
     endif()
 
-    if(BUILD_TESTING AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/test)
+    if(BUILD_TESTING AND EXISTS "${CMAKE_SOURCE_DIR}/test/CMakeLists.txt")
       add_subdirectory(test)
     endif()
 

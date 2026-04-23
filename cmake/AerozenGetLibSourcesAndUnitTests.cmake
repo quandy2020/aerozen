@@ -1,0 +1,68 @@
+# Copyright (C) 2026 duyongquan <quandy2020@126.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#################################################
+# aerozen_get_libsources_and_unittests(<lib_srcs> <tests>)
+#
+# Grab all the files ending in "*.cpp" from either the "src/" subdirectory or the
+# current subdirectory if "src/" does not exist. They will be collated into
+# library source files <lib_sources_var> and unittest source files <tests_var>.
+#
+# These output variables can be consumed directly by aerozen_create_core_library(~),
+# aerozen_add_component(~), aerozen_build_tests(~), and aerozen_build_executables(~).
+function(aerozen_get_libsources_and_unittests lib_sources_var tests_var)
+
+  # Glob all the source files
+  if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/src)
+
+    # Prefer files in the src/ subdirectory
+    file(GLOB source_files RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*.cpp")
+    file(GLOB test_files RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*_test.cpp")
+
+  else()
+
+    # If src/ doesn't exist, then use the current directory
+    file(GLOB source_files RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "*.cpp")
+    file(GLOB test_files RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "*_test.cpp")
+
+  endif()
+
+  # Sort the files alphabetically
+  if(source_files)
+    list(SORT source_files)
+  endif()
+
+  if(test_files)
+    list(SORT test_files)
+  endif()
+
+  # Initialize the test list
+  set(tests)
+
+  # Remove the unit tests from the list of source files
+  foreach(test_file ${test_files})
+
+    # Remove from the source_files list.
+    list(REMOVE_ITEM source_files ${test_file})
+
+    # Append to the list of tests.
+    list(APPEND tests ${test_file})
+
+  endforeach()
+
+  # Return the lists that have been created.
+  set(${lib_sources_var} ${source_files} PARENT_SCOPE)
+  set(${tests_var} ${tests} PARENT_SCOPE)
+
+endfunction()

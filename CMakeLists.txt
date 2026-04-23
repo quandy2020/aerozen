@@ -20,9 +20,11 @@ cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(aerozen VERSION 0.1.0)
 
 #============================================================================
-# Find aerozen-cmake
+# Include project cmake modules
 #============================================================================
-find_package(aerozen-cmake REQUIRED)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(AEROZEN_CMAKE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(AerozenCMake)
 
 #============================================================================
 # Configure the project
@@ -77,7 +79,7 @@ endif()
 #--------------------------------------
 # Find Protobuf
 aerozen_find_package(AerozenProtobuf
-                REQUIRED
+                REQUIRED_BY parameters
                 PRETTY Protobuf)
 
 #--------------------------------------
@@ -115,7 +117,10 @@ endif()
 
 #--------------------------------------
 # Find aerozen-utils
-aerozen_find_package(AerozenUtils VERSION 4 REQUIRED COMPONENTS cli)
+aerozen_find_package(AerozenUtils
+  VERSION 4
+  REQUIRED_BY log parameters
+  COMPONENTS cli)
 
 #--------------------------------------
 # Find ifaddrs
@@ -134,6 +139,18 @@ find_program(HAVE_AEROZEN_TOOLS aerozen)
 set (GZ_TOOLS_VER 2)
 
 #--------------------------------------
+# Find GoogleTest and provide legacy target names expected by aerozen-cmake.
+find_package(GTest REQUIRED)
+if(TARGET GTest::gtest AND NOT TARGET gtest)
+  add_library(gtest INTERFACE IMPORTED)
+  target_link_libraries(gtest INTERFACE GTest::gtest)
+endif()
+if(TARGET GTest::gtest_main AND NOT TARGET gtest_main)
+  add_library(gtest_main INTERFACE IMPORTED)
+  target_link_libraries(gtest_main INTERFACE GTest::gtest_main)
+endif()
+
+#--------------------------------------
 # Find SQLite3
 aerozen_find_package(SQLite3
   VERSION 3.7.13
@@ -144,36 +161,38 @@ aerozen_find_package(SQLite3
 #============================================================================
 # Configure the build
 #============================================================================
-aerozen_configure_build(QUIT_IF_BUILD_ERRORS
+aerozen_configure_build(EXPOSE_SYMBOLS_BY_DEFAULT
+  QUIT_IF_BUILD_ERRORS
   COMPONENTS log parameters)
 
 #============================================================================
 # aerozen command line support
 #============================================================================
-add_subdirectory(conf)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/conf/CMakeLists.txt")
+  add_subdirectory(conf)
+endif()
 
 #============================================================================
 # aerozen python bindings
 #============================================================================
 if (NOT SKIP_PYBIND11)
   if (Python3_Development_FOUND)
-    add_subdirectory(python)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/python/CMakeLists.txt")
+      add_subdirectory(python)
+    else()
+      message(WARNING "Python directory not found: Python interfaces are disabled.")
+    endif()
   else ()
     message(WARNING "Python development libraries are missing: Python interfaces are disabled.")
   endif()
 endif()
 
 #============================================================================
+# aerozen core library
+#============================================================================
+add_subdirectory(aerozen)
+
+#============================================================================
 # Create package information
 #============================================================================
 aerozen_create_packages()
-
-# #============================================================================
-# # Configure documentation
-# #============================================================================
-# configure_file(${CMAKE_SOURCE_DIR}/api.md.in ${CMAKE_BINARY_DIR}/api.md)
-# configure_file(${CMAKE_SOURCE_DIR}/tutorials.md.in ${CMAKE_BINARY_DIR}/tutorials.md)
-
-# aerozen_create_docs(
-#   API_MAINPAGE_MD "${CMAKE_BINARY_DIR}/api.md"
-#   TUTORIALS_MAINPAGE_MD "${CMAKE_BINARY_DIR}/tutorials.md")

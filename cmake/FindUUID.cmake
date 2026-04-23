@@ -17,12 +17,12 @@
 # Find uuid
 if (UNIX)
   if(NOT APPLE)
-    include(GzPkgConfig)
-    gz_pkg_check_modules_quiet(UUID uuid)
+    include(AerozenPkgConfig)
+    aerozen_pkg_check_modules_quiet(UUID uuid)
 
     if(NOT UUID_FOUND)
-      include(GzManualSearch)
-      gz_manual_search(UUID
+      include(AerozenManualSearch)
+      aerozen_manual_search(UUID
                        HEADER_NAMES uuid.h
                        LIBRARY_NAMES uuid libuuid
                        PATH_SUFFIXES uuid)

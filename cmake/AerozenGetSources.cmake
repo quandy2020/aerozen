@@ -21,7 +21,7 @@
 function(aerozen_get_sources sources_var)
 
   # GLOB all the source files
-  file(GLOB source_files "*.cc")
+  file(GLOB source_files "*.cpp")
   list(SORT source_files)
 
   # Initialize this list
