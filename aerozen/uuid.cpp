@@ -1,0 +1,47 @@
+/*
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include "aerozen/uuid.hpp"
+
+namespace aerozen {
+
+Uuid::Uuid()
+{
+  uuid_generate(data_);
+}
+
+Uuid::~Uuid()
+{
+  uuid_clear(data_);
+}
+
+std::string Uuid::ToString() const
+{
+  std::vector<char> uuidStr(kUuidStringLength);
+
+  snprintf(&uuidStr[0], Uuid::UuidStrLen,
+    "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+    this->data[0], this->data[1], this->data[2], this->data[3],
+    this->data[4], this->data[5], this->data[6], this->data[7],
+    this->data[8], this->data[9], this->data[10], this->data[11],
+    this->data[12], this->data[13], this->data[14], this->data[15]);
+
+  // Do not include the \0 in the string.
+  return std::string(uuidStr.begin(), uuidStr.end() - 1);
+}
+
+}  // namespace aerozen

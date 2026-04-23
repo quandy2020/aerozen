@@ -39,3 +39,15 @@
 
 # debug information files
 *.dwo
+
+# build directory
+build/
+
+# install directory
+install/
+
+# package directory
+package/
+
+# dist directory
+dist/

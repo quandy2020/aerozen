@@ -1,0 +1,2 @@
+/workspace/aerozen/build/CMakeFiles/edit_cache.dir
+/workspace/aerozen/build/CMakeFiles/rebuild_cache.dir
