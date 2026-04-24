@@ -19,7 +19,7 @@
 
  #include "aerozen/utils/extra_test_macros.hpp"
  
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WIN32(OnlyWindowsOn))
+GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(OnlyWindowsOn))
  {
  #if defined __APPLE__
    ADD_FAILURE() << "Windows only test on Apple platform";
@@ -28,16 +28,16 @@
  #endif
  }
  
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_WIN32(OnlyWindowsOff))
+GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(OnlyWindowsOff))
  {
- #if defined __WIN32
+#if defined AEROZEN_WINDOWS_DISABLED
    ADD_FAILURE() << "Ran on Windows platform";
  #endif
  }
  
  GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(OnlyMacOn))
  {
- #if defined _WIN32
+#if defined AEROZEN_WINDOWS_DISABLED
    ADD_FAILURE() << "Apple only test on Windows platform";
  #elif defined __linux__
    ADD_FAILURE() << "Apple only test on Linux platform";
@@ -53,7 +53,7 @@
  
  GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(OnlyLinuxOn))
  {
- #if defined _WIN32
+#if defined AEROZEN_WINDOWS_DISABLED
    ADD_FAILURE() << "Linux only test on Windows platform";
  #elif defined __APPLE__
    ADD_FAILURE() << "Linux only test on Apple platform";

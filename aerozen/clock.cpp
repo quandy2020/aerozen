@@ -25,8 +25,7 @@
 
 #include <gz/msgs/clock.pb.h>
 #include <gz/msgs/time.pb.h>
-#include <gz/transport/Clock.hh>
-#include <gz/transport/Node.hh>
+#include "aerozen/node.hpp"
 
 namespace aerozen {
 
@@ -74,8 +73,8 @@ class NetworkClock::Implementation {
   std::chrono::nanoseconds clock_time_ns;
   NetworkClock::TimeBase clock_time_base;
   mutable std::mutex clock_mutex;
-  gz::transport::Node node;
-  gz::transport::Node::Publisher pub;
+  Node node;
+  Node::Publisher pub;
 };
 
 NetworkClock::Implementation::Implementation(const std::string &_topicName,

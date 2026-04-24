@@ -85,7 +85,7 @@
    #endif
  
  
- #elif defined _MSC_VER
+#elif defined AEROZEN_MSVC_DISABLED
  
  
    #ifndef DETAIL_AEROZEN_UTILS_BEGIN_WARN_SUP_PUSH
@@ -171,7 +171,7 @@
    #endif
  
  
- #elif defined _MSC_VER
+#elif defined AEROZEN_MSVC_DISABLED
  
    #ifndef DETAIL_AEROZEN_UTILS_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR
      #define DETAIL_AEROZEN_UTILS_WARN_IGNORE__NON_VIRTUAL_DESTRUCTOR \

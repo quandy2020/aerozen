@@ -35,7 +35,7 @@
 #ifndef AEROZEN_UTILS__DETAIL__SUBPROCESS_HPP
 #define AEROZEN_UTILS__DETAIL__SUBPROCESS_HPP
 
-#if defined(_MSC_VER)
+#if defined(AEROZEN_MSVC_DISABLED)
 #pragma warning(push, 1)
 
 /* disable warning: '__cplusplus' is not defined as a preprocessor macro,
@@ -46,11 +46,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(_MSC_VER)
+#if defined(AEROZEN_MSVC_DISABLED)
 #pragma warning(pop)
 #endif
 
-#if defined(_MSC_VER)
+#if defined(AEROZEN_MSVC_DISABLED)
 #define subprocess_pure
 #define subprocess_weak __inline
 #define subprocess_tls __declspec(thread)
@@ -225,7 +225,7 @@ subprocess_weak int subprocess_alive(struct subprocess_s *const process);
 #define SUBPROCESS_NULL 0
 #endif
 
-#if !defined(_WIN32)
+#if !defined(AEROZEN_WINDOWS_DISABLED)
 #include <signal.h>
 #include <spawn.h>
 #include <stdlib.h>
@@ -234,9 +234,9 @@ subprocess_weak int subprocess_alive(struct subprocess_s *const process);
 #include <unistd.h>
 #endif
 
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
 
-#if (_MSC_VER < 1920)
+#if (AEROZEN_MSVC_DISABLED < 1920)
 #ifdef _WIN64
 typedef __int64 subprocess_intptr_t;
 typedef unsigned __int64 subprocess_size_t;
@@ -265,7 +265,7 @@ typedef struct _OVERLAPPED *LPOVERLAPPED;
 #pragma clang diagnostic pop
 #endif
 
-#ifdef _MSC_VER
+#ifdef AEROZEN_MSVC_DISABLED
 #pragma warning(push, 1)
 #endif
 #ifdef __MINGW32__
@@ -324,7 +324,7 @@ struct subprocess_overlapped_s {
 #ifdef __MINGW32__
 #pragma GCC diagnostic pop
 #endif
-#ifdef _MSC_VER
+#ifdef AEROZEN_MSVC_DISABLED
 #pragma warning(pop)
 #endif
 
@@ -400,7 +400,7 @@ struct subprocess_s {
   FILE *stdout_file;
   FILE *stderr_file;
 
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   void *hProcess;
   void *hStdInput;
   void *hEventOutput;
@@ -416,7 +416,7 @@ struct subprocess_s {
 #pragma clang diagnostic pop
 #endif
 
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
 subprocess_weak int subprocess_create_named_pipe_helper(void **rd, void **wr);
 int subprocess_create_named_pipe_helper(void **rd, void **wr) {
   const unsigned long pipeAccessInbound = 0x00000001;
@@ -434,7 +434,7 @@ int subprocess_create_named_pipe_helper(void **rd, void **wr) {
   static subprocess_tls long index = 0;
   const long unique = index++;
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
+#if defined(AEROZEN_MSVC_DISABLED) && AEROZEN_MSVC_DISABLED < 1900
 #pragma warning(push, 1)
 #pragma warning(disable : 4996)
   _snprintf(name, sizeof(name) - 1,
@@ -477,7 +477,7 @@ int subprocess_create(const char *const commandLine[], int options,
 int subprocess_create_ex(const char *const commandLine[], int options,
                          const char *const environment[],
                          struct subprocess_s *const out_process) {
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   int fd;
   void *rd, *wr;
   char *commandLineCombined;
@@ -927,7 +927,7 @@ FILE *subprocess_stderr(const struct subprocess_s *const process) {
 
 int subprocess_join(struct subprocess_s *const process,
                     int *const out_return_code) {
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   const unsigned long infinite = 0xFFFFFFFF;
 
   if (process->stdin_file) {
@@ -1002,7 +1002,7 @@ int subprocess_destroy(struct subprocess_s *const process) {
     process->stderr_file = SUBPROCESS_NULL;
   }
 
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   if (process->hProcess) {
     CloseHandle(process->hProcess);
     process->hProcess = SUBPROCESS_NULL;
@@ -1025,7 +1025,7 @@ int subprocess_destroy(struct subprocess_s *const process) {
 }
 
 int subprocess_terminate(struct subprocess_s *const process) {
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   unsigned int killed_process_exit_code;
   int success_terminate;
   int windows_call_result;
@@ -1044,7 +1044,7 @@ int subprocess_terminate(struct subprocess_s *const process) {
 
 unsigned subprocess_read_stdout(struct subprocess_s *const process,
                                 char *const buffer, unsigned size) {
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   void *handle;
   unsigned long bytes_read = 0;
   struct subprocess_overlapped_s overlapped = {0, 0, {{0, 0}}, SUBPROCESS_NULL};
@@ -1089,7 +1089,7 @@ unsigned subprocess_read_stdout(struct subprocess_s *const process,
 
 unsigned subprocess_read_stderr(struct subprocess_s *const process,
                                 char *const buffer, unsigned size) {
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   void *handle;
   unsigned long bytes_read = 0;
   struct subprocess_overlapped_s overlapped = {0, 0, {{0, 0}}, SUBPROCESS_NULL};
@@ -1138,7 +1138,7 @@ int subprocess_alive(struct subprocess_s *const process) {
   if (!is_alive) {
     return 0;
   }
-#if defined(_WIN32)
+#if defined(AEROZEN_WINDOWS_DISABLED)
   {
     const unsigned long zero = 0x0;
     const unsigned long wait_object_0 = 0x00000000L;

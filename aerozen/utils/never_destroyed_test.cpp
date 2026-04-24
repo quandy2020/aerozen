@@ -34,7 +34,7 @@
  };
  struct DtorGoesBoom
  {
- #ifdef _WIN32
+#ifdef AEROZEN_WINDOWS_DISABLED
  // Disable warning C4722 which is triggered by the exception thrown in the dtor
  #pragma warning(push)
  #pragma warning(disable : 4722)
@@ -43,7 +43,7 @@
    {
      throw Boom();
    }
- #ifdef _WIN32
+#ifdef AEROZEN_WINDOWS_DISABLED
  #pragma warning(pop)
  #endif
  };
