@@ -20,9 +20,9 @@
 #include <mutex>
 #include <string>
 
+#include "aerozen/config.hpp"
 #include "aerozen/req_handler.hpp"
 #include "aerozen/uuid.hpp"
-#include "aerozen/config.hpp"
 
 #ifdef HAVE_ZENOH
 #include <zenoh.hxx>
@@ -36,7 +36,7 @@ namespace aerozen {
 class IReqHandlerPrivate
 {
 public:
-     /**
+    /**
      * @brief Default constructor.
      */
     IReqHandlerPrivate(const std::string& _nUuid)

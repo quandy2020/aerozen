@@ -26,9 +26,9 @@
 #include <string>
 #include <utility>
 
+#include "aerozen/config.hpp"
 #include "aerozen/transport_types.hpp"
 #include "aerozen/uuid.hpp"
-#include "aerozen/config.hpp"
 
 namespace zenoh {
 class Session;
@@ -170,12 +170,13 @@ protected:
     /**
      * @brief Stores the service response as raw bytes.
      */
-    std::string rep;f
+    std::string rep;
+    f
 
-    /**
-     * @brief Stores the result of the service call.
-     */
-    bool result;
+        /**
+         * @brief Stores the result of the service call.
+         */
+        bool result;
 
     /**
      * @brief When there is a blocking service call request, the call can

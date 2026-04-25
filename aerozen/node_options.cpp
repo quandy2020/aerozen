@@ -20,30 +20,24 @@
 
 #include "aerozen/helpers.hpp"
 #include "aerozen/node_options.hpp"
+#include "aerozen/node_options_private.hpp"
 #include "aerozen/topic_utils.hpp"
 
-#include "node_options_private.hpp"
-
 namespace aerozen {
-//////////////////////////////////////////////////
 NodeOptions::NodeOptions() : dataPtr(new NodeOptionsPrivate()) {
-    // Check if the environment variable GZ_PARTITION is present.
-    std::string gzPartition;
-    if (env("GZ_PARTITION", gzPartition)) {
-        this->SetPartition(gzPartition);
+    // Check if the environment variable AEROZEN_PARTITION is present.
+    std::string partition;
+    if (env("AEROZEN_PARTITION", partition)) {
+        this->SetPartition(partition);
     }
 }
-
-//////////////////////////////////////////////////
 NodeOptions::NodeOptions(const NodeOptions& _other)
     : dataPtr(new NodeOptionsPrivate()) {
     (*this) = _other;
 }
 
-//////////////////////////////////////////////////
 NodeOptions::~NodeOptions() {}
 
-//////////////////////////////////////////////////
 NodeOptions& NodeOptions::operator=(const NodeOptions& _other) {
     this->SetNameSpace(_other.NameSpace());
     this->SetPartition(_other.Partition());
@@ -51,12 +45,10 @@ NodeOptions& NodeOptions::operator=(const NodeOptions& _other) {
     return *this;
 }
 
-//////////////////////////////////////////////////
 const std::string& NodeOptions::NameSpace() const {
     return this->dataPtr->ns;
 }
 
-//////////////////////////////////////////////////
 bool NodeOptions::SetNameSpace(const std::string& _ns) {
     if (!TopicUtils::IsValidNamespace(_ns)) {
         std::cerr << "Invalid namespace [" << _ns << "]" << std::endl;
@@ -66,12 +58,10 @@ bool NodeOptions::SetNameSpace(const std::string& _ns) {
     return true;
 }
 
-//////////////////////////////////////////////////
 const std::string& NodeOptions::Partition() const {
     return this->dataPtr->partition;
 }
 
-//////////////////////////////////////////////////
 bool NodeOptions::SetPartition(const std::string& _partition) {
     if (!TopicUtils::IsValidPartition(_partition)) {
         std::cerr << "Invalid partition name [" << _partition << "]"
@@ -82,7 +72,6 @@ bool NodeOptions::SetPartition(const std::string& _partition) {
     return true;
 }
 
-//////////////////////////////////////////////////
 bool NodeOptions::AddTopicRemap(const std::string& _fromTopic,
                                 const std::string& _toTopic) {
     // Sanity check: Make sure that both topics are valid.
@@ -108,8 +97,6 @@ bool NodeOptions::AddTopicRemap(const std::string& _fromTopic,
 
     return true;
 }
-
-//////////////////////////////////////////////////
 bool NodeOptions::TopicRemap(const std::string& _fromTopic,
                              std::string& _toTopic) const {
     // Is there any remap for this topic?

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 #include <google/protobuf/text_format.h>
-#include <gz/msgs/empty.pb.h>
+#include "aerozen/proto/empty.pb.h"
 
 #include <chrono>
 #include <cstring>
@@ -34,21 +34,19 @@
 #endif
 #include <zmq.hpp>
 
-#include "gz/transport/AdvertiseOptions.hh"
-#include "gz/transport/Helpers.hh"
-#include "gz/transport/NodeShared.hh"
-#include "gz/transport/RepHandler.hh"
-#include "gz/transport/ReqHandler.hh"
-#include "gz/transport/SubscriptionHandler.hh"
-#include "gz/transport/TransportTypes.hh"
-#include "gz/transport/Uuid.hh"
-
-#include "Discovery.hh"
-#include "NodeSharedPrivate.hh"
+#include "aerozen/advertise_options.hpp"
+#include "aerozen/discovery.hpp"
+#include "aerozen/helpers.hpp"
+#include "aerozen/node_shared.hpp"
+#include "aerozen/node_shared_private.hpp"
+#include "aerozen/rep_handler.hpp"
+#include "aerozen/req_handler.hpp"
+#include "aerozen/subscription_handler.hpp"
+#include "aerozen/uuid.hpp"
 
 using namespace std::chrono_literals;
 
-const char kGzAuthDomain[] = "gz-auth";
+const char kAerozenAuthDomain[] = "aerozen-auth";
 
 // Enum that encapsulates the possible values for ZeroMQ's setsocketopt
 // for ZMQ_PLAIN_SERVER. A value of 1 enables
@@ -60,7 +58,6 @@ enum class ZmqPlainSecurityServerOptions {
     ZMQ_PLAIN_SECURITY_SERVER_ENABLED = 1,
 };
 
-//////////////////////////////////////////////////
 // Helper to get the username and password
 bool userPass(std::string& _user, std::string& _pass) {
     char* username = std::getenv("GZ_TRANSPORT_USERNAME");
@@ -75,7 +72,6 @@ bool userPass(std::string& _user, std::string& _pass) {
     return true;
 }
 
-//////////////////////////////////////////////////
 // Helper to send messages
 #ifdef GZ_ZMQ_POST_4_3_1
 int sendHelper(zmq::socket_t& _pub, const std::string& _data,
@@ -113,7 +109,6 @@ int sendHelper(zmq::socket_t& _pub, const std::string& _data, int _type) {
 #endif
 }
 
-//////////////////////////////////////////////////
 // Helper to receive messages
 std::string receiveHelper(zmq::socket_t& _socket) {
     zmq::message_t msg(0);
@@ -128,7 +123,6 @@ std::string receiveHelper(zmq::socket_t& _socket) {
     return std::string(reinterpret_cast<char*>(msg.data()), msg.size());
 }
 
-//////////////////////////////////////////////////
 // Helper to send an authentication error. This is used by basic
 // authentication.
 void sendAuthErrorHelper(zmq::socket_t& _socket, const std::string& _err) {
@@ -147,7 +141,7 @@ void sendAuthErrorHelper(zmq::socket_t& _socket, const std::string& _err) {
 }
 
 namespace gz::transport {
-//////////////////////////////////////////////////
+
 NodeShared* NodeShared::Instance() {
     // Create an instance of NodeShared per process so the ZMQ context
     // is not shared between different processes.
@@ -186,7 +180,6 @@ NodeShared* NodeShared::Instance() {
     }
 }
 
-//////////////////////////////////////////////////
 NodeShared::NodeShared() : dataPtr(new NodeSharedPrivate) {
     // Set the multicast IP used for discovery.
     std::string envDiscoveryIp;
@@ -313,7 +306,6 @@ NodeShared::NodeShared() : dataPtr(new NodeSharedPrivate) {
     this->dataPtr->srvThread = std::thread(&NodeShared::SrvPublishThread, this);
 }
 
-//////////////////////////////////////////////////
 NodeShared::~NodeShared() {
     // Tell the service thread to terminate.
     this->dataPtr->exit = true;
@@ -336,7 +328,6 @@ NodeShared::~NodeShared() {
         this->dataPtr->accessControlThread.join();
 }
 
-//////////////////////////////////////////////////
 void NodeShared::RunReceptionTask() {
     while (!this->dataPtr->exit) {
         // Poll socket for a reply, with timeout.
@@ -362,7 +353,6 @@ void NodeShared::RunReceptionTask() {
     }
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::Publish(const std::string& _topic, char* _data,
                          const size_t _dataSize, DeallocFunc* _ffn,
                          const std::string& _msgType) {
@@ -422,7 +412,6 @@ bool NodeShared::Publish(const std::string& _topic, char* _data,
     return true;
 }
 
-//////////////////////////////////////////////////
 void NodeShared::RecvMsgUpdate() {
     zmq::message_t msg(0);
     std::string topic;
@@ -504,7 +493,6 @@ void NodeShared::RecvMsgUpdate() {
     this->TriggerCallbacks(info, data, handlerInfo);
 }
 
-//////////////////////////////////////////////////
 NodeShared::HandlerInfo NodeShared::CheckHandlerInfo(
     const std::string& _topic) const {
     HandlerInfo info;
@@ -520,7 +508,6 @@ NodeShared::HandlerInfo NodeShared::CheckHandlerInfo(
     return info;
 }
 
-//////////////////////////////////////////////////
 NodeShared::SubscriberInfo NodeShared::CheckSubscriberInfo(
     const std::string& _topic, const std::string& _msgType) const {
     SubscriberInfo info;
@@ -538,7 +525,6 @@ NodeShared::SubscriberInfo NodeShared::CheckSubscriberInfo(
     return info;
 }
 
-//////////////////////////////////////////////////
 void NodeShared::TriggerCallbacks(const MessageInfo& _info,
                                   const std::string& _msgData,
                                   const HandlerInfo& _handlerInfo) {
@@ -602,7 +588,6 @@ void NodeShared::TriggerCallbacks(const MessageInfo& _info,
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::RecvSrvRequest() {
     if (dataPtr->verbose)
         std::cout << "Message received requesting a service call" << std::endl;
@@ -809,7 +794,6 @@ void NodeShared::RecvSrvRequest() {
     //             << topic << "]\n";
 }
 
-//////////////////////////////////////////////////
 void NodeShared::RecvSrvResponse() {
     if (dataPtr->verbose)
         std::cout << "Message received containing a service call REP"
@@ -911,7 +895,6 @@ void NodeShared::RecvSrvResponse() {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::SendPendingRemoteReqs(const std::string& _topic,
                                        const std::string& _reqType,
                                        const std::string& _repType) {
@@ -1099,7 +1082,6 @@ void NodeShared::SendPendingRemoteReqs(const std::string& _topic,
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnNewConnection(const MessagePublisher& _pub) {
     std::string impl = this->GzImplementation();
     if (impl != "zeromq")
@@ -1169,7 +1151,6 @@ void NodeShared::OnNewConnection(const MessagePublisher& _pub) {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnNewDisconnection(const MessagePublisher& _pub) {
     std::lock_guard<std::recursive_mutex> lock(this->mutex);
 
@@ -1207,7 +1188,6 @@ void NodeShared::OnNewDisconnection(const MessagePublisher& _pub) {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnNewSrvConnection(const ServicePublisher& _pub) {
     std::string topic = _pub.Topic();
     std::string reqType = _pub.ReqTypeName();
@@ -1251,7 +1231,6 @@ void NodeShared::OnNewSrvConnection(const ServicePublisher& _pub) {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnNewSrvDisconnection(const ServicePublisher& _pub) {
     std::string addr = _pub.Addr();
 
@@ -1269,7 +1248,6 @@ void NodeShared::OnNewSrvDisconnection(const ServicePublisher& _pub) {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnNewRegistration(const MessagePublisher& _pub) {
     // Discard the message if the destination PUUID is not me.
     if (_pub.Ctrl() != this->pUuid)
@@ -1289,7 +1267,6 @@ void NodeShared::OnNewRegistration(const MessagePublisher& _pub) {
     this->remoteSubscribers.AddPublisher(_pub);
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnEndRegistration(const MessagePublisher& _pub) {
     // Discard the message if the destination PUUID is not me.
     if (!_pub.Ctrl().empty() && _pub.Ctrl() != this->pUuid)
@@ -1310,7 +1287,6 @@ void NodeShared::OnEndRegistration(const MessagePublisher& _pub) {
     this->remoteSubscribers.DelPublisherByNode(topic, procUuid, nodeUuid);
 }
 
-//////////////////////////////////////////////////
 void NodeShared::OnSubscribers() {
     // Get the list of local subscribers while holding the lock.
     std::vector<MessagePublisher> pubs;
@@ -1326,7 +1302,6 @@ void NodeShared::OnSubscribers() {
         this->dataPtr->msgDiscovery->SendSubscribersRep(publisher);
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::InitializeSockets() {
     try {
         // Set the hostname's ip address.
@@ -1435,23 +1410,19 @@ bool NodeShared::InitializeSockets() {
     return true;
 }
 
-/////////////////////////////////////////////////
 bool NodeShared::TopicPublishers(const std::string& _topic,
                                  SrvAddresses_M& _publishers) const {
     return this->dataPtr->srvDiscovery->Publishers(_topic, _publishers);
 }
 
-/////////////////////////////////////////////////
 bool NodeShared::DiscoverService(const std::string& _topic) const {
     return this->dataPtr->srvDiscovery->Discover(_topic);
 }
 
-/////////////////////////////////////////////////
 bool NodeShared::AdvertisePublisher(const ServicePublisher& _publisher) {
     return this->dataPtr->srvDiscovery->Advertise(_publisher);
 }
 
-/////////////////////////////////////////////////
 int NodeShared::RcvHwm() {
     if (!this->dataPtr->subscriber)
         return -1;
@@ -1471,7 +1442,6 @@ int NodeShared::RcvHwm() {
     return rcvHwm;
 }
 
-/////////////////////////////////////////////////
 int NodeShared::SndHwm() {
     if (!this->dataPtr->publisher)
         return -1;
@@ -1491,7 +1461,6 @@ int NodeShared::SndHwm() {
     return sndHwm;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::HandlerWrapper::HasSubscriber(
     const std::string& _fullyQualifiedTopic,
     const std::string& _msgType) const {
@@ -1504,21 +1473,18 @@ bool NodeShared::HandlerWrapper::HasSubscriber(
                                   rawSubscriberPtr);
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::HandlerWrapper::HasSubscriber(
     const std::string& _fullyQualifiedTopic) const {
     return this->normal.HasHandlersForTopic(_fullyQualifiedTopic) ||
            this->raw.HasHandlersForTopic(_fullyQualifiedTopic);
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::HandlerWrapper::HasSubscriberForNode(
     const std::string& _fullyQualifiedTopic, const std::string& _nUuid) const {
     return this->normal.HasHandlersForNode(_fullyQualifiedTopic, _nUuid) ||
            this->raw.HasHandlersForNode(_fullyQualifiedTopic, _nUuid);
 }
 
-//////////////////////////////////////////////////
 template <typename HandlerT>
 static void AppendNodeUuids(const HandlerStorage<HandlerT>& _handlerStorage,
                             const std::string& _fullyQualifiedTopic,
@@ -1540,7 +1506,6 @@ static void AppendNodeUuids(const HandlerStorage<HandlerT>& _handlerStorage,
     }
 }
 
-//////////////////////////////////////////////////
 std::vector<std::string> NodeShared::HandlerWrapper::NodeUuids(
     const std::string& _fullyQualifiedTopic,
     const std::string& _msgTypeName) const {
@@ -1551,7 +1516,6 @@ std::vector<std::string> NodeShared::HandlerWrapper::NodeUuids(
     return uuids;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::HandlerWrapper::RemoveHandlersForNode(
     const std::string& _fullyQualifiedTopic, const std::string& _nUuid) {
     bool removed = false;
@@ -1561,7 +1525,6 @@ bool NodeShared::HandlerWrapper::RemoveHandlersForNode(
     return removed;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::HandlerWrapper::RemoveHandler(
     const std::string& _fullyQualifiedTopic, const std::string& _nUuid,
     const std::string& _hUuid) {
@@ -1569,7 +1532,6 @@ bool NodeShared::HandlerWrapper::RemoveHandler(
            this->raw.RemoveHandler(_fullyQualifiedTopic, _nUuid, _hUuid);
 }
 
-//////////////////////////////////////////////////
 std::vector<MessagePublisher> NodeShared::HandlerWrapper::Convert(
     const std::string& _addr, const std::string& _pUuid) {
     std::vector<MessagePublisher> res;
@@ -1597,7 +1559,6 @@ std::vector<MessagePublisher> NodeShared::HandlerWrapper::Convert(
     return res;
 }
 
-//////////////////////////////////////////////////
 void NodeSharedPrivate::SecurityOnNewConnection() {
     std::string user, pass;
 
@@ -1620,7 +1581,6 @@ void NodeSharedPrivate::SecurityOnNewConnection() {
     }
 }
 
-//////////////////////////////////////////////////
 void NodeSharedPrivate::SecurityInit() {
     // Security is only applicable to zeromq backend.
     if (this->gzImplementation != "zeromq")
@@ -1649,7 +1609,6 @@ void NodeSharedPrivate::SecurityInit() {
     }
 }
 
-//////////////////////////////////////////////////
 // Access control handler for plain security.
 // This function is designed to be run in a thread.
 void NodeSharedPrivate::AccessControlHandler() {
@@ -1783,7 +1742,6 @@ void NodeSharedPrivate::AccessControlHandler() {
     delete sock;
 }
 
-/////////////////////////////////////////////////
 void NodeSharedPrivate::PublishThread() {
     // Loop until exits
     while (!this->exit) {
@@ -1861,7 +1819,6 @@ void NodeSharedPrivate::PublishThread() {
     }
 }
 
-/////////////////////////////////////////////////
 void NodeShared::SrvPublishThread() {
     // Loop until exits
     while (!this->dataPtr->exit) {
@@ -1903,7 +1860,6 @@ void NodeShared::SrvPublishThread() {
     }
 }
 
-//////////////////////////////////////////////////
 std::optional<transport::TopicStatistics> NodeShared::TopicStats(
     const std::string& _topic) const {
     if (this->dataPtr->topicStats.find(_topic) !=
@@ -1912,7 +1868,6 @@ std::optional<transport::TopicStatistics> NodeShared::TopicStats(
     return std::nullopt;
 }
 
-//////////////////////////////////////////////////
 void NodeShared::EnableStats(
     const std::string& _topic, bool _enable,
     std::function<void(const TopicStatistics& _stats)> _statCb) {
@@ -1924,7 +1879,6 @@ void NodeShared::EnableStats(
     }
 }
 
-/////////////////////////////////////////////////
 int NodeSharedPrivate::NonNegativeEnvVar(const std::string& _envVar,
                                          int _defaultValue) const {
     int numVal = _defaultValue;
@@ -1953,13 +1907,11 @@ int NodeSharedPrivate::NonNegativeEnvVar(const std::string& _envVar,
     return numVal;
 }
 
-/////////////////////////////////////////////////
 void NodeShared::AddGlobalRelay(const std::string& _relayAddress) {
     dataPtr->msgDiscovery->AddRelayAddress(_relayAddress);
     dataPtr->srvDiscovery->AddRelayAddress(_relayAddress);
 }
 
-/////////////////////////////////////////////////
 std::vector<std::string> NodeShared::GlobalRelays() const {
     // Merge relays from message and service discovery. They should be identical
     // since they're typically build from the same sources.
@@ -1974,19 +1926,16 @@ std::vector<std::string> NodeShared::GlobalRelays() const {
     return std::vector<std::string>(srvRelaySet.cbegin(), srvRelaySet.cend());
 }
 
-/////////////////////////////////////////////////
 std::string NodeShared::GzImplementation() const {
     return this->dataPtr->gzImplementation;
 }
 
 #ifdef HAVE_ZENOH
-/////////////////////////////////////////////////
 std::shared_ptr<zenoh::Session> NodeShared::Session() {
     return this->dataPtr->session;
 }
 #endif
 
-//////////////////////////////////////////////////
 bool NodeShared::Unsubscribe(const std::string& _topic,
                              const std::string& _nUuid,
                              const NodeOptions& _nOpt,
@@ -2044,7 +1993,7 @@ bool NodeShared::Unsubscribe(const std::string& _topic,
         // Remove the filter for this topic if I am the last subscriber.
         if (this->GzImplementation() == "zeromq") {
             if (!this->localSubscribers.HasSubscriber(fullyQualifiedTopic)) {
-#ifdef GZ_CPPZMQ_POST_4_7_0
+#ifdef AEROZEN_CPPZMQ_POST_4_7_0
                 this->dataPtr->subscriber->set(zmq::sockopt::unsubscribe,
                                                fullyQualifiedTopic);
 #else
@@ -2086,14 +2035,12 @@ bool NodeShared::Unsubscribe(const std::string& _topic,
     return true;
 }
 
-//////////////////////////////////////////////////
 std::unordered_set<std::string>& NodeShared::TopicsSubscribed(
     const std::string& _nUuid) const {
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
     return this->dataPtr->topicsSubscribed[_nUuid];
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::RemoveSubscribedTopic(const std::string& _topic,
                                        const std::string& _nUuid) {
     std::lock_guard<std::recursive_mutex> lk(this->mutex);
@@ -2104,7 +2051,6 @@ bool NodeShared::RemoveSubscribedTopic(const std::string& _topic,
     return this->dataPtr->topicsSubscribed.at(_nUuid).erase(_topic) > 0;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::SubscribeHelper(const std::string& _fullyQualifiedTopic,
                                  const std::string& _nUuid) {
     {
@@ -2122,7 +2068,6 @@ bool NodeShared::SubscribeHelper(const std::string& _fullyQualifiedTopic,
     return true;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::RemoveHandlersFromPubQueue(const std::string& _topic,
                                             const std::string& _nUuid) {
     // Remove from pubQueue
@@ -2155,7 +2100,6 @@ bool NodeShared::RemoveHandlersFromPubQueue(const std::string& _topic,
     return true;
 }
 
-//////////////////////////////////////////////////
 bool NodeShared::RemoveHandlerFromPubQueue(const std::string& _topic,
                                            const std::string& _nUuid,
                                            const std::string& _hUuid) {
@@ -2192,22 +2136,18 @@ bool NodeShared::RemoveHandlerFromPubQueue(const std::string& _topic,
     return true;
 }
 
-//////////////////////////////////////////////////
 std::string NodeShared::ReplierAddress() const {
     return this->dataPtr->myReplierAddress;
 }
 
-//////////////////////////////////////////////////
 std::string NodeShared::MyAddress() const {
     return this->dataPtr->myAddress;
 }
 
-//////////////////////////////////////////////////
 HandlerStorage<IReqHandler>& NodeShared::Requests() {
     return this->dataPtr->requests;
 }
 
-//////////////////////////////////////////////////
 HandlerStorage<IRepHandler>& NodeShared::Repliers() {
     return this->dataPtr->repliers;
 }

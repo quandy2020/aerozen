@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef AEROZEN_REP_HANDLER_HPP_
-#define AEROZEN_REP_HANDLER_HPP_
+#ifndef AEROZEN_REPHANDLER_HPP_
+#define AEROZEN_REPHANDLER_HPP_
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/stubs/common.h>
@@ -34,98 +34,125 @@
 #include "aerozen/uuid.hpp"
 
 namespace zenoh {
-// Forward declaration.
 class Session;
-}  // namespace zenoh
+}
 
 namespace aerozen {
-/// Forward declaration;
+
 class IRepHandlerPrivate;
 
-/// \class IRepHandler rep_handler.hpp aerozen/rep_handler.hpp
-/// \brief Interface class used to manage a replier handler.
+/**
+ * @class IRepHandler RepHandler.hh gz/transport/RepHandler.hh
+ * @brief Interface class used to manage a replier handler.
+ */
 class IRepHandler
 {
 public:
-    /// \brief Constructor.
-    /// \param[in] _pUuid Process UUID.
-    /// \param[in] _nUuid Node UUID.
+    /**
+     * @brief Constructor.
+     * @param[in] _pUuid Process UUID.
+     * @param[in] _nUuid Node UUID.
+     */
     explicit IRepHandler(const std::string& _pUuid, const std::string& _nUuid);
 
-    /// \brief Destructor.
+    /**
+     * @brief Destructor.
+     */
     virtual ~IRepHandler();
 
-    /// \brief Executes the local callback registered for this handler.
-    /// \param[in] _msgReq Input parameter (Protobuf message).
-    /// \param[out] _msgRep Output parameter (Protobuf message).
-    /// \return Service call result.
+    /**
+     * @brief Executes the local callback registered for this handler.
+     * @param[in] _msgReq Input parameter (Protobuf message).
+     * @param[out] _msgRep Output parameter (Protobuf message).
+     * @return Service call result.
+     */
     virtual bool RunLocalCallback(const ProtoMsg& _msgReq,
                                   ProtoMsg& _msgRep) = 0;
 
-    /// \brief Executes the callback registered for this handler.
-    /// \param[in] _req Serialized data received. The data will be used
-    /// to compose a specific protobuf message and will be passed to the
-    /// callback function.
-    /// \param[out] _rep Out parameter with the data serialized.
-    /// \return Service call result.
+    /**
+     * @brief Executes the callback registered for this handler.
+     * @param[in] _req Serialized data received. The data will be used
+     * to compose a specific protobuf message and will be passed to the
+     * callback function.
+     * @param[out] _rep Out parameter with the data serialized.
+     * @return Service call result.
+     */
     virtual bool RunCallback(const std::string& _req, std::string& _rep) = 0;
 
-    /// \brief Get the unique UUID of this handler.
-    /// \return a string representation of the handler UUID.
+    /**
+     * @brief Get the unique UUID of this handler.
+     * @return a string representation of the handler UUID.
+     */
     std::string HandlerUuid() const;
 
-    /// \brief Get the message type name used in the service request.
-    /// \return Message type name.
+    /**
+     * @brief Get the message type name used in the service request.
+     * @return Message type name.
+     */
     virtual std::string ReqTypeName() const = 0;
 
-    /// \brief Get the message type name used in the service response.
-    /// \return Message type name.
+    /**
+     * @brief Get the message type name used in the service response.
+     * @return Message type name.
+     */
     virtual std::string RepTypeName() const = 0;
 
 #ifdef HAVE_ZENOH
-    /// \brief Create a Zenoh queriable.
-    /// \param[in] _session Zenoh session.
-    /// \param[in] _service The service.
+    /**
+     * @brief Create a Zenoh queriable.
+     * @param[in] _session Zenoh session.
+     * @param[in] _service The service.
+     */
 protected:
     void CreateZenohQueriable(std::shared_ptr<zenoh::Session> _session,
                               const std::string& _service);
 #endif
-    /// \brief Private data.
-    std::unique_ptr<IRepHandlerPrivate> dataPtr;
+
+    /**
+     * @brief Private data.
+     */
 };
 
-/// \class RepHandler RepHandler.hh
-/// \brief It creates a service reply handler for a pair of protobuf
-/// messages containing the request parameters and the response.
-/// 'Req' is the protobuf message type containing the input parameters of
+/**
+ * @class RepHandler RepHandler.hh
+ * @brief It creates a service reply handler for a pair of protobuf
+ * messages containing the request parameters and the response.
+ * 'Req' is the protobuf message type containing the input parameters of
+ */
 // the service call. 'Rep' is the protobuf message type that will be filled
-/// with the service response.
+/**
+ * with the service response.
+ */
 template <typename Req, typename Rep>
 class RepHandler : public IRepHandler
 {
-public:
     // Documentation inherited.
     using IRepHandler::IRepHandler;
 
-    /// \brief Set the callback for this handler.
-    /// \param[in] _cb The callback with the following parameters:
-    /// * _req Protobuf message containing the service request params
-    /// * _rep Protobuf message containing the service response.
-    /// * Returns true when the service response is considered
-    ///   successful or false otherwise.
+    /**
+     * @brief Set the callback for this handler.
+     * @param[in] _cb The callback with the following parameters:
+     * * _req Protobuf message containing the service request params
+     * * _rep Protobuf message containing the service response.
+     * * Returns true when the service response is considered
+     *   successful or false otherwise.
+     */
+public:
     void SetCallback(const std::function<bool(const Req&, Rep&)>& _cb) {
         this->cb = _cb;
     }
 
 #ifdef HAVE_ZENOH
-    /// \brief Set the callback for this handler.
-    /// \param[in] _cb The callback with the following parameters:
-    /// * _req Protobuf message containing the service request params.
-    /// * _rep Protobuf message containing the service response.
-    /// * Returns true when the service response is considered
-    ///   successful or false otherwise.
-    /// \param[in] _session The Zenoh session.
-    /// \param[in] _service The service name.
+    /**
+     * @brief Set the callback for this handler.
+     * @param[in] _cb The callback with the following parameters:
+     * * _req Protobuf message containing the service request params.
+     * * _rep Protobuf message containing the service response.
+     * * Returns true when the service response is considered
+     *   successful or false otherwise.
+     * @param[in] _session The Zenoh session.
+     * @param[in] _service The service name.
+     */
     void SetCallback(const std::function<bool(const Req&, Rep&)>& _cb,
                      std::shared_ptr<zenoh::Session> _session,
                      const std::string& _service) {
@@ -202,7 +229,8 @@ public:
             return false;
         }
 
-        // Instantiate the specific protobuf message associated to this topic.
+        // Instantiate the specific protobuf message associated to this
+        // topic.
         auto msgReq = this->CreateMsg(_req);
         if (!msgReq) {
             return false;
@@ -231,9 +259,11 @@ public:
         return std::string(Rep().GetTypeName());
     }
 
-    /// \brief Create a specific protobuf message given its serialized data.
-    /// \param[in] _data The serialized data.
-    /// \return Pointer to the specific protobuf message.
+    /**
+     * @brief Create a specific protobuf message given its serialized data.
+     * @param[in] _data The serialized data.
+     * @return Pointer to the specific protobuf message.
+     */
 private:
     std::shared_ptr<Req> CreateMsg(const std::string& _data) const {
         // Instantiate a specific protobuf message
@@ -248,9 +278,11 @@ private:
         return msgPtr;
     }
 
-    /// \brief Callback to the function registered for this handler.
+    /**
+     * @brief Callback to the function registered for this handler.
+     */
     std::function<bool(const Req&, Rep&)> cb;
 };
 }  // namespace aerozen
 
-#endif  // AEROZEN_REP_HANDLER_HPP_
+#endif  // AEROZEN_REPHANDLER_HPP_

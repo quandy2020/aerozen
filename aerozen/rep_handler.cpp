@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  *
  */
 
-#include "aerozen/rep_handler.hpp"
 #include <memory>
 #include <string>
+
+#include "aerozen/config.hpp"
+#include "aerozen/rep_handler.hpp"
 #include "aerozen/topic_utils.hpp"
 #include "aerozen/uuid.hpp"
 
@@ -26,55 +28,74 @@
 #endif
 
 namespace aerozen {
-/// \internal
-/// \brief Private data for IRepHandler class.
+
+/**
+ * @brief Private data for IRepHandler class.
+ */
 class IRepHandlerPrivate
 {
-    /// \brief Default constructor.
 public:
+    /**
+     * @brief Default constructor.
+     */
     IRepHandlerPrivate(const std::string& _pUuid, const std::string& _nUuid)
         : pUuid(_pUuid), nUuid(_nUuid), hUuid(Uuid().ToString()) {}
 
-    /// \brief Destructor.
-public:
+    /**
+     * @brief Destructor.
+     */
     virtual ~IRepHandlerPrivate() = default;
 
-    /// \brief Process UUID.
-public:
+    /**
+     * @brief Process UUID.
+     */
     std::string pUuid;
 
-    /// \brief Node UUID.
-public:
+    /**
+     * @brief Node UUID.
+     */
     std::string nUuid;
 
-    /// \brief Handler UUID.
-public:
+    /**
+     * @brief Handler UUID.
+     */
     std::string hUuid;
 
 #ifdef HAVE_ZENOH
-    /// \brief Zenoh queriable to receive requests.
+    /**
+     * @brief Zenoh queriable to receive requests.
+     */
     std::unique_ptr<zenoh::Queryable<void>> zQueryable;
 
-    /// \brief The liveliness token.
-public:
+    /**
+     * @brief The liveliness token.
+     */
     std::unique_ptr<zenoh::LivelinessToken> zToken;
 #endif
 };
 
-/////////////////////////////////////////////////
+/**
+ * //////////////////////////////////////////////
+ */
 IRepHandler::IRepHandler(const std::string& _pUuid, const std::string& _nUuid)
     : dataPtr(new IRepHandlerPrivate(_pUuid, _nUuid)) {}
 
-/////////////////////////////////////////////////
+/**
+ * //////////////////////////////////////////////
+ */
 IRepHandler::~IRepHandler() {}
 
-/////////////////////////////////////////////////
+/**
+ * //////////////////////////////////////////////
+ */
 std::string IRepHandler::HandlerUuid() const {
     return this->dataPtr->hUuid;
 }
 
 #ifdef HAVE_ZENOH
-/////////////////////////////////////////////////
+/**
+ * //////////////////////////////////////////////
+ */
 void IRepHandler::CreateZenohQueriable(std::shared_ptr<zenoh::Session> _session,
                                        const std::string& _service) {
     auto onQuery = [this, _service](const zenoh::Query& _query) {

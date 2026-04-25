@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-#include <gz/msgs/discovery.pb.h>
-#include <gz/msgs/statistic.pb.h>
+#include "aerozen/proto/discovery.pb.h"
+#include "aerozen/proto/statistic.pb.h"
 
 #include <cassert>
 #include <iostream>
@@ -26,54 +26,56 @@
 #include <unordered_set>
 #include <vector>
 
-#include "gz/transport/Helpers.hh"
-#include "gz/transport/MessageInfo.hh"
-#include "gz/transport/Node.hh"
-#include "gz/transport/NodeOptions.hh"
-#include "gz/transport/NodeShared.hh"
-#include "gz/transport/TopicUtils.hh"
-#include "gz/transport/TransportTypes.hh"
-#include "gz/transport/Uuid.hh"
+#include "aerozen/helpers.hpp"
+#include "aerozen/message_info.hpp"
+#include "aerozen/node.hpp"
+#include "aerozen/node_options.hpp"
+#include "aerozen/node_private.hpp"
+#include "aerozen/node_shared.hpp"
+#include "aerozen/node_shared_private.hpp"
+#include "aerozen/topic_utils.hpp"
+#include "aerozen/transport_types.hpp"
+#include "aerozen/uuid.hpp"
 
-#include "NodePrivate.hh"
-#include "NodeSharedPrivate.hh"
+namespace aerozen {
 
-using namespace gz;
-using namespace transport;
-
-namespace gz::transport {
-inline namespace GZ_TRANSPORT_VERSION_NAMESPACE {
-//////////////////////////////////////////////////
+// --------------------------------------------------
 int rcvHwm() {
     return NodeShared::Instance()->RcvHwm();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 int sndHwm() {
     return NodeShared::Instance()->SndHwm();
 }
 
-//////////////////////////////////////////////////
-/// \internal
-/// \brief Private data for Node::Publisher class.
+// --------------------------------------------------
+/**
+ * @internal
+ * @brief Private data for Node::Publisher class.
+ */
 class Node::PublisherPrivate
 {
-    /// \brief Default constructor.
+    /**
+     * @brief Default constructor.
+     */
 public:
     PublisherPrivate() : shared(NodeShared::Instance()) {}
 
-    /// \brief Constructor
-    /// \param[in] _publisher The message publisher.
-public:
+    /**
+     * @brief Constructor
+     * @param[in] _publisher The message publisher.
+     */
     explicit PublisherPrivate(const MessagePublisher& _publisher)
         : shared(NodeShared::Instance()), publisher(_publisher) {}
 
 #ifdef HAVE_ZENOH
-    /// \brief Constructor
-    /// \param[in] _publisher The message publisher.
-    /// \param[in] _zPub The zenoh publisher.
-    /// \param[in] _zToken The zenoh liveliness token.
-public:
+    /**
+     * @brief Constructor
+     * @param[in] _publisher The message publisher.
+     * @param[in] _zPub The zenoh publisher.
+     * @param[in] _zToken The zenoh liveliness token.
+     */
     explicit PublisherPrivate(const MessagePublisher& _publisher,
                               zenoh::Publisher _zPub,
                               zenoh::LivelinessToken _zToken)
@@ -84,11 +86,12 @@ public:
     }
 #endif
 
-    /// \brief Check if this Publisher is ready to send an update based on
-    /// publication settings and the clock.
-    ///
-    /// \return True if it is okay to publish, false otherwise.
-public:
+    /**
+     * @brief Check if this Publisher is ready to send an update based on
+     * publication settings and the clock.
+     *
+     * @return True if it is okay to publish, false otherwise.
+     */
     bool ThrottledUpdateReady() const {
         if (!this->publisher.Options().Throttled())
             return true;
@@ -101,13 +104,14 @@ public:
                    .count() >= this->periodNs;
     }
 
-    /// \brief Check if this Publisher is ready to send an update based on
-    /// publication settings and the clock.
-    ///
-    /// This additionally advances the internal timestamp by one period.
-    ///
-    /// \return True if it is okay to publish, false otherwise.
-public:
+    /**
+     * @brief Check if this Publisher is ready to send an update based on
+     * publication settings and the clock.
+     *
+     * This additionally advances the internal timestamp by one period.
+     *
+     * @return True if it is okay to publish, false otherwise.
+     */
     bool UpdateThrottling() {
         if (!this->publisher.Options().Throttled())
             return true;
@@ -121,15 +125,17 @@ public:
         return true;
     }
 
-    /// \brief Check if this Publisher is valid
-    /// \return True if we have a topic to publish to, otherwise false.
-public:
+    /**
+     * @brief Check if this Publisher is valid
+     * @return True if we have a topic to publish to, otherwise false.
+     */
     bool Valid() {
         return !this->publisher.Topic().empty();
     }
 
-    /// \brief Destructor.
-public:
+    /**
+     * @brief Destructor.
+     */
     virtual ~PublisherPrivate() {
         std::lock_guard<std::recursive_mutex> lk(this->shared->mutex);
         // Notify the discovery service to unregister and unadvertise my topic.
@@ -140,7 +146,9 @@ public:
         }
     }
 
-    /// \brief Create a MessageInfo object for this Publisher
+    /**
+     * @brief Create a MessageInfo object for this Publisher
+     */
     MessageInfo CreateMessageInfo() {
         MessageInfo info;
 
@@ -153,83 +161,100 @@ public:
         return info;
     }
 
-    /// \brief Pointer to the object shared between all the nodes within the
-    /// same process.
-public:
+    /**
+     * @brief Pointer to the object shared between all the nodes within the
+     * same process.
+     */
     NodeShared* shared = nullptr;
 
-    /// \brief The message publisher.
-public:
+    /**
+     * @brief The message publisher.
+     */
     MessagePublisher publisher;
 
 #ifdef HAVE_ZENOH
-    /// \brief The zenoh publisher.
-public:
+    /**
+     * @brief The zenoh publisher.
+     */
     std::unique_ptr<zenoh::Publisher> zPub;
 
-    /// \brief The liveliness token.
-public:
+    /**
+     * @brief The liveliness token.
+     */
     std::unique_ptr<zenoh::LivelinessToken> zToken;
 #endif
 
-    /// \brief Timestamp of the last callback executed.
-public:
+    /**
+     * @brief Timestamp of the last callback executed.
+     */
     Timestamp lastCbTimestamp;
 
-    /// \brief If throttling is enabled, the minimum period for receiving a
-    /// message in nanoseconds.
-public:
+    /**
+     * @brief If throttling is enabled, the minimum period for receiving a
+     * message in nanoseconds.
+     */
     double periodNs = 0.0;
 
-    /// \brief Mutex to protect the node::publisher from race conditions.
-public:
+    /**
+     * @brief Mutex to protect the node::publisher from race conditions.
+     */
     mutable std::mutex mutex;
 };
 
-//////////////////////////////////////////////////
-/// \internal
-/// \brief Private data for Node::Subscriber class.
+// --------------------------------------------------
+/**
+ * @internal
+ * @brief Private data for Node::Subscriber class.
+ */
 class Node::SubscriberPrivate
 {
-    /// \brief Constructor
+    /**
+     * @brief Constructor
+     */
 public:
     SubscriberPrivate() : shared(NodeShared::Instance()) {}
 
-    /// \brief Check if this subscriber is valid
-    /// \return True if topic, node and handler ids are not empty.
-public:
+    /**
+     * @brief Check if this subscriber is valid
+     * @return True if topic, node and handler ids are not empty.
+     */
     bool Valid() {
         return !this->topic.empty() && !this->hUuid.empty() &&
                !this->nUuid.empty();
     }
 
-    /// \brief Pointer to the object shared between all the nodes within the
-    /// same process.
-public:
+    /**
+     * @brief Pointer to the object shared between all the nodes within the
+     * same process.
+     */
     NodeShared* shared = nullptr;
 
-    /// \brief Topic name
-public:
+    /**
+     * @brief Topic name
+     */
     std::string topic;
 
-    /// \brief Node UUID
-public:
+    /**
+     * @brief Node UUID
+     */
     std::string nUuid;
 
-    /// \brief Node options
-public:
+    /**
+     * @brief Node options
+     */
     NodeOptions nOpts;
 
-    /// \brief Handler UUID
-public:
+    /**
+     * @brief Handler UUID
+     */
     std::string hUuid;
 };
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::Subscriber()
     : dataPtr(std::make_shared<SubscriberPrivate>()) {}
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::Subscriber(const std::string& _topic,
                              const std::string& _nUuid,
                              const NodeOptions& _nOpts,
@@ -241,12 +266,12 @@ Node::Subscriber::Subscriber(const std::string& _topic,
     this->dataPtr->hUuid = _hUuid;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::~Subscriber() {
     this->Unsubscribe();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Subscriber::Unsubscribe() {
     if (!this->Valid())
         return false;
@@ -264,28 +289,28 @@ bool Node::Subscriber::Unsubscribe() {
     return res;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::operator bool() {
     return this->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::operator bool() const {
     return this->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Subscriber::Valid() const {
     return this->dataPtr->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber::Subscriber(Node::Subscriber&& _other)
     : dataPtr(std::make_shared<SubscriberPrivate>()) {
     *this = std::move(_other);
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Subscriber& Node::Subscriber::operator=(Node::Subscriber&& _other) {
     this->dataPtr->topic = _other.dataPtr->topic;
     this->dataPtr->nUuid = _other.dataPtr->nUuid;
@@ -302,10 +327,10 @@ Node::Subscriber& Node::Subscriber::operator=(Node::Subscriber&& _other) {
     return *this;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::Publisher() : dataPtr(std::make_shared<PublisherPrivate>()) {}
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::Publisher(const MessagePublisher& _publisher)
     : dataPtr(std::make_shared<PublisherPrivate>(_publisher)) {
     if (this->dataPtr->publisher.Options().Throttled()) {
@@ -315,7 +340,7 @@ Node::Publisher::Publisher(const MessagePublisher& _publisher)
 }
 
 #ifdef HAVE_ZENOH
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::Publisher(const MessagePublisher& _publisher,
                            zenoh::Publisher&& _zPub,
                            zenoh::LivelinessToken&& _zToken)
@@ -328,25 +353,25 @@ Node::Publisher::Publisher(const MessagePublisher& _publisher,
 }
 #endif
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::~Publisher() {}
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::operator bool() {
     return this->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher::operator bool() const {
     return this->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::Valid() const {
     return this->dataPtr->Valid();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::HasConnections() const {
     auto& publisher = this->dataPtr->publisher;
     const std::string& topic = publisher.Topic();
@@ -354,18 +379,20 @@ bool Node::Publisher::HasConnections() const {
 
     std::lock_guard<std::recursive_mutex> lk(this->dataPtr->shared->mutex);
 
-    /// \todo(anyone): Checking "remoteSubscribers.HasTopic()" will return
-    /// true even
-    /// if the subscriber has not successfully authenticated with the
-    /// publisher.
-    /// See Issue #73
+    /**
+     * @todo(anyone): Checking "remoteSubscribers.HasTopic()" will return
+     * true even
+     * if the subscriber has not successfully authenticated with the
+     * publisher.
+     * See Issue #73
+     */
     return this->Valid() &&
            (this->dataPtr->shared->localSubscribers.HasSubscriber(topic,
                                                                   msgType) ||
             this->dataPtr->shared->remoteSubscribers.HasTopic(topic, msgType));
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::Publish(const ProtoMsg& _msg) {
     if (!this->Valid())
         return false;
@@ -539,7 +566,7 @@ bool Node::Publisher::Publish(const ProtoMsg& _msg) {
     return true;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::PublishRaw(const std::string& _msgData,
                                  const std::string& _msgType) {
     if (!this->Valid())
@@ -613,17 +640,17 @@ bool Node::Publisher::PublishRaw(const std::string& _msgData,
     return true;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::ThrottledUpdateReady() const {
     return this->dataPtr->ThrottledUpdateReady();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Publisher::UpdateThrottling() {
     return this->dataPtr->UpdateThrottling();
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Node(const NodeOptions& _options) : dataPtr(new NodePrivate()) {
     // Generate the node UUID.
     Uuid uuid;
@@ -633,10 +660,10 @@ Node::Node(const NodeOptions& _options) : dataPtr(new NodePrivate()) {
     this->dataPtr->options = _options;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Node() : Node(gz::transport::NodeOptions()) {}
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 Node::~Node() {
     // Unsubscribe from all the topics.
     auto subsTopics = this->SubscribedTopics();
@@ -659,7 +686,7 @@ Node::~Node() {
     assert(this->AdvertisedServices().empty());
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::vector<std::string> Node::AdvertisedTopics() const {
     std::vector<std::string> v;
     std::unordered_set<std::string> result;
@@ -686,7 +713,7 @@ std::vector<std::string> Node::AdvertisedTopics() const {
     return v;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::vector<std::string> Node::SubscribedTopics() const {
     std::vector<std::string> v;
 
@@ -703,13 +730,13 @@ std::vector<std::string> Node::SubscribedTopics() const {
     return v;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::Unsubscribe(const std::string& _topic) {
     return this->dataPtr->shared->Unsubscribe(_topic, this->dataPtr->nUuid,
                                               this->Options());
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::vector<std::string> Node::AdvertisedServices() const {
     std::vector<std::string> v;
 
@@ -724,7 +751,7 @@ std::vector<std::string> Node::AdvertisedServices() const {
     return v;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::UnadvertiseSrv(const std::string& _topic) {
     // Topic remapping.
     std::string topic = _topic;
@@ -756,7 +783,7 @@ bool Node::UnadvertiseSrv(const std::string& _topic) {
     return true;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 void Node::TopicList(std::vector<std::string>& _topics) const {
     std::vector<std::string> allTopics;
     _topics.clear();
@@ -781,7 +808,7 @@ void Node::TopicList(std::vector<std::string>& _topics) const {
     }
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 void Node::ServiceList(std::vector<std::string>& _services) const {
     std::vector<std::string> allServices;
     _services.clear();
@@ -807,7 +834,7 @@ void Node::ServiceList(std::vector<std::string>& _services) const {
     }
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::SubscribeRaw(const std::string& _topic, const RawCallback& _callback,
                         const std::string& _msgType,
                         const SubscribeOptions& _opts) {
@@ -849,12 +876,12 @@ bool Node::SubscribeRaw(const std::string& _topic, const RawCallback& _callback,
     return this->SubscribeHelper(*fullyQualifiedTopic.FullTopic());
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 const NodeOptions& Node::Options() const {
     return this->dataPtr->options;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::optional<TopicStatistics> Node::TopicStats(
     const std::string& _topic) const {
     std::string fullyQualifiedTopic;
@@ -870,7 +897,7 @@ std::optional<TopicStatistics> Node::TopicStats(
     return this->dataPtr->shared->TopicStats(fullyQualifiedTopic);
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::EnableStats(const std::string& _topic, bool _enable,
                        const std::string& _publicationTopic,
                        uint64_t _publicationRate) {
@@ -905,27 +932,27 @@ bool Node::EnableStats(const std::string& _topic, bool _enable,
     return true;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 NodeShared* Node::Shared() const {
     return this->dataPtr->shared;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 const std::string& Node::NodeUuid() const {
     return this->dataPtr->nUuid;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::unordered_set<std::string>& Node::TopicsSubscribed() const {
     return this->dataPtr->shared->TopicsSubscribed(this->dataPtr->nUuid);
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 std::unordered_set<std::string>& Node::SrvsAdvertised() const {
     return this->dataPtr->srvsAdvertised;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::TopicInfo(const std::string& _topic,
                      std::vector<MessagePublisher>& _publishers,
                      std::vector<MessagePublisher>& _subscribers) const {
@@ -980,7 +1007,7 @@ bool Node::TopicInfo(const std::string& _topic,
     return true;
 }
 
-//////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::ServiceInfo(const std::string& _service,
                        std::vector<ServicePublisher>& _publishers) const {
     this->dataPtr->shared->dataPtr->srvDiscovery->WaitForInit();
@@ -1021,7 +1048,7 @@ bool Node::ServiceInfo(const std::string& _service,
     return true;
 }
 
-/////////////////////////////////////////////////
+// --------------------------------------------------
 Node::Publisher Node::Advertise(const std::string& _topic,
                                 const std::string& _msgTypeName,
                                 const AdvertiseMessageOptions& _options) {
@@ -1089,7 +1116,7 @@ Node::Publisher Node::Advertise(const std::string& _topic,
         return Publisher();
 }
 
-/////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::SubscribeHelper(const std::string& _fullyQualifiedTopic) {
     if (!this->dataPtr->shared->SubscribeHelper(_fullyQualifiedTopic,
                                                 this->dataPtr->nUuid)) {
@@ -1101,7 +1128,7 @@ bool Node::SubscribeHelper(const std::string& _fullyQualifiedTopic) {
     return true;
 }
 
-/////////////////////////////////////////////////
+// --------------------------------------------------
 bool Node::RequestRaw(const std::string& _topic, const std::string& _request,
                       const std::string& _requestType,
                       const std::string& _responseType, unsigned int _timeout,
@@ -1131,14 +1158,13 @@ bool Node::RequestRaw(const std::string& _topic, const std::string& _request,
     return executed && res->SerializeToString(&_response);
 }
 
-/////////////////////////////////////////////////
+// --------------------------------------------------
 void Node::AddGlobalRelay(const std::string& _relayAddress) {
     Shared()->AddGlobalRelay(_relayAddress);
 }
 
-/////////////////////////////////////////////////
+// --------------------------------------------------
 std::vector<std::string> Node::GlobalRelays() const {
     return Shared()->GlobalRelays();
 }
-}  // namespace GZ_TRANSPORT_VERSION_NAMESPACE
-}  // namespace gz::transport
+}  // namespace aerozen

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,44 +19,42 @@
 
 #include <string>
 
-#include "gz/transport/NetUtils.hh"
-#include "gz/transport/NodeOptions.hh"
+#include "aerozen/net_utils.hpp"
+#include "aerozen/node_options.hpp"
+#include "aerozen/utils/environment.hpp"
 
-#include <gz/utils/Environment.hh>
+using namespace aerozen;
 
-using namespace gz;
-
-//////////////////////////////////////////////////
-/// \brief Check that  is set.
+/**
+ * @brief Check that the partition is set.
+ */
 TEST(NodeOptionsTest, ignPartition) {
-    // Set GZ_PARTITION
+    // Set AEROZEN_PARTITION
     std::string aPartition = "customPartition";
-    ASSERT_TRUE(gz::utils::setenv("GZ_PARTITION", aPartition));
+    ASSERT_TRUE(aerozen::utils::setenv("AEROZEN_PARTITION", aPartition));
 
-    transport::NodeOptions opts;
+    aerozen::NodeOptions opts;
     EXPECT_EQ(opts.Partition(), aPartition);
 
-    // A partition set by the user should overwrite GZ_PARTITION.
+    // A partition set by the user should overwrite AEROZEN_PARTITION.
     std::string userPartition = "userPartition";
     opts.SetPartition(userPartition);
     EXPECT_EQ(opts.Partition(), userPartition);
 
     // Copy constructor
-    transport::NodeOptions opts2(opts);
+    aerozen::NodeOptions opts2(opts);
     EXPECT_EQ(opts.Partition(), opts2.Partition());
     EXPECT_EQ(opts.NameSpace(), opts2.NameSpace());
 
     EXPECT_FALSE(opts2.SetPartition("/"));
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the accessors.
 TEST(NodeOptionsTest, accessors) {
     // Check the default values.
-    gz::utils::unsetenv("GZ_PARTITION");
-    transport::NodeOptions opts;
+    aerozen::utils::unsetenv("AEROZEN_PARTITION");
+    aerozen::NodeOptions opts;
     EXPECT_TRUE(opts.NameSpace().empty());
-    auto defaultPartition = transport::hostname() + ":" + transport::username();
+    auto defaultPartition = aerozen::hostname() + ":" + aerozen::username();
     EXPECT_EQ(opts.Partition(), defaultPartition);
 
     // NameSpace.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@
 
 using namespace aerozen;
 
-// Global constants.
+/**
+ * Global constants.
+ */
 static const std::string g_topic = "/topic";          // NOLINT(*)
 static const std::string g_addr = "tcp://myAddress";  // NOLINT(*)
 static const std::string g_puuid = "processUUID";     // NOLINT(*)
@@ -54,8 +56,6 @@ static const std::string g_newMsgTypeName = "MessageType2";   // NOLINT(*)
 static const std::string g_newReqTypeName = "RequestType2";   // NOLINT(*)
 static const std::string g_newRepTypeName = "ResponseType2";  // NOLINT(*)
 
-//////////////////////////////////////////////////
-/// \brief Initialize some global variables.
 void init() {
     g_opts1.SetScope(g_scope);
     g_opts2.SetScope(g_newScope);
@@ -67,8 +67,9 @@ void init() {
     g_srvOpts2.SetScope(g_newScope);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the Publisher accessors.
+/**
+ * @brief Check the Publisher accessors.
+ */
 TEST(PublisherTest, Publisher) {
     init();
 
@@ -79,17 +80,25 @@ TEST(PublisherTest, Publisher) {
     EXPECT_EQ(publisher.NUuid(), g_nuuid);
     EXPECT_EQ(publisher.Options(), g_opts1);
 
-    // Copy constructor.
+    /**
+     * Copy constructor.
+     */
     Publisher pub2(publisher);
 
-    // Assignment operator.
+    /**
+     * Assignment operator.
+     */
     Publisher pub3 = pub2;
 
-    // [In]Equality operators.
+    /**
+     * [In]Equality operators.
+     */
     EXPECT_TRUE(publisher == pub3);
     EXPECT_FALSE(publisher != pub3);
 
-    // Modify the publisher's member variables.
+    /**
+     * Modify the publisher's member variables.
+     */
     publisher.SetTopic(g_newTopic);
     publisher.SetAddr(g_newAddr);
     publisher.SetPUuid(g_newPUuid);
@@ -103,24 +112,33 @@ TEST(PublisherTest, Publisher) {
     EXPECT_EQ(publisher.Options(), g_opts2);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the Publisher Pack()/Unpack().
+/**
+ * @brief Check the Publisher Pack()/Unpack().
+ */
 TEST(PublisherTest, PublisherIO) {
     init();
 
-    // Try to pack an empty publisher.
+    /**
+     * Try to pack an empty publisher.
+     */
     Publisher emptyPublisher;
 
-    // Pack a Publisher.
+    /**
+     * Pack a Publisher.
+     */
     Publisher publisher(g_topic, g_addr, g_puuid, g_nuuid, g_opts1);
     msgs::Discovery msg;
     publisher.FillDiscovery(msg);
 
-    // Unpack the Publisher.
+    /**
+     * Unpack the Publisher.
+     */
     Publisher otherPublisher;
     otherPublisher.SetFromDiscovery(msg);
 
-    // Check that after Pack() and Unpack() the Publisher remains the same.
+    /**
+     * Check that after Pack() and Unpack() the Publisher remains the same.
+     */
     EXPECT_EQ(publisher.Topic(), otherPublisher.Topic());
     EXPECT_EQ(publisher.Addr(), otherPublisher.Addr());
     EXPECT_EQ(publisher.PUuid(), otherPublisher.PUuid());
@@ -128,8 +146,9 @@ TEST(PublisherTest, PublisherIO) {
     EXPECT_EQ(publisher.Options(), otherPublisher.Options());
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the << operator
+/**
+ * @brief Check the << operator
+ */
 TEST(PublisherTest, PublisherStreamInsertion) {
     init();
 
@@ -156,8 +175,9 @@ TEST(PublisherTest, PublisherStreamInsertion) {
     EXPECT_EQ(output.str(), expectedOutput);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the MessagePublisher accessors.
+/**
+ * @brief Check the MessagePublisher accessors.
+ */
 TEST(PublisherTest, MessagePublisher) {
     init();
 
@@ -172,12 +192,16 @@ TEST(PublisherTest, MessagePublisher) {
     EXPECT_EQ(pub1.MsgTypeName(), g_msgTypeName);
     EXPECT_EQ(pub1.Options(), g_msgOpts1);
 
-    // [In]Equality operators.
+    /**
+     * [In]Equality operators.
+     */
     MessagePublisher pub2(pub1);
     EXPECT_TRUE(pub1 == pub2);
     EXPECT_FALSE(pub1 != pub2);
 
-    // Modify the publisher's member variables.
+    /**
+     * Modify the publisher's member variables.
+     */
     pub1.SetTopic(g_newTopic);
     pub1.SetAddr(g_newAddr);
     pub1.SetCtrl(g_newCtrl);
@@ -195,26 +219,35 @@ TEST(PublisherTest, MessagePublisher) {
     EXPECT_EQ(pub1.Options(), g_msgOpts2);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the MessagePublisher Pack()/Unpack().
+/**
+ * @brief Check the MessagePublisher Pack()/Unpack().
+ */
 TEST(PublisherTest, MessagePublisherIO) {
     init();
 
-    // Try to pack an empty publisher.
+    /**
+     * Try to pack an empty publisher.
+     */
     MessagePublisher emptyPublisher;
 
-    // Pack a Publisher.
+    /**
+     * Pack a Publisher.
+     */
     MessagePublisher publisher(g_topic, g_addr, g_ctrl, g_puuid, g_nuuid,
                                g_msgTypeName, g_msgOpts2);
 
     msgs::Discovery msg;
     publisher.FillDiscovery(msg);
 
-    // Unpack the Publisher.
+    /**
+     * Unpack the Publisher.
+     */
     MessagePublisher otherPublisher;
     otherPublisher.SetFromDiscovery(msg);
 
-    // Check that after Pack() and Unpack() the Publisher remains the same.
+    /**
+     * Check that after Pack() and Unpack() the Publisher remains the same.
+     */
     EXPECT_EQ(publisher.Topic(), otherPublisher.Topic());
     EXPECT_EQ(publisher.Addr(), otherPublisher.Addr());
     EXPECT_EQ(publisher.Ctrl(), otherPublisher.Ctrl());
@@ -224,8 +257,9 @@ TEST(PublisherTest, MessagePublisherIO) {
     EXPECT_EQ(publisher.Options(), otherPublisher.Options());
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the << operator
+/**
+ * @brief Check the << operator
+ */
 TEST(PublisherTest, MessagePublisherStreamInsertion) {
     init();
 
@@ -262,8 +296,9 @@ TEST(PublisherTest, MessagePublisherStreamInsertion) {
     EXPECT_EQ(output.str(), expectedOutput);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the ServicePublisher accessors.
+/**
+ * @brief Check the ServicePublisher accessors.
+ */
 TEST(PublisherTest, ServicePublisher) {
     init();
 
@@ -289,7 +324,9 @@ TEST(PublisherTest, ServicePublisher) {
     EXPECT_TRUE(pub1 == pub3);
     EXPECT_FALSE(pub1 != pub3);
 
-    // Modify the publisher's member variables.
+    /**
+     * Modify the publisher's member variables.
+     */
     pub1.SetTopic(g_newTopic);
     pub1.SetAddr(g_newAddr);
     pub1.SetSocketId(g_newSocketId);
@@ -309,26 +346,35 @@ TEST(PublisherTest, ServicePublisher) {
     EXPECT_EQ(pub1.Options(), g_srvOpts2);
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the ServicePublisher Pack()/Unpack().
+/**
+ * @brief Check the ServicePublisher Pack()/Unpack().
+ */
 TEST(PublisherTest, ServicePublisherIO) {
     init();
 
-    // Try to pack an empty publisher.
+    /**
+     * Try to pack an empty publisher.
+     */
     ServicePublisher emptyPublisher;
 
-    // Pack a Publisher.
+    /**
+     * Pack a Publisher.
+     */
     ServicePublisher publisher(g_topic, g_addr, g_socketId, g_puuid, g_nuuid,
                                g_reqTypeName, g_repTypeName, g_srvOpts2);
 
     msgs::Discovery msg;
     publisher.FillDiscovery(msg);
 
-    // Unpack the Publisher.
+    /**
+     * Unpack the Publisher.
+     */
     ServicePublisher otherPublisher;
     otherPublisher.SetFromDiscovery(msg);
 
-    // Check that after Pack() and Unpack() the Publisher remains the same.
+    /**
+     * Check that after Pack() and Unpack() the Publisher remains the same.
+     */
     EXPECT_EQ(publisher.Topic(), otherPublisher.Topic());
     EXPECT_EQ(publisher.Addr(), otherPublisher.Addr());
     EXPECT_EQ(publisher.SocketId(), otherPublisher.SocketId());
@@ -339,8 +385,9 @@ TEST(PublisherTest, ServicePublisherIO) {
     EXPECT_EQ(publisher.Options(), otherPublisher.Options());
 }
 
-//////////////////////////////////////////////////
-/// \brief Check the << operator
+/**
+ * @brief Check the << operator
+ */
 TEST(PublisherTest, ServicePublisherStreamInsertion) {
     init();
 
