@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #ifndef AEROZEN_PUBLISHER_HPP_
 #define AEROZEN_PUBLISHER_HPP_
@@ -27,13 +27,13 @@
 
 namespace aerozen {
 
-  /// \class Publisher publisher.hpp
-  /// aerozen/publisher.hpp
-  /// \brief This class stores all the information about a publisher.
-  /// It stores the topic name that publishes, addresses, UUIDs, scope, etc.
-  class Publisher
-  {
-   public:
+/// \class Publisher publisher.hpp
+/// aerozen/publisher.hpp
+/// \brief This class stores all the information about a publisher.
+/// It stores the topic name that publishes, addresses, UUIDs, scope, etc.
+class Publisher
+{
+public:
     /// \brief Default constructor.
     Publisher() = default;
 
@@ -43,10 +43,8 @@ namespace aerozen {
     /// \param[in] _pUuid Process UUID.
     /// \param[in] _nUuid node UUID.
     /// \param[in] _opts The advertise options.
-    Publisher(const std::string& _topic,
-              const std::string& _addr,
-              const std::string& _pUuid,
-              const std::string& _nUuid,
+    Publisher(const std::string& _topic, const std::string& _addr,
+              const std::string& _pUuid, const std::string& _nUuid,
               const AdvertiseOptions& _opts);
 
     /// \brief Destructor.
@@ -127,20 +125,18 @@ namespace aerozen {
     /// \brief Stream insertion operator.
     /// \param[out] _out The output stream.
     /// \param[in] _msg Publisher to write to the stream.
-    friend std::ostream& operator<<(std::ostream& _out,
-                                    const Publisher& _msg)
-    {
-      _out << "Publisher:"                              << std::endl
-           << "\tTopic: ["       << _msg.Topic() << "]" << std::endl
-           << "\tAddress: "      << _msg.Addr()         << std::endl
-           << "\tProcess UUID: " << _msg.PUuid()        << std::endl
-           << "\tNode UUID: "    << _msg.NUuid()        << std::endl
-           << _msg.Options();
+    friend std::ostream& operator<<(std::ostream& _out, const Publisher& _msg) {
+        _out << "Publisher:" << std::endl
+             << "\tTopic: [" << _msg.Topic() << "]" << std::endl
+             << "\tAddress: " << _msg.Addr() << std::endl
+             << "\tProcess UUID: " << _msg.PUuid() << std::endl
+             << "\tNode UUID: " << _msg.NUuid() << std::endl
+             << _msg.Options();
 
-      return _out;
+        return _out;
     }
 
-   protected:
+protected:
     /// \brief Topic name.
     std::string topic;
 
@@ -153,18 +149,18 @@ namespace aerozen {
     /// \brief Node UUID of the publisher.
     std::string nUuid;
 
-   private:
+private:
     /// \brief Advertised options.
     /// This member is not used when we have a derived publisher.
     AdvertiseOptions opts;
-  };
+};
 
-  /// \class MessagePublisher publisher.hpp
-  /// aerozen/publisher.hpp
-  /// \brief This class stores all the information about a message publisher.
-  class MessagePublisher : public Publisher
-  {
-   public:
+/// \class MessagePublisher publisher.hpp
+/// aerozen/publisher.hpp
+/// \brief This class stores all the information about a message publisher.
+class MessagePublisher : public Publisher
+{
+public:
     /// \brief Default constructor.
     MessagePublisher() = default;
 
@@ -229,17 +225,16 @@ namespace aerozen {
     /// \param[out] _out The output stream.
     /// \param[in] _msg MessagePublisher to write to the stream.
     friend std::ostream& operator<<(std::ostream& _out,
-                                    const MessagePublisher& _msg)
-    {
-      _out << "Publisher:"                                  << std::endl
-           << "\tTopic: ["           << _msg.Topic() << "]" << std::endl
-           << "\tAddress: "          << _msg.Addr()         << std::endl
-           << "\tProcess UUID: "     << _msg.PUuid()        << std::endl
-           << "\tNode UUID: "        << _msg.NUuid()        << std::endl
-           << "\tControl address: "  << _msg.Ctrl()         << std::endl
-           << "\tMessage type: "     << _msg.MsgTypeName()  << std::endl
-           << _msg.Options();
-      return _out;
+                                    const MessagePublisher& _msg) {
+        _out << "Publisher:" << std::endl
+             << "\tTopic: [" << _msg.Topic() << "]" << std::endl
+             << "\tAddress: " << _msg.Addr() << std::endl
+             << "\tProcess UUID: " << _msg.PUuid() << std::endl
+             << "\tNode UUID: " << _msg.NUuid() << std::endl
+             << "\tControl address: " << _msg.Ctrl() << std::endl
+             << "\tMessage type: " << _msg.MsgTypeName() << std::endl
+             << _msg.Options();
+        return _out;
     }
 
     /// \brief Equality operator. This function checks if the given
@@ -256,7 +251,7 @@ namespace aerozen {
     /// \return True if this object does not match the provided object.
     bool operator!=(const MessagePublisher& _pub) const;
 
-   private:
+private:
     /// \brief ZeroMQ control address of the publisher.
     std::string ctrl;
 
@@ -265,14 +260,14 @@ namespace aerozen {
 
     /// \brief Advertise options (e.g.: msgsPerSec).
     AdvertiseMessageOptions msgOpts;
-  };
+};
 
-  /// \class ServicePublisher publisher.hpp
-  /// aerozen/publisher.hpp
-  /// \brief This class stores all the information about a service publisher.
-  class ServicePublisher : public Publisher
-  {
-   public:
+/// \class ServicePublisher publisher.hpp
+/// aerozen/publisher.hpp
+/// \brief This class stores all the information about a service publisher.
+class ServicePublisher : public Publisher
+{
+public:
     /// \brief Default constructor.
     ServicePublisher() = default;
 
@@ -285,12 +280,9 @@ namespace aerozen {
     /// \param[in] _reqType Message type used in the service request.
     /// \param[in] _repType Message type used in the service response.
     /// \param[in] _opts Advertise options.
-    ServicePublisher(const std::string& _topic,
-                     const std::string& _addr,
-                     const std::string& _id,
-                     const std::string& _pUuid,
-                     const std::string& _nUuid,
-                     const std::string& _reqType,
+    ServicePublisher(const std::string& _topic, const std::string& _addr,
+                     const std::string& _id, const std::string& _pUuid,
+                     const std::string& _nUuid, const std::string& _reqType,
                      const std::string& _repType,
                      const AdvertiseServiceOptions& _opts);
 
@@ -350,19 +342,18 @@ namespace aerozen {
     /// \param[out] _out The output stream.
     /// \param[in] _msg ServicePublisher to write to the stream.
     friend std::ostream& operator<<(std::ostream& _out,
-                                    const ServicePublisher& _msg)
-    {
-      _out << "Publisher:"                                  << std::endl
-           << "\tTopic: ["           << _msg.Topic() << "]" << std::endl
-           << "\tAddress: "          << _msg.Addr()         << std::endl
-           << "\tProcess UUID: "     << _msg.PUuid()        << std::endl
-           << "\tNode UUID: "        << _msg.NUuid()        << std::endl
-           << "\tSocket ID: "        << _msg.SocketId()     << std::endl
-           << "\tRequest type: "     << _msg.ReqTypeName()  << std::endl
-           << "\tResponse type: "    << _msg.RepTypeName()  << std::endl
-           << _msg.Options();
+                                    const ServicePublisher& _msg) {
+        _out << "Publisher:" << std::endl
+             << "\tTopic: [" << _msg.Topic() << "]" << std::endl
+             << "\tAddress: " << _msg.Addr() << std::endl
+             << "\tProcess UUID: " << _msg.PUuid() << std::endl
+             << "\tNode UUID: " << _msg.NUuid() << std::endl
+             << "\tSocket ID: " << _msg.SocketId() << std::endl
+             << "\tRequest type: " << _msg.ReqTypeName() << std::endl
+             << "\tResponse type: " << _msg.RepTypeName() << std::endl
+             << _msg.Options();
 
-      return _out;
+        return _out;
     }
 
     /// \brief Equality operator. This function checks if the given
@@ -379,7 +370,7 @@ namespace aerozen {
     /// \return True if this object does not match the provided object.
     bool operator!=(const ServicePublisher& _srv) const;
 
-   private:
+private:
     /// \brief ZeroMQ socket ID used by this publisher.
     std::string socketId;
 
@@ -391,7 +382,7 @@ namespace aerozen {
 
     /// \brief Advertise options.
     AdvertiseServiceOptions srvOpts;
-  };
+};
 }  // namespace aerozen
 
 #endif  // AEROZEN_PUBLISHER_HPP_

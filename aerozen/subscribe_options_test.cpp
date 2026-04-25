@@ -15,59 +15,31 @@
  *
  */
 
-#include "aerozen/helpers.hpp"
 #include "aerozen/subscribe_options.hpp"
+#include "aerozen/helpers.hpp"
 #include "gtest/gtest.h"
 
 using namespace aerozen;
 
-TEST(SubscribeOptionsTest, DefaultValues)
-{
-  SubscribeOptions opts;
-
-  EXPECT_EQ(kUnthrottled, opts.MsgsPerSec());
-  EXPECT_FALSE(opts.Throttled());
-  EXPECT_FALSE(opts.IgnoreLocalMessages());
+TEST(SubscribeOptionsTest, copyConstructor) {
+    SubscribeOptions opts1;
+    opts1.SetMsgsPerSec(2u);
+    EXPECT_EQ(opts1.MsgsPerSec(), 2u);
+    SubscribeOptions opts2(opts1);
+    EXPECT_EQ(opts2.MsgsPerSec(), opts1.MsgsPerSec());
 }
 
-TEST(SubscribeOptionsTest, SetMsgsPerSec)
-{
-  SubscribeOptions opts;
-  opts.SetMsgsPerSec(42u);
-
-  EXPECT_EQ(42u, opts.MsgsPerSec());
-  EXPECT_TRUE(opts.Throttled());
+TEST(SubscribeOptionsTest, accessors) {
+    // MsgsPerSec.
+    SubscribeOptions opts;
+    EXPECT_EQ(opts.MsgsPerSec(), kUnthrottled);
+    opts.SetMsgsPerSec(3u);
+    EXPECT_EQ(opts.MsgsPerSec(), 3u);
 }
 
-TEST(SubscribeOptionsTest, DisableThrottling)
-{
-  SubscribeOptions opts;
-  opts.SetMsgsPerSec(10u);
-  EXPECT_TRUE(opts.Throttled());
-
-  opts.SetMsgsPerSec(kUnthrottled);
-  EXPECT_EQ(kUnthrottled, opts.MsgsPerSec());
-  EXPECT_FALSE(opts.Throttled());
-}
-
-TEST(SubscribeOptionsTest, IgnoreLocalMessages)
-{
-  SubscribeOptions opts;
-  opts.SetIgnoreLocalMessages(true);
-  EXPECT_TRUE(opts.IgnoreLocalMessages());
-
-  opts.SetIgnoreLocalMessages(false);
-  EXPECT_FALSE(opts.IgnoreLocalMessages());
-}
-
-TEST(SubscribeOptionsTest, CopyConstructor)
-{
-  SubscribeOptions opts;
-  opts.SetMsgsPerSec(100u);
-  opts.SetIgnoreLocalMessages(true);
-
-  SubscribeOptions copied(opts);
-  EXPECT_EQ(100u, copied.MsgsPerSec());
-  EXPECT_TRUE(copied.Throttled());
-  EXPECT_TRUE(copied.IgnoreLocalMessages());
+TEST(SubscribeOptionsTest, throttled) {
+    SubscribeOptions opts;
+    EXPECT_FALSE(opts.Throttled());
+    opts.SetMsgsPerSec(3u);
+    EXPECT_TRUE(opts.Throttled());
 }

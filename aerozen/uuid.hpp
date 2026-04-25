@@ -18,56 +18,63 @@
 #ifndef AEROZEN_UUID_HPP_
 #define AEROZEN_UUID_HPP_
 
-#include <ostream>
-#include <string>
-
 #include <uuid/uuid.h>
 
-namespace aerozen {
+#include <iostream>
+#include <string>
 
 using portable_uuid_t = uuid_t;
 
+namespace aerozen {
 /**
- * @brief A portable wrapper for a UUID value.
+ * @class Uuid Uuid.hpp aerozen/uuid.hpp
+ * @brief A portable class for representing a Universally Unique Identifier.
  */
-class Uuid {
- public:
-  /**
-   * @brief Constructs a UUID with a generated value.
-   */
-  Uuid();
+class Uuid
+{
+public:
+    /**
+     * @brief Constructor.
+     */
+    Uuid();
 
-  /**
-   * @brief Default destructor.
-   */
-  ~Uuid() = default;
+    /**
+     * @brief Destructor.
+     */
+    virtual ~Uuid();
 
-  Uuid(const Uuid&) = default;
-  Uuid& operator=(const Uuid&) = default;
-  Uuid(Uuid&&) = default;
-  Uuid& operator=(Uuid&&) = default;
+    /**
+     * @brief Return the string representation of the Uuid.
+     * @return The UUID in string format.
+     */
+    std::string ToString() const;
 
-  /**
-   * @brief Returns the canonical UUID string.
-   *
-   * The format is `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-   *
-   * @return Canonical UUID string representation.
-   */
-  std::string ToString() const;
+    /**
+     * @brief Stream insertion operator.
+     * @param[out] _out The output stream.
+     * @param[in] _uuid UUID to write to the stream.
+     */
+    friend std::ostream& operator<<(std::ostream& _out, const Uuid& _uuid) {
+        _out << _uuid.ToString();
+        return _out;
+    }
 
-  friend std::ostream& operator<<(std::ostream& out, const Uuid& uuid) {
-    out << uuid.ToString();
-    return out;
-  }
+private:
+    /**
+     * @brief Length of a UUID in string format.
+     *
+     * A UUID is a 16-octet number. In its string representation, every octet
+     * is divided in two parts, and each part (4 bits) is represented as a
+     * hexadecimal value. A UUID is also displayed in five groups separated
+     * by hyphens, in the form 8-4-4-4-12 for a total of 36 characters.
+     * To summarize: 36 octets + \0 = 37 octets.
+     */
+    static const int UuidStrLen = 37;
 
- private:
-  /**
-   * @brief UUID string length including null terminator.
-   */
-  static constexpr int kUuidStringLength = 37;
-
-  portable_uuid_t data_;
+    /**
+     * @brief Internal representation.
+     */
+    portable_uuid_t data;
 };
 }  // namespace aerozen
 

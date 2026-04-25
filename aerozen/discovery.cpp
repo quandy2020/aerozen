@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <zmq.hpp>
 
@@ -23,32 +23,27 @@
 
 // Compatibility macro for ZMQ_FD_T
 #if (ZMQ_VERSION >= 40303)
-  #define ZMQ_FD_T zmq_fd_t
+#define ZMQ_FD_T zmq_fd_t
 #else
 // Logic from newer zmq.h
-  #define ZMQ_FD_T int
+#define ZMQ_FD_T int
 #endif
 
 namespace aerozen {
-  /////////////////////////////////////////////////
-  bool pollSockets(const std::vector<int> &_sockets, const int _timeout)
-  {
-    zmq::pollitem_t items[] =
-    {
-      {0, static_cast<ZMQ_FD_T>(_sockets.at(0)), ZMQ_POLLIN, 0},
+/////////////////////////////////////////////////
+bool pollSockets(const std::vector<int>& _sockets, const int _timeout) {
+    zmq::pollitem_t items[] = {
+        {0, static_cast<ZMQ_FD_T>(_sockets.at(0)), ZMQ_POLLIN, 0},
     };
 
-    try
-    {
-      zmq::poll(&items[0], sizeof(items) / sizeof(items[0]),
-          std::chrono::milliseconds(_timeout));
-    }
-    catch(...)
-    {
-      return false;
+    try {
+        zmq::poll(&items[0], sizeof(items) / sizeof(items[0]),
+                  std::chrono::milliseconds(_timeout));
+    } catch (...) {
+        return false;
     }
 
     // Return if we got a reply.
     return items[0].revents & ZMQ_POLLIN;
-  }
+}
 }  // namespace aerozen

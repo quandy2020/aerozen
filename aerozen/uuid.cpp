@@ -15,20 +15,33 @@
  *
  */
 
+#include <string>
+#include <vector>
+
 #include "aerozen/uuid.hpp"
 
 namespace aerozen {
 
-Uuid::Uuid()
-{
-  uuid_generate(data_);
+Uuid::Uuid() {
+    uuid_generate(this->data);
 }
 
-std::string Uuid::ToString() const
-{
-  char uuid_str[kUuidStringLength];
-  uuid_unparse_lower(data_, uuid_str);
-  return std::string(uuid_str);
+Uuid::~Uuid() {
+    uuid_clear(this->data);
 }
 
+std::string Uuid::ToString() const {
+    std::vector<char> uuidStr(Uuid::UuidStrLen);
+
+    snprintf(
+        &uuidStr[0], Uuid::UuidStrLen,
+        "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        this->data[0], this->data[1], this->data[2], this->data[3],
+        this->data[4], this->data[5], this->data[6], this->data[7],
+        this->data[8], this->data[9], this->data[10], this->data[11],
+        this->data[12], this->data[13], this->data[14], this->data[15]);
+
+    // Do not include the \0 in the string.
+    return std::string(uuidStr.begin(), uuidStr.end() - 1);
+}
 }  // namespace aerozen

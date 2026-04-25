@@ -15,70 +15,64 @@
  *
  */
 
- #ifndef AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_
- #define AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_
- 
- #include <type_traits>
- 
- namespace aerozen
- {
-   namespace utils
-   {
-     namespace detail
-     {
-       //////////////////////////////////////////////////
-       template <class T>
-       void VerifyComplete()
-       {
-         // If you are brought here by a compilation error while using the
-         // ImplPtr class or the UniqueImplPtr class, be sure to use the
-         // MakeImpl<T>() or MakeUniqueImpl<T>() function when constructing your
-         // [Unique]ImplPtr instance.
-         static_assert(sizeof(T) > 0,
-                       "DefaultDelete cannot delete an incomplete type");
-         static_assert(!std::is_void<T>::value,
-                       "DefaultDelete cannot delete an incomplete type");
-       }
- 
-       //////////////////////////////////////////////////
-       template <class T>
-       void DefaultDelete(T *_ptr) noexcept
-       {
-         VerifyComplete<T>();
-         delete _ptr;
-       }
- 
-       //////////////////////////////////////////////////
-       template <class T>
-       T *DefaultCopyConstruct(const T &_source)
-       {
-         VerifyComplete<T>();
-         return new T(_source);
-       }
- 
-       //////////////////////////////////////////////////
-       template <class T>
-       void DefaultCopyAssign(T &_dest, const T &_source)
-       {
-         VerifyComplete<T>();
-         _dest = _source;
-       }
- 
-       //////////////////////////////////////////////////
-       template <class T,
-                 class CopyConstruct = T* (*)(const T&),
-                 class CopyAssign = void (*)(T&, const T&)>
-       struct CopyMoveDeleteOperations
-       {
-         public: template <class C, class A>
-         CopyMoveDeleteOperations(C &&_construct, A &&_assign);
- 
-         public: CopyConstruct construct;
-         public: CopyAssign assign;
-       };
-     }  // namespace detail
-   }  // namespace utils
- }  // namespace aerozen
- 
- #endif  // AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_
- 
+#ifndef AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_
+#define AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_
+
+#include <type_traits>
+
+namespace aerozen {
+namespace utils {
+namespace detail {
+//////////////////////////////////////////////////
+template <class T>
+void VerifyComplete() {
+    // If you are brought here by a compilation error while using the
+    // ImplPtr class or the UniqueImplPtr class, be sure to use the
+    // MakeImpl<T>() or MakeUniqueImpl<T>() function when constructing your
+    // [Unique]ImplPtr instance.
+    static_assert(sizeof(T) > 0,
+                  "DefaultDelete cannot delete an incomplete type");
+    static_assert(!std::is_void<T>::value,
+                  "DefaultDelete cannot delete an incomplete type");
+}
+
+//////////////////////////////////////////////////
+template <class T>
+void DefaultDelete(T* _ptr) noexcept {
+    VerifyComplete<T>();
+    delete _ptr;
+}
+
+//////////////////////////////////////////////////
+template <class T>
+T* DefaultCopyConstruct(const T& _source) {
+    VerifyComplete<T>();
+    return new T(_source);
+}
+
+//////////////////////////////////////////////////
+template <class T>
+void DefaultCopyAssign(T& _dest, const T& _source) {
+    VerifyComplete<T>();
+    _dest = _source;
+}
+
+//////////////////////////////////////////////////
+template <class T, class CopyConstruct = T* (*)(const T&),
+          class CopyAssign = void (*)(T&, const T&)>
+struct CopyMoveDeleteOperations {
+public:
+    template <class C, class A>
+    CopyMoveDeleteOperations(C&& _construct, A&& _assign);
+
+public:
+    CopyConstruct construct;
+
+public:
+    CopyAssign assign;
+};
+}  // namespace detail
+}  // namespace utils
+}  // namespace aerozen
+
+#endif  // AEROZEN_UTILS__DETAIL__DEFAULTOPS_HH_

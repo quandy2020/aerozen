@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
+#include "aerozen/proto/statistic.pb.h"
 
 #include <chrono>
 #include <cmath>
@@ -22,268 +23,226 @@
 #include "aerozen/topic_statistics.hpp"
 
 namespace aerozen {
-
 class TopicStatisticsPrivate
 {
-  /**
-   * @brief Default constructor.
-   */
-  public: TopicStatisticsPrivate() = default;
+public:
+    /**
+     * @brief Default constructor
+     */
+    TopicStatisticsPrivate() = default;
 
-  /**
-   * @brief Copy constructor.
-   * @param[in] _stats Statistics to copy.
-   */
-  public: explicit TopicStatisticsPrivate(const TopicStatisticsPrivate &_stats)
-          : seq(_stats.seq),
-            publication(_stats.publication),
-            reception(_stats.reception),
-            age(_stats.age),
-            droppedMsgCount(_stats.droppedMsgCount),
-            prevPublicationStamp(_stats.prevPublicationStamp),
-            prevReceptionStamp(_stats.prevReceptionStamp)
-  {
-  }
+    /**
+     * @brief Copy constructor
+     * @param[in] _stats Statistics to copy.
+     */
+    explicit TopicStatisticsPrivate(const TopicStatisticsPrivate& _stats)
+        : seq(_stats.seq),
+          publication(_stats.publication),
+          reception(_stats.reception),
+          age(_stats.age),
+          droppedMsgCount(_stats.droppedMsgCount),
+          prevPublicationStamp(_stats.prevPublicationStamp),
+          prevReceptionStamp(_stats.prevReceptionStamp) {}
 
-  /**
-   * @brief Map of address to sequence numbers.
-   *
-   * This is used to identify dropped messages.
-   */
-  public: std::map<std::string, uint64_t> seq;
+    /**
+     * @brief Map of address to sequence numbers. This is used to
+     * identify dropped messages.
+     */
+    std::map<std::string, uint64_t> seq;
 
-  /**
-   * @brief Statistics for the publisher.
-   */
-  public: Statistics publication;
+    /**
+     * @brief Statistics for the publisher.
+     */
+    Statistics publication;
 
-  /**
-   * @brief Statistics for the subscriber.
-   */
-  public: Statistics reception;
+    /**
+     * @brief Statistics for the subscriber.
+     */
+    Statistics reception;
 
-  /**
-   * @brief Age statistics.
-   */
-  public: Statistics age;
+    /**
+     * @brief Age statistics.
+     */
+    Statistics age;
 
-  /**
-   * @brief Total number of dropped messages.
-   */
-  public: uint64_t droppedMsgCount = 0;
+    /**
+     * @brief Total number of dropped messages.
+     */
+    uint64_t droppedMsgCount = 0;
 
-  /**
-   * @brief Previous publication time stamp.
-   */
-  public: uint64_t prevPublicationStamp = 0;
+    /**
+     * @brief Previous publication time stamp.
+     */
+    uint64_t prevPublicationStamp = 0;
 
-  /**
-   * @brief Previous reception time stamp.
-   */
-  public: uint64_t prevReceptionStamp = 0;
+    /**
+     * @brief Previous reception time stamp.
+     */
+    uint64_t prevReceptionStamp = 0;
 };
 
-//////////////////////////////////////////////////
-void Statistics::Update(double _stat)
-{
-  // Increase the sample count.
-  this->count++;
+void Statistics::Update(double _stat) {
+    // Increase the sample count.
+    this->count++;
 
-  // Update the rolling average
-  const double currentAvg = this->average;
-  this->average = currentAvg +
-    (_stat - currentAvg) / this->count;
+    // Update the rolling average
+    const double currentAvg = this->average;
+    this->average = currentAvg + (_stat - currentAvg) / this->count;
 
-  // Store the min and max.
-  this->min = std::min(this->min, _stat);
-  this->max = std::max(this->max, _stat);
+    // Store the min and max.
+    this->min = std::min(this->min, _stat);
+    this->max = std::max(this->max, _stat);
 
-  // Update the variance, used to calculate the standard deviation,
-  // using Welford's algorithm described at
-  // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford%27s_online_algorithm
-  this->sum_square_mean_dist += (_stat - currentAvg) *
-    (_stat - this->average);
+    // Update the variance, used to calculate the standard deviation,
+    // using Welford's algorithm described at
+    // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford%27s_online_algorithm
+    this->sumSquareMeanDist += (_stat - currentAvg) * (_stat - this->average);
 }
 
-//////////////////////////////////////////////////
-double Statistics::Avg() const
-{
-  return this->average;
+double Statistics::Avg() const {
+    return this->average;
 }
 
-//////////////////////////////////////////////////
-double Statistics::StdDev() const
-{
-  return this->count > 0 ? std::sqrt(this->sum_square_mean_dist / this->count) : 0;
+double Statistics::StdDev() const {
+    return this->count > 0 ? std::sqrt(this->sumSquareMeanDist / this->count)
+                           : 0;
 }
 
-//////////////////////////////////////////////////
-double Statistics::Min() const
-{
-  return this->min;
+double Statistics::Min() const {
+    return this->min;
 }
 
-//////////////////////////////////////////////////
-double Statistics::Max() const
-{
-  return this->max;
+double Statistics::Max() const {
+    return this->max;
 }
 
-//////////////////////////////////////////////////
-uint64_t Statistics::Count() const
-{
-  return this->count;
+uint64_t Statistics::Count() const {
+    return this->count;
 }
 
-//////////////////////////////////////////////////
-TopicStatistics::TopicStatistics()
-  : data_ptr_(new TopicStatisticsPrivate)
-{
-}
+TopicStatistics::TopicStatistics() : dataPtr(new TopicStatisticsPrivate) {}
 
-//////////////////////////////////////////////////
-TopicStatistics::TopicStatistics(const TopicStatistics &_stats)
-  : data_ptr_(new TopicStatisticsPrivate(*(_stats.data_ptr_.get())))
-{
-}
+TopicStatistics::TopicStatistics(const TopicStatistics& _stats)
+    : dataPtr(new TopicStatisticsPrivate(*(_stats.dataPtr.get()))) {}
 
-//////////////////////////////////////////////////
-TopicStatistics::~TopicStatistics()
-{
-}
+TopicStatistics::~TopicStatistics() {}
 
-//////////////////////////////////////////////////
-void TopicStatistics::Update(const std::string &_sender,
-    uint64_t _stamp, uint64_t _seq)
-{
-  // Current wall time
-  uint64_t now =
-    std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
+void TopicStatistics::Update(const std::string& _sender, uint64_t _stamp,
+                             uint64_t _seq) {
+    // Current wall time
+    uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                       std::chrono::steady_clock::now().time_since_epoch())
+                       .count();
 
-  if (this->data_ptr_->prevPublicationStamp != 0)
-  {
-    this->data_ptr_->publication.Update(static_cast<double>(_stamp -
-        this->data_ptr_->prevPublicationStamp));
-    this->data_ptr_->reception.Update(static_cast<double>(now -
-          this->data_ptr_->prevReceptionStamp));
-    this->data_ptr_->age.Update(static_cast<double>(now - _stamp));
+    if (this->dataPtr->prevPublicationStamp != 0) {
+        this->dataPtr->publication.Update(
+            static_cast<double>(_stamp - this->dataPtr->prevPublicationStamp));
+        this->dataPtr->reception.Update(
+            static_cast<double>(now - this->dataPtr->prevReceptionStamp));
+        this->dataPtr->age.Update(static_cast<double>(now - _stamp));
 
-    if (this->data_ptr_->seq[_sender] + 1 != _seq)
-    {
-      this->data_ptr_->droppedMsgCount++;
+        if (this->dataPtr->seq[_sender] + 1 != _seq) {
+            this->dataPtr->droppedMsgCount++;
+        }
     }
-  }
 
-  this->data_ptr_->prevPublicationStamp = _stamp;
-  this->data_ptr_->prevReceptionStamp = now;
+    this->dataPtr->prevPublicationStamp = _stamp;
+    this->dataPtr->prevReceptionStamp = now;
 
-  this->data_ptr_->seq[_sender] = _seq;
+    this->dataPtr->seq[_sender] = _seq;
 }
 
-//////////////////////////////////////////////////
-void TopicStatistics::FillMessage(msgs::Metric &_msg) const
-{
-  _msg.set_unit("milliseconds");
-  msgs::Statistic *stat = _msg.add_statistics();
-  stat->set_type(msgs::Statistic::SAMPLE_COUNT);
-  stat->set_name("dropped_message_count");
-  stat->set_value(static_cast<double>(this->data_ptr_->droppedMsgCount));
+void TopicStatistics::FillMessage(msgs::Metric& _msg) const {
+    _msg.set_unit("milliseconds");
+    msgs::Statistic* stat = _msg.add_statistics();
+    stat->set_type(msgs::Statistic::SAMPLE_COUNT);
+    stat->set_name("dropped_message_count");
+    stat->set_value(static_cast<double>(this->dataPtr->droppedMsgCount));
 
-  // Publication statistics
-  msgs::StatisticsGroup *statGroup = _msg.add_statistics_groups();
-  statGroup->set_name("publication_statistics");
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::AVERAGE);
-  stat->set_name("avg_hz");
-  stat->set_value(1000.0 / this->data_ptr_->publication.Avg());
+    // Publication statistics
+    msgs::StatisticsGroup* statGroup = _msg.add_statistics_groups();
+    statGroup->set_name("publication_statistics");
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::AVERAGE);
+    stat->set_name("avg_hz");
+    stat->set_value(1000.0 / this->dataPtr->publication.Avg());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MINIMUM);
-  stat->set_name("min_period");
-  stat->set_value(this->data_ptr_->publication.Min());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MINIMUM);
+    stat->set_name("min_period");
+    stat->set_value(this->dataPtr->publication.Min());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MAXIMUM);
-  stat->set_name("max_period");
-  stat->set_value(this->data_ptr_->publication.Max());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MAXIMUM);
+    stat->set_name("max_period");
+    stat->set_value(this->dataPtr->publication.Max());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::STDDEV);
-  stat->set_name("period_standard_devation");
-  stat->set_value(this->data_ptr_->publication.StdDev());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::STDDEV);
+    stat->set_name("period_standard_devation");
+    stat->set_value(this->dataPtr->publication.StdDev());
 
-  // Reception statistics
-  statGroup = _msg.add_statistics_groups();
-  statGroup->set_name("reception_statistics");
+    // Reception statistics
+    statGroup = _msg.add_statistics_groups();
+    statGroup->set_name("reception_statistics");
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::AVERAGE);
-  stat->set_name("avg_hz");
-  stat->set_value(1000.0 / this->data_ptr_->reception.Avg());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::AVERAGE);
+    stat->set_name("avg_hz");
+    stat->set_value(1000.0 / this->dataPtr->reception.Avg());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MINIMUM);
-  stat->set_name("min_period");
-  stat->set_value(this->data_ptr_->reception.Min());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MINIMUM);
+    stat->set_name("min_period");
+    stat->set_value(this->dataPtr->reception.Min());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MAXIMUM);
-  stat->set_name("max_period");
-  stat->set_value(this->data_ptr_->reception.Max());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MAXIMUM);
+    stat->set_name("max_period");
+    stat->set_value(this->dataPtr->reception.Max());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::STDDEV);
-  stat->set_name("period_standard_devation");
-  stat->set_value(this->data_ptr_->reception.StdDev());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::STDDEV);
+    stat->set_name("period_standard_devation");
+    stat->set_value(this->dataPtr->reception.StdDev());
 
-  // Age statistics
-  statGroup = _msg.add_statistics_groups();
-  statGroup->set_name("age_statistics");
+    // Age statistics
+    statGroup = _msg.add_statistics_groups();
+    statGroup->set_name("age_statistics");
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::AVERAGE);
-  stat->set_name("avg_age");
-  stat->set_value(this->data_ptr_->age.Avg());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::AVERAGE);
+    stat->set_name("avg_age");
+    stat->set_value(this->dataPtr->age.Avg());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MINIMUM);
-  stat->set_name("min_age");
-  stat->set_value(this->data_ptr_->age.Min());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MINIMUM);
+    stat->set_name("min_age");
+    stat->set_value(this->dataPtr->age.Min());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::MAXIMUM);
-  stat->set_name("max_age");
-  stat->set_value(this->data_ptr_->age.Max());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::MAXIMUM);
+    stat->set_name("max_age");
+    stat->set_value(this->dataPtr->age.Max());
 
-  stat = statGroup->add_statistics();
-  stat->set_type(msgs::Statistic::STDDEV);
-  stat->set_name("age_standard_devation");
-  stat->set_value(this->data_ptr_->age.StdDev());
+    stat = statGroup->add_statistics();
+    stat->set_type(msgs::Statistic::STDDEV);
+    stat->set_name("age_standard_devation");
+    stat->set_value(this->dataPtr->age.StdDev());
 }
 
-//////////////////////////////////////////////////
-uint64_t TopicStatistics::DroppedMsgCount() const
-{
-  return this->data_ptr_->droppedMsgCount;
+uint64_t TopicStatistics::DroppedMsgCount() const {
+    return this->dataPtr->droppedMsgCount;
 }
 
-//////////////////////////////////////////////////
-Statistics TopicStatistics::PublicationStatistics() const
-{
-  return this->data_ptr_->publication;
+Statistics TopicStatistics::PublicationStatistics() const {
+    return this->dataPtr->publication;
 }
 
-//////////////////////////////////////////////////
-Statistics TopicStatistics::ReceptionStatistics() const
-{
-  return this->data_ptr_->reception;
+Statistics TopicStatistics::ReceptionStatistics() const {
+    return this->dataPtr->reception;
 }
-
-//////////////////////////////////////////////////
-Statistics TopicStatistics::AgeStatistics() const
-{
-  return this->data_ptr_->age;
+Statistics TopicStatistics::AgeStatistics() const {
+    return this->dataPtr->age;
 }
-
-}  // namespace aerozen 
+}  // namespace aerozen

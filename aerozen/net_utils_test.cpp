@@ -20,12 +20,10 @@
 
 using namespace aerozen;
 
-TEST(NetUtilsTest, hostname)
-{
-  EXPECT_FALSE(hostname().empty());
+TEST(NetUtilsTest, hostname) {
+    EXPECT_FALSE(hostname().empty());
 }
 
-TEST(NetUtilsTest, username)
-{
-  EXPECT_TRUE(!username().empty());
+TEST(NetUtilsTest, username) {
+    EXPECT_TRUE(!username().empty());
 }

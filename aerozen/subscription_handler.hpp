@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,48 +30,50 @@
 #include <string>
 #include <utility>
 
-#include <gz/msgs/factory.h>
-
+#include "aerozen/config.hh"
+#include "aerozen/factory.hpp"
 #include "aerozen/message_info.hpp"
 #include "aerozen/subscribe_options.hpp"
 #include "aerozen/topic_utils.hpp"
 #include "aerozen/transport_types.hpp"
 #include "aerozen/uuid.hpp"
 
-namespace zenoh
-{
-  // Forward declaration.
-  class Session;
-}
+namespace zenoh {
+class Session;
+}  // namespace zenoh
 
 namespace aerozen {
-  /**
-   * @brief Forward declaration.
-   */
-  class SubscriptionHandlerBasePrivate;
 
-  /**
-   * @brief Contains functions and data common to all subscription handlers.
-   */
-  class SubscriptionHandlerBase {
+/**
+ * Forward declaration;
+ */
+class SubscriptionHandlerBasePrivate;
+
+/**
+ * @brief SubscriptionHandlerBase contains functions and data which are
+ * common to all SubscriptionHandler types.
+ */
+class SubscriptionHandlerBase
+{
+public:
     /**
      * @brief Constructor.
      * @param[in] _pUuid UUID of the process registering the handler.
      * @param[in] _nUuid UUID of the node registering the handler.
      * @param[in] _opts Subscription options.
      */
-    public: explicit SubscriptionHandlerBase(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts = SubscribeOptions());
+    explicit SubscriptionHandlerBase(
+        const std::string& _pUuid, const std::string& _nUuid,
+        const SubscribeOptions& _opts = SubscribeOptions());
 
     /**
      * @brief Destructor.
      */
-    public: virtual ~SubscriptionHandlerBase();
+    virtual ~SubscriptionHandlerBase();
 
     /**
-     * @brief Get the type of subscribed messages.
+     * @brief Get the type of the messages from which this subscriber
+     * handler is subscribed.
      * @return String representation of the message type.
      */
     virtual std::string TypeName() = 0;
@@ -80,400 +82,391 @@ namespace aerozen {
      * @brief Get the process UUID.
      * @return The string representation of the process UUID.
      */
-    public: std::string ProcUuid() const;
+    std::string ProcUuid() const;
 
     /**
      * @brief Get the node UUID.
      * @return The string representation of the node UUID.
      */
-    public: std::string NodeUuid() const;
+    std::string NodeUuid() const;
 
     /**
      * @brief Get the unique UUID of this handler.
      * @return A string representation of the handler UUID.
      */
-    public: std::string HandlerUuid() const;
+    std::string HandlerUuid() const;
 
     /**
-     * @brief Return whether local messages are ignored.
+     * @brief Return whether local messages are ignored or not.
      * @return True when local messages are ignored or false otherwise.
      */
-    public: bool IgnoreLocalMessages() const;
+    bool IgnoreLocalMessages() const;
 
-    
-protected: 
-    
+protected:
     /**
-     * @brief Check throttling and whether callback should execute.
-     * @return True if callback should execute, false otherwise.
+     * @brief Check if message subscription is throttled. If so, verify
+     * whether the callback should be executed or not.
+     * @return true if the callback should be executed or false otherwise.
      */
     bool UpdateThrottling();
 
     /**
-     * @brief Subscription options.
+     * @brief Subscribe options.
      */
-    protected: SubscribeOptions opts;
+    SubscribeOptions opts;
 
     /**
-     * @brief Minimum interval between received messages in nanoseconds.
+     * @brief If throttling is enabled, the minimum period for receiving a
+     * message in nanoseconds.
      */
-    protected: double periodNs;
+    double periodNs;
 
     /**
      * @brief Private data.
      */
-    protected: std::unique_ptr<SubscriptionHandlerBasePrivate> dataPtr;
-  };
+    std::unique_ptr<SubscriptionHandlerBasePrivate> dataPtr;
+};
 
-  /**
-   * @class ISubscriptionHandler subscription_handler.hpp
-   * aerozen/subscription_handler.hpp
-   * @brief Interface class used to manage generic protobuf messages.
-   *
-   * This extends SubscriptionHandlerBase by defining virtual functions for
-   * deserializing protobuf message data and receiving deserialized messages.
-   * Those functions are not needed by the RawSubscriptionHandler class.
-   */
-  class ISubscriptionHandler
-      : public SubscriptionHandlerBase
-  {
+/**
+ * @class ISubscriptionHandler SubscriptionHandler.hh
+ * gz/transport/SubscriptionHandler.hh
+ * @brief Interface class used to manage generic protobuf messages.
+ *
+ * This extends SubscriptionHandlerBase by defining virtual functions for
+ * deserializing protobuf message data, and for receiving deserialized
+ * messages. Those functions are not needed by the RawSubscriptionHandler
+ * class.
+ */
+class ISubscriptionHandler : public SubscriptionHandlerBase
+{
+public:
     /**
      * @brief Constructor.
      * @param[in] _pUuid UUID of the process registering the handler.
      * @param[in] _nUuid UUID of the node registering the handler.
      * @param[in] _opts Subscription options.
      */
-    public: explicit ISubscriptionHandler(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts = SubscribeOptions());
+    explicit ISubscriptionHandler(
+        const std::string& _pUuid, const std::string& _nUuid,
+        const SubscribeOptions& _opts = SubscribeOptions());
 
     /**
      * @brief Destructor.
      */
-    public: virtual ~ISubscriptionHandler() = default;
+    virtual ~ISubscriptionHandler() = default;
 
     /**
-     * @brief Execute the local callback registered for this handler.
+     * @brief Executes the local callback registered for this handler.
      * @param[in] _msg Protobuf message received.
-     * @param[in] _info Message information (e.g. topic name).
+     * @param[in] _info Message information (e.g.: topic name).
      * @return True when success, false otherwise.
      */
-    public: virtual bool RunLocalCallback(
-      const ProtoMsg &_msg,
-      const MessageInfo &_info) = 0;
+    virtual bool RunLocalCallback(const ProtoMsg& _msg,
+                                  const MessageInfo& _info) = 0;
 
     /**
-     * @brief Create a specific protobuf message from serialized data.
-     * @param[in] _data Serialized data.
-     * @param[in] _type Data type.
+     * @brief Create a specific protobuf message given its serialized data.
+     * @param[in] _data The serialized data.
+     * @param[in] _type The data type.
      * @return Pointer to the specific protobuf message.
      */
-    public: virtual const std::shared_ptr<ProtoMsg> CreateMsg(
-      const std::string &_data,
-      const std::string &_type) const = 0;
+    virtual const std::shared_ptr<ProtoMsg> CreateMsg(
+        const std::string& _data, const std::string& _type) const = 0;
 
 #ifdef HAVE_ZENOH
     /**
-     * @brief Create a Zenoh subscriber.
+     * @brief Create a Zenoh subscriber
      * @param[in] _session Zenoh session.
-     * @param[in] _fullyQualifiedTopic Topic information.
+     * @param[in] _topic The topic.
      */
-    public: void CreateGenericZenohSubscriber(
-      std::shared_ptr<zenoh::Session> _session,
-      const FullyQualifiedTopic &_fullyQualifiedTopic);
+    void CreateGenericZenohSubscriber(
+        std::shared_ptr<zenoh::Session> _session,
+        const FullyQualifiedTopic& _fullyQualifiedTopic);
 #endif
-  };
+};
 
-  /**
-   * @class SubscriptionHandler subscription_handler.hpp
-   * @brief Creates a subscription handler for a specific protobuf message.
-   *
-   * T is the protobuf message type used by this handler.
-   */
-  template <typename T> class SubscriptionHandler
-    : public ISubscriptionHandler
-  {
+/**
+ * @class SubscriptionHandler SubscriptionHandler.hh
+ * @brief It creates a subscription handler for a specific protobuf
+ * message. 'T' is the Protobuf message type that will be used for this
+ * particular handler.
+ */
+template <typename T>
+class SubscriptionHandler : public ISubscriptionHandler
+{
+public:
     // Documentation inherited.
-    public: explicit SubscriptionHandler(const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts = SubscribeOptions())
-      : ISubscriptionHandler(_pUuid, _nUuid, _opts)
-    {
-    }
+    explicit SubscriptionHandler(
+        const std::string& _pUuid, const std::string& _nUuid,
+        const SubscribeOptions& _opts = SubscribeOptions())
+        : ISubscriptionHandler(_pUuid, _nUuid, _opts) {}
 
     // Documentation inherited.
     const std::shared_ptr<ProtoMsg> CreateMsg(
-      const std::string &_data,
-      const std::string &/*_type*/) const
-    {
-      // Instantiate a specific protobuf message
-      auto msgPtr = std::make_shared<T>();
+        const std::string& _data, const std::string& /*_type*/) const {
+        // Instantiate a specific protobuf message
+        auto msgPtr = std::make_shared<T>();
 
-      // Create the message using some serialized data
-      if (!msgPtr->ParseFromString(_data))
-      {
-        std::cerr << "SubscriptionHandler::CreateMsg() error: ParseFromString"
-                  << " failed" << std::endl;
-      }
+        // Create the message using some serialized data
+        if (!msgPtr->ParseFromString(_data)) {
+            std::cerr
+                << "SubscriptionHandler::CreateMsg() error: ParseFromString"
+                << " failed" << std::endl;
+        }
 
-      return msgPtr;
+        return msgPtr;
     }
 
     // Documentation inherited.
-    std::string TypeName()
-    {
-      return std::string(T().GetTypeName());
+    std::string TypeName() {
+        return std::string(T().GetTypeName());
     }
 
     /**
      * @brief Set the callback for this handler.
-     * @param[in] _cb Callback.
+     * @param[in] _cb The callback with the following parameters:
      */
-    void SetCallback(const MsgCallback<T> &_cb)
-    {
-      this->cb = _cb;
+    void SetCallback(const MsgCallback<T>& _cb) {
+        this->cb = _cb;
     }
 
 #ifdef HAVE_ZENOH
     /**
-     * @brief Set callback and create Zenoh subscriber for this handler.
-     * @param[in] _cb Callback.
-     * @param[in] _session Zenoh session.
-     * @param[in] _fullyQualifiedTopic Topic associated with this callback.
+     * @brief Set the callback for this handler.
+     * @param[in] _cb The callback.
+     * @param[in] _session The Zenoh session.
+     * @param[in] _topic The topic associated to this callback.
      */
-    public: void SetCallback(const MsgCallback<T> &_cb,
-                             std::shared_ptr<zenoh::Session> _session,
-                             const FullyQualifiedTopic &_fullyQualifiedTopic)
-    {
-      this->SetCallback(std::move(_cb));
-      this->CreateGenericZenohSubscriber(_session, _fullyQualifiedTopic);
+public:
+    void SetCallback(const MsgCallback<T>& _cb,
+                     std::shared_ptr<zenoh::Session> _session,
+                     const FullyQualifiedTopic& _fullyQualifiedTopic) {
+        this->SetCallback(std::move(_cb));
+        this->CreateGenericZenohSubscriber(_session, _fullyQualifiedTopic);
     }
 #endif
 
     // Documentation inherited.
-    public: bool RunLocalCallback(const ProtoMsg &_msg,
-                                  const MessageInfo &_info)
-    {
-      // No callback stored.
-      if (!this->cb)
-      {
-        std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
-                  << "Callback is NULL" << std::endl;
-        return false;
-      }
+public:
+    bool RunLocalCallback(const ProtoMsg& _msg, const MessageInfo& _info) {
+        // No callback stored.
+        if (!this->cb) {
+            std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
+                      << "Callback is NULL" << std::endl;
+            return false;
+        }
 
-      // Check the subscription throttling option.
-      if (!this->UpdateThrottling())
-        return true;
+        // Check the subscription throttling option.
+        if (!this->UpdateThrottling())
+            return true;
 
 #if GOOGLE_PROTOBUF_VERSION >= 5028000
-      auto msgPtr = google::protobuf::DynamicCastMessage<T>(&_msg);
+        auto msgPtr = google::protobuf::DynamicCastMessage<T>(&_msg);
 #elif GOOGLE_PROTOBUF_VERSION >= 4022000
-      auto msgPtr = google::protobuf::internal::DownCast<const T*>(&_msg);
+        auto msgPtr = google::protobuf::internal::DownCast<const T*>(&_msg);
 #elif GOOGLE_PROTOBUF_VERSION >= 3000000
-      auto msgPtr = google::protobuf::down_cast<const T*>(&_msg);
+        auto msgPtr = google::protobuf::down_cast<const T*>(&_msg);
 #else
-      auto msgPtr = google::protobuf::internal::down_cast<const T*>(&_msg);
+        auto msgPtr = google::protobuf::internal::down_cast<const T*>(&_msg);
 #endif
 
-      // Verify the dynamically casted message is valid
-      if (msgPtr == nullptr)
-      {
-        if (_msg.GetDescriptor() != nullptr)
-        {
-          std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
-                    << "Failed to cast the message of the type "
-                    << _msg.GetDescriptor()->full_name()
-                    << " to the specified type" << '\n';
+        // Verify the dynamically casted message is valid
+        if (msgPtr == nullptr) {
+            if (_msg.GetDescriptor() != nullptr) {
+                std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
+                          << "Failed to cast the message of the type "
+                          << _msg.GetDescriptor()->full_name()
+                          << " to the specified type" << '\n';
+            } else {
+                std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
+                          << "Failed to cast the message of an unknown type"
+                          << " to the specified type" << '\n';
+            }
+            std::cerr.flush();
+            return false;
         }
-        else
-        {
-          std::cerr << "SubscriptionHandler::RunLocalCallback() error: "
-                    << "Failed to cast the message of an unknown type"
-                    << " to the specified type" << '\n';
-        }
-        std::cerr.flush();
-        return false;
-      }
 
-      this->cb(*msgPtr, _info);
-      return true;
+        this->cb(*msgPtr, _info);
+        return true;
     }
 
     /**
-     * @brief Callback registered for this handler.
+     * @brief Callback to the function registered for this handler.
      */
-    private: MsgCallback<T> cb;
-  };
+private:
+    MsgCallback<T> cb;
+};
 
-  /**
-   * @brief Specialized template for generic google::protobuf::Message callback.
-   */
-  template <> class SubscriptionHandler<ProtoMsg>
-    : public ISubscriptionHandler
-  {
+/**
+ * @brief Specialized template when the user prefers a callbacks that
+ * accepts a generic google::protobuf::message instead of a specific type.
+ */
+template <>
+class SubscriptionHandler<ProtoMsg> : public ISubscriptionHandler
+{
+public:
     // Documentation inherited.
-    public: explicit SubscriptionHandler(const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts = SubscribeOptions())
-      : ISubscriptionHandler(_pUuid, _nUuid, _opts)
-    {
+    explicit SubscriptionHandler(
+        const std::string& _pUuid, const std::string& _nUuid,
+        const SubscribeOptions& _opts = SubscribeOptions())
+        : ISubscriptionHandler(_pUuid, _nUuid, _opts) {}
+
+    // Documentation inherited.
+    const std::shared_ptr<ProtoMsg> CreateMsg(const std::string& _data,
+                                              const std::string& _type) const {
+        std::shared_ptr<google::protobuf::Message> msgPtr;
+
+        const google::protobuf::Descriptor* desc =
+            google::protobuf::DescriptorPool::generated_pool()
+                ->FindMessageTypeByName(_type);
+
+        // First, check if we have the descriptor from the generated proto
+        // classes.
+        if (desc) {
+            msgPtr.reset(google::protobuf::MessageFactory::generated_factory()
+                             ->GetPrototype(desc)
+                             ->New());
+        } else {
+            // Fallback on Gazebo Msgs if the message type is not found.
+            msgPtr = gz::msgs::Factory::New(_type);
+        }
+
+        if (!msgPtr)
+            return nullptr;
+
+        // Create the message using some serialized data
+        if (!msgPtr->ParseFromString(_data)) {
+            std::cerr << "CreateMsg() error: ParseFromString failed"
+                      << std::endl;
+            return nullptr;
+        }
+
+        return msgPtr;
     }
 
     // Documentation inherited.
-    public: const std::shared_ptr<ProtoMsg> CreateMsg(
-      const std::string &_data,
-      const std::string &_type) const
-    {
-      std::shared_ptr<google::protobuf::Message> msgPtr;
-
-      const google::protobuf::Descriptor *desc =
-        google::protobuf::DescriptorPool::generated_pool()
-          ->FindMessageTypeByName(_type);
-
-      // First, check if we have the descriptor from the generated proto
-      // classes.
-      if (desc)
-      {
-        msgPtr.reset(google::protobuf::MessageFactory::generated_factory()
-          ->GetPrototype(desc)->New());
-      }
-      else
-      {
-        // Fallback on Gazebo Msgs if the message type is not found.
-        msgPtr = gz::msgs::Factory::New(_type);
-      }
-
-      if (!msgPtr)
-        return nullptr;
-
-      // Create the message using some serialized data
-      if (!msgPtr->ParseFromString(_data))
-      {
-        std::cerr << "CreateMsg() error: ParseFromString failed" << std::endl;
-        return nullptr;
-      }
-
-      return msgPtr;
-    }
-
-    // Documentation inherited.
-    public: std::string TypeName()
-    {
-      return kGenericMessageType;
+    std::string TypeName() {
+        return kGenericMessageType;
     }
 
     /**
      * @brief Set the callback for this handler.
-     * @param[in] _cb Callback.
+     * @param[in] _cb The callback.
      */
-    public: void SetCallback(const MsgCallback<ProtoMsg> &_cb)
-    {
-      this->cb = _cb;
+    void SetCallback(const MsgCallback<ProtoMsg>& _cb) {
+        this->cb = _cb;
     }
 
+#ifdef HAVE_ZENOH
     /**
-     * @brief Set callback and create Zenoh subscriber for this handler.
-     * @param[in] _cb Callback.
-     * @param[in] _session Zenoh session.
-     * @param[in] _fullyQualifiedTopic Topic associated with this callback.
+     * @brief Set the callback for this handler.
+     * @param[in] _cb The callback.
+     * @param[in] _session The Zenoh session.
+     * @param[in] _topic The topic associated to this callback.
      */
-    public: void SetCallback(const MsgCallback<ProtoMsg> &_cb,
-                             std::shared_ptr<zenoh::Session> _session,
-                             const FullyQualifiedTopic &_fullyQualifiedTopic)
-    {
-      this->SetCallback(std::move(_cb));
-      this->CreateGenericZenohSubscriber(_session, _fullyQualifiedTopic);
+public:
+    void SetCallback(const MsgCallback<ProtoMsg>& _cb,
+                     std::shared_ptr<zenoh::Session> _session,
+                     const FullyQualifiedTopic& _fullyQualifiedTopic) {
+        this->SetCallback(std::move(_cb));
+        this->CreateGenericZenohSubscriber(_session, _fullyQualifiedTopic);
     }
+#endif
 
     // Documentation inherited.
-    public: bool RunLocalCallback(const ProtoMsg &_msg,
-                                  const MessageInfo &_info)
-    {
-      // No callback stored.
-      if (!this->cb)
-      {
-        std::cerr << "SubscriptionHandler::RunLocalCallback() "
-                  << "error: Callback is NULL" << std::endl;
-        return false;
-      }
+public:
+    bool RunLocalCallback(const ProtoMsg& _msg, const MessageInfo& _info) {
+        // No callback stored.
+        if (!this->cb) {
+            std::cerr << "SubscriptionHandler::RunLocalCallback() "
+                      << "error: Callback is NULL" << std::endl;
+            return false;
+        }
 
-      // Check the subscription throttling option.
-      if (!this->UpdateThrottling())
+        // Check the subscription throttling option.
+        if (!this->UpdateThrottling())
+            return true;
+
+        this->cb(_msg, _info);
         return true;
-
-      this->cb(_msg, _info);
-      return true;
     }
 
     /**
-     * @brief Callback registered for this handler.
+     * @brief Callback to the function registered for this handler.
      */
-    private: MsgCallback<ProtoMsg> cb;
-  };
+private:
+    MsgCallback<ProtoMsg> cb;
+};
 
-  /**
-   * @brief Manage callback for a raw subscription.
-   */
-  class RawSubscriptionHandler : public SubscriptionHandlerBase
-  {
+/**
+ * @class RawSubscriptionHandler SubscriptionHandler.hpp
+ * RawSubscriptionHandler is used to manage the callback of a raw
+ * subscription.
+ */
+class RawSubscriptionHandler : public SubscriptionHandlerBase
+{
     /**
-     * @brief Constructor.
-     * @param[in] _pUuid UUID of the process registering the handler.
-     * @param[in] _nUuid UUID of the node registering the handler.
-     * @param[in] _msgType Message type name this handler listens for.
+     * @brief Constructor
+     * @param[in] _pUuid UUID of the process registering the handler
+     * @param[in] _nUuid UUID of the node registering the handler
+     * @param[in] _msgType Name of message type that this handler should
+     * listen for. Setting this to kGenericMessageType will tell this handler
+     * to listen for all message types.
      * @param[in] _opts Subscription options.
      */
-    public: explicit RawSubscriptionHandler(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const std::string &_msgType = kGenericMessageType,
-      const SubscribeOptions &_opts = SubscribeOptions());
+public:
+    explicit RawSubscriptionHandler(
+        const std::string& _pUuid, const std::string& _nUuid,
+        const std::string& _msgType = kGenericMessageType,
+        const SubscribeOptions& _opts = SubscribeOptions());
 
     // Documentation inherited
-    public: std::string TypeName() override;
+    std::string TypeName() override;
 
     /**
      * @brief Set the callback of this handler.
-     * @param[in] _callback Callback triggered when a message is received.
+     * @param[in] _callback The callback function that will be triggered when
+     * a message is received.
      */
-    public: void SetCallback(const RawCallback &_callback);
+    void SetCallback(const RawCallback& _callback);
+
+#ifdef HAVE_ZENOH
+    /**
+     * @brief Set the callback for this handler.
+     * @param[in] _cb The callback.
+     * @param[in] _session The Zenoh session.
+     * @param[in] _topic The topic associated to this callback.
+     */
+    void SetCallback(const RawCallback& _cb,
+                     std::shared_ptr<zenoh::Session> _session,
+                     const FullyQualifiedTopic& _fullyQualifiedTopic);
+#endif
 
     /**
-     * @brief Set callback and create Zenoh subscriber for this handler.
-     * @param[in] _cb Callback.
-     * @param[in] _session Zenoh session.
-     * @param[in] _fullyQualifiedTopic Topic associated with this callback.
+     * @brief Executes the raw callback registered for this handler.
+     * @param[in] _msgData Serialized string of message data
+     * @param[in] _size Number of bytes in the serialized message data
+     * @param[in] _info Meta-data for the message
+     * @return True if the callback was triggered, false if the callback was
+     * not set.
      */
-    public: void SetCallback(const RawCallback &_cb,
-                             std::shared_ptr<zenoh::Session> _session,
-                             const FullyQualifiedTopic &_fullyQualifiedTopic);
-
+    bool RunRawCallback(const char* _msgData, const size_t _size,
+                        const MessageInfo& _info);
 
     /**
-     * @brief Execute the raw callback registered for this handler.
-     * @param[in] _msgData Serialized string of message data.
-     * @param[in] _size Number of bytes in serialized message data.
-     * @param[in] _info Metadata for the message.
-     * @return True if callback was triggered, false if callback was not set.
+     * @brief Destructor
      */
-    public: bool RunRawCallback(const char *_msgData, const size_t _size,
-                                const MessageInfo &_info);
+    ~RawSubscriptionHandler();
+
+private:
+    class Implementation;
 
     /**
-     * @brief Destructor.
+     * \internal
+     * @brief Pointer to the implementation of the class
      */
-    public: ~RawSubscriptionHandler();
-
-    private: class Implementation;
-
-    /**
-     * @internal
-     * @brief Pointer to the implementation of the class.
-     */
-    private: std::unique_ptr<Implementation> pimpl;
-  };
+    std::unique_ptr<Implementation> pimpl;
+};
 }  // namespace aerozen
 
 #endif  // AEROZEN_SUBSCRIPTION_HANDLER_HPP_

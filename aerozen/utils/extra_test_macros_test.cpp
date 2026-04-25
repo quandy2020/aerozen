@@ -15,83 +15,80 @@
  *
  */
 
- #include <gtest/gtest.h>
+#include <gtest/gtest.h>
 
- #include "aerozen/utils/extra_test_macros.hpp"
- 
-GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(OnlyWindowsOn))
- {
- #if defined __APPLE__
-   ADD_FAILURE() << "Windows only test on Apple platform";
- #elif defined __linux__
-   ADD_FAILURE() << "Windows only test on Linux platform";
- #endif
- }
- 
-GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(OnlyWindowsOff))
- {
+#include "aerozen/utils/extra_test_macros.hpp"
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(OnlyWindowsOn)) {
+#if defined __APPLE__
+    ADD_FAILURE() << "Windows only test on Apple platform";
+#elif defined __linux__
+    ADD_FAILURE() << "Windows only test on Linux platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(OnlyWindowsOff)) {
 #if defined AEROZEN_WINDOWS_DISABLED
-   ADD_FAILURE() << "Ran on Windows platform";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(OnlyMacOn))
- {
+    ADD_FAILURE() << "Ran on Windows platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(OnlyMacOn)) {
 #if defined AEROZEN_WINDOWS_DISABLED
-   ADD_FAILURE() << "Apple only test on Windows platform";
- #elif defined __linux__
-   ADD_FAILURE() << "Apple only test on Linux platform";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_MAC(OnlyMacOff))
- {
- #if defined __APPLE__
-   ADD_FAILURE() << "Ran on Apple platform";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(OnlyLinuxOn))
- {
+    ADD_FAILURE() << "Apple only test on Windows platform";
+#elif defined __linux__
+    ADD_FAILURE() << "Apple only test on Linux platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_MAC(OnlyMacOff)) {
+#if defined __APPLE__
+    ADD_FAILURE() << "Ran on Apple platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(OnlyLinuxOn)) {
 #if defined AEROZEN_WINDOWS_DISABLED
-   ADD_FAILURE() << "Linux only test on Windows platform";
- #elif defined __APPLE__
-   ADD_FAILURE() << "Linux only test on Apple platform";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(OnlyLinuxOff))
- {
- #if defined __linux__
-   ADD_FAILURE() << "Ran on Linux platform";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(OnlyArm32On))
- {
- #if defined __aarch64__ || defined _M_ARM64
-   ADD_FAILURE() << "Ran on Arm64 arch";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(OnlyArm32Off))
- {
- #if defined __arm__ || defined _M_ARM
-   ADD_FAILURE() << "Ran on Arm32 arch";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(OnlyArm64On))
- {
- #if defined __arm__ || defined _M_ARM
-   ADD_FAILURE() << "Ran on Arm32 arch";
- #endif
- }
- 
- GTEST_TEST(ExtraTestMacros, AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(OnlyArm64Off))
- {
- #if defined __aarch64__ || defined _M_ARM64
-   ADD_FAILURE() << "Ran on Arm64 arch";
- #endif
- }
- 
+    ADD_FAILURE() << "Linux only test on Windows platform";
+#elif defined __APPLE__
+    ADD_FAILURE() << "Linux only test on Apple platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(OnlyLinuxOff)) {
+#if defined __linux__
+    ADD_FAILURE() << "Ran on Linux platform";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(OnlyArm32On)) {
+#if defined __aarch64__ || defined _M_ARM64
+    ADD_FAILURE() << "Ran on Arm64 arch";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(OnlyArm32Off)) {
+#if defined __arm__ || defined _M_ARM
+    ADD_FAILURE() << "Ran on Arm32 arch";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(OnlyArm64On)) {
+#if defined __arm__ || defined _M_ARM
+    ADD_FAILURE() << "Ran on Arm32 arch";
+#endif
+}
+
+GTEST_TEST(ExtraTestMacros,
+           AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(OnlyArm64Off)) {
+#if defined __aarch64__ || defined _M_ARM64
+    ADD_FAILURE() << "Ran on Arm64 arch";
+#endif
+}

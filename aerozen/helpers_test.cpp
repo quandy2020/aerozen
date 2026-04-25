@@ -26,89 +26,83 @@ using namespace aerozen;
 
 //////////////////////////////////////////////////
 /// \brief Check the env() function.
-TEST(HelpersTest, env)
-{
-  // Create a random string.
-  std::string name = testing::getRandomNumber();
+TEST(HelpersTest, env) {
+    // Create a random string.
+    std::string name = testing::getRandomNumber();
 
-  // Check that an unknown environment variable returns false.
-  std::string value;
-  EXPECT_FALSE(transport::env(name, value));
+    // Check that an unknown environment variable returns false.
+    std::string value;
+    EXPECT_FALSE(transport::env(name, value));
 
-  // Create a random environment variable and give it its name as value.
-  ASSERT_TRUE(gz::utils::setenv(name, name));
+    // Create a random environment variable and give it its name as value.
+    ASSERT_TRUE(gz::utils::setenv(name, name));
 
-  // Check that we find the environment variable and the value is correct.
-  EXPECT_TRUE(transport::env(name, value));
-  EXPECT_EQ(name, value);
+    // Check that we find the environment variable and the value is correct.
+    EXPECT_TRUE(transport::env(name, value));
+    EXPECT_EQ(name, value);
 }
 
 /////////////////////////////////////////////////
-TEST(HelpersTest, SplitNoDelimiterPresent)
-{
-  char delim = ':';
-  std::string orig = "Hello World!";
-  std::vector<std::string> pieces = transport::split(orig, delim);
-  ASSERT_LT(0u, pieces.size());
-  EXPECT_EQ(1u, pieces.size());
-  EXPECT_EQ(orig, pieces[0]);
+TEST(HelpersTest, SplitNoDelimiterPresent) {
+    char delim = ':';
+    std::string orig = "Hello World!";
+    std::vector<std::string> pieces = transport::split(orig, delim);
+    ASSERT_LT(0u, pieces.size());
+    EXPECT_EQ(1u, pieces.size());
+    EXPECT_EQ(orig, pieces[0]);
 }
 
 /////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterInMiddle)
-{
-  char delim = ' ';
-  std::string orig = "Hello World!";
-  std::vector<std::string> pieces = transport::split(orig, delim);
-  ASSERT_LT(1u, pieces.size());
-  EXPECT_EQ(2u, pieces.size());
-  EXPECT_EQ("Hello", pieces[0]);
-  EXPECT_EQ("World!", pieces[1]);
+TEST(HelpersTest, SplitOneDelimiterInMiddle) {
+    char delim = ' ';
+    std::string orig = "Hello World!";
+    std::vector<std::string> pieces = transport::split(orig, delim);
+    ASSERT_LT(1u, pieces.size());
+    EXPECT_EQ(2u, pieces.size());
+    EXPECT_EQ("Hello", pieces[0]);
+    EXPECT_EQ("World!", pieces[1]);
 }
 
 /////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterAtBeginning)
-{
-  char delim = ':';
-  std::string orig = ":Hello World!";
-  std::vector<std::string> pieces = transport::split(orig, delim);
-  ASSERT_LT(1u, pieces.size());
-  EXPECT_EQ(2u, pieces.size());
-  EXPECT_EQ("", pieces[0]);
-  EXPECT_EQ("Hello World!", pieces[1]);
+TEST(HelpersTest, SplitOneDelimiterAtBeginning) {
+    char delim = ':';
+    std::string orig = ":Hello World!";
+    std::vector<std::string> pieces = transport::split(orig, delim);
+    ASSERT_LT(1u, pieces.size());
+    EXPECT_EQ(2u, pieces.size());
+    EXPECT_EQ("", pieces[0]);
+    EXPECT_EQ("Hello World!", pieces[1]);
 }
 
 /////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterAtEnd)
-{
-  char delim = '!';
-  std::string orig = "Hello World!";
-  std::vector<std::string> pieces = transport::split(orig, delim);
-  ASSERT_LT(1u, pieces.size());
-  EXPECT_EQ(2u, pieces.size());
-  EXPECT_EQ("Hello World", pieces[0]);
-  EXPECT_EQ("", pieces[1]);
+TEST(HelpersTest, SplitOneDelimiterAtEnd) {
+    char delim = '!';
+    std::string orig = "Hello World!";
+    std::vector<std::string> pieces = transport::split(orig, delim);
+    ASSERT_LT(1u, pieces.size());
+    EXPECT_EQ(2u, pieces.size());
+    EXPECT_EQ("Hello World", pieces[0]);
+    EXPECT_EQ("", pieces[1]);
 }
 
 //////////////////////////////////////////////////
 /// \brief Check the getTransportImplementation() function.
-TEST(HelpersTest, TransportImplementation)
-{
-  std::string impl = transport::getTransportImplementation();
-  EXPECT_FALSE(impl.empty());
+TEST(HelpersTest, TransportImplementation) {
+    std::string impl = transport::getTransportImplementation();
+    EXPECT_FALSE(impl.empty());
 
-  ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", "abc"));
+    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", "abc"));
 
-  impl = transport::getTransportImplementation();
-  EXPECT_EQ("abc", impl);
+    impl = transport::getTransportImplementation();
+    EXPECT_EQ("abc", impl);
 
-  // This call unsets the environment variable on Windows.
-  ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", ""));
+    // This call unsets the environment variable on Windows.
+    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", ""));
 
-  impl = transport::getTransportImplementation();
-  std::string value;
-  if (gz::utils::env("GZ_TRANSPORT_IMPLEMENTATION", value, true))
-    EXPECT_TRUE(impl.empty());
-  else
-    EXPECT_EQ("zeromq", impl);
+    impl = transport::getTransportImplementation();
+    std::string value;
+    if (gz::utils::env("GZ_TRANSPORT_IMPLEMENTATION", value, true))
+        EXPECT_TRUE(impl.empty());
+    else
+        EXPECT_EQ("zeromq", impl);
 }

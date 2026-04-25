@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #ifndef AEROZEN_TOPIC_UTILS_HPP_
 #define AEROZEN_TOPIC_UTILS_HPP_
@@ -24,13 +24,14 @@
 #include <vector>
 
 namespace aerozen {
-  //
-  /**
-   * @class TopicUtils TopicUtils.hpp aerozen/topic_utils.hpp
-   * @brief This class provides different utilities related with topics.
-   */
-  class TopicUtils
-  {
+
+/**
+ * @class TopicUtils TopicUtils.hh gz/transport/TopicUtils.hh
+ * @brief This class provides different utilities related with topics.
+ */
+class TopicUtils
+{
+public:
     /**
      * @brief Determines if a namespace is valid. A namespace's length must
      * not exceed kMaxNameLength.
@@ -39,7 +40,7 @@ namespace aerozen {
      * @param[in] _ns Namespace to be checked.
      * @return true if the namespace is valid.
      */
-    public: static bool IsValidNamespace(const std::string &_ns);
+    static bool IsValidNamespace(const std::string& _ns);
 
     /**
      * @brief Determines if a partition is valid.
@@ -50,7 +51,7 @@ namespace aerozen {
      * @param[in] _partition Partition to be checked.
      * @return true if the partition is valid.
      */
-    public: static bool IsValidPartition(const std::string &_partition);
+    static bool IsValidPartition(const std::string& _partition);
 
     /**
      * @brief Determines if a topic name is valid. A topic name is any
@@ -63,7 +64,7 @@ namespace aerozen {
      * @param[in] _topic Topic name to be checked.
      * @return true if the topic name is valid.
      */
-    public: static bool IsValidTopic(const std::string &_topic);
+    static bool IsValidTopic(const std::string& _topic);
 
     /**
      * @brief Get the full topic path given a namespace and a topic name.
@@ -103,10 +104,10 @@ namespace aerozen {
      * @sa IsValidTopic
      * @sa DecomposeFullyQualifiedTopic
      */
-    public: static bool FullyQualifiedName(const std::string &_partition,
-                                           const std::string &_ns,
-                                           const std::string &_topic,
-                                           std::string &_name);
+    static bool FullyQualifiedName(const std::string& _partition,
+                                   const std::string& _ns,
+                                   const std::string& _topic,
+                                   std::string& _name);
 
     /**
      * @brief Decompose a fully qualified topic name into its partition and
@@ -130,10 +131,9 @@ namespace aerozen {
      * @return True if the topic and partition were set.
      * @sa FullyQualifiedName
      */
-    public: static bool DecomposeFullyQualifiedTopic(
-      const std::string &_fullyQualifiedName,
-      std::string &_partition,
-      std::string &_namespaceAndTopic);
+    static bool DecomposeFullyQualifiedTopic(
+        const std::string& _fullyQualifiedName, std::string& _partition,
+        std::string& _namespaceAndTopic);
 
     /**
      * @brief Partially decompose a Zenoh liveliness token into its components.
@@ -168,15 +168,11 @@ namespace aerozen {
      * @param[out] _remainingToken The part of the token unprocessed.
      * @return True if all the components were set.
      */
-    public: static bool DecomposeLivelinessTokenHelper(
-      const std::string &_token,
-      std::string &_prefix,
-      std::string &_partition,
-      std::string &_namespaceAndTopic,
-      std::string &_pUUID,
-      std::string &_nUUID,
-      std::string &_entityType,
-      std::string &_remainingToken);
+    static bool DecomposeLivelinessTokenHelper(
+        const std::string& _token, std::string& _prefix,
+        std::string& _partition, std::string& _namespaceAndTopic,
+        std::string& _pUUID, std::string& _nUUID, std::string& _entityType,
+        std::string& _remainingToken);
 
     /**
      * @brief Decompose a Zenoh liveliness token into its components.
@@ -214,15 +210,11 @@ namespace aerozen {
      * @param[out] _typeName The message type component.
      * @return True if all the components were set.
      */
-    public: static bool DecomposeLivelinessToken(
-      const std::string &_token,
-      std::string &_prefix,
-      std::string &_partition,
-      std::string &_namespaceAndTopic,
-      std::string &_pUUID,
-      std::string &_nUUID,
-      std::string &_entityType,
-      std::string &_typeName);
+    static bool DecomposeLivelinessToken(
+        const std::string& _token, std::string& _prefix,
+        std::string& _partition, std::string& _namespaceAndTopic,
+        std::string& _pUUID, std::string& _nUUID, std::string& _entityType,
+        std::string& _typeName);
 
     /**
      * @brief Decompose a Zenoh liveliness token into its components.
@@ -261,16 +253,11 @@ namespace aerozen {
      * @param[out] _repType The service response message type.
      * @return True if all the components were set.
      */
-    public: static bool DecomposeLivelinessToken(
-      const std::string &_token,
-      std::string &_prefix,
-      std::string &_partition,
-      std::string &_namespaceAndTopic,
-      std::string &_pUUID,
-      std::string &_nUUID,
-      std::string &_entityType,
-      std::string &_reqType,
-      std::string &_repType);
+    static bool DecomposeLivelinessToken(
+        const std::string& _token, std::string& _prefix,
+        std::string& _partition, std::string& _namespaceAndTopic,
+        std::string& _pUUID, std::string& _nUUID, std::string& _entityType,
+        std::string& _reqType, std::string& _repType);
 
     /**
      * @brief Create a partial liveliness token.
@@ -287,11 +274,9 @@ namespace aerozen {
      *   * SS for a service server.
      * @return A partial liveliness token.
      */
-    public: static std::string CreateLivelinessTokenHelper(
-      const std::string &_fullyQualifiedTopic,
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const std::string &_entityType);
+    static std::string CreateLivelinessTokenHelper(
+        const std::string& _fullyQualifiedTopic, const std::string& _pUuid,
+        const std::string& _nUuid, const std::string& _entityType);
 
     /**
      * @brief Create a liveliness token.
@@ -309,12 +294,10 @@ namespace aerozen {
      * @param[in] _typeName The message type.
      * @return The liveliness token.
      */
-    public: static std::string CreateLivelinessToken(
-      const std::string &_fullyQualifiedTopic,
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const std::string &_entityType,
-      const std::string &_typeName);
+    static std::string CreateLivelinessToken(
+        const std::string& _fullyQualifiedTopic, const std::string& _pUuid,
+        const std::string& _nUuid, const std::string& _entityType,
+        const std::string& _typeName);
 
     /**
      * @brief Create a liveliness token.
@@ -333,13 +316,10 @@ namespace aerozen {
      * @param[in] _repTypeName The service response type.
      * @return The liveliness token.
      */
-    public: static std::string CreateLivelinessToken(
-      const std::string &_fullyQualifiedTopic,
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const std::string &_entityType,
-      const std::string &_reqTypeName,
-      const std::string &_repTypeName);
+    static std::string CreateLivelinessToken(
+        const std::string& _fullyQualifiedTopic, const std::string& _pUuid,
+        const std::string& _nUuid, const std::string& _entityType,
+        const std::string& _reqTypeName, const std::string& _repTypeName);
 
     /**
      * @brief Convert a topic name to a valid topic. The input topic is
@@ -349,21 +329,21 @@ namespace aerozen {
      * @param[in] _topic Input topic, which may be invalid.
      * @return A valid topic, or empty string if not possible to convert.
      */
-    public: static std::string AsValidTopic(const std::string &_topic);
+    static std::string AsValidTopic(const std::string& _topic);
 
     /**
      * @brief Replace "/" instances with "%".
      * @param[in] _input Input name.
      * @return The mangled name.
      */
-    public: static std::string MangleName(const std::string &_input);
+    static std::string MangleName(const std::string& _input);
 
     /**
      * @brief Recompose a previously mangled name.
      * @param[in] _input Input mangled name.
      * @return The unmangled name.
      */
-    public: static std::string DemangleName(const std::string &_input);
+    static std::string DemangleName(const std::string& _input);
 
     /**
      * @brief Mangle multiple types into a single string using "&" as delimiter
@@ -371,8 +351,8 @@ namespace aerozen {
      * @param[out] _output The mangled string.
      * @return True if the mangled worked succesfully.
      */
-    public: static bool MangleType(const std::vector<std::string> &_input,
-                                   std::string &_output);
+    static bool MangleType(const std::vector<std::string>& _input,
+                           std::string& _output);
 
     /**
      * @brief Recompose a previously mangled type.
@@ -380,42 +360,43 @@ namespace aerozen {
      * @param[out] _output The unmangled vector with types.
      * @return True if the demanged worked succesfully.
      */
-    public: static bool DemangleType(const std::string &_input,
-                                     std::vector<std::string> &_output);
+    static bool DemangleType(const std::string& _input,
+                             std::vector<std::string>& _output);
 
     /**
      * @brief The kMaxNameLength specifies the maximum number of characters
      * allowed in a namespace, a partition name, a topic name, and a fully
      * qualified topic name.
      */
-    public: static const uint16_t kMaxNameLength = 65535;
+    static const uint16_t kMaxNameLength = 65535;
 
     /**
      * @brief The separator used within the liveliness token.
      */
-    public: static const char kTokenSeparator[];
+    static const char kTokenSeparator[];
 
     /**
      * @brief The separator used to concatenate type names.
      */
-    public: static const char kTypeSeparator[];
+    static const char kTypeSeparator[];
 
     /**
      * @brief A common prefix for all liveliness tokens.
      */
-    public: static const char kTokenPrefix[];
+    static const char kTokenPrefix[];
 
     /**
      * @brief A replacement for the slash when mangling names.
      */
-    public: static const char kSlashReplacement;
-  };
+    static const char kSlashReplacement;
+};
 
-
-  /**
-   * @brief Type for fully qualified topics
-   */
-  class FullyQualifiedTopic {
+/**
+ * @brief Type for fully qualified topics
+ */
+class FullyQualifiedTopic
+{
+public:
     /**
      * @brief Constructor
      * @param[in] _partition Partition
@@ -423,50 +404,51 @@ namespace aerozen {
      * @param[in] _topic Unqualified topic
      * @sa TopicUtils::FullyQualifiedName
      */
-   public:
-    FullyQualifiedTopic(const std::string &_partition,
-                        const std::string &_ns,
-                        const std::string &_topic)
+    FullyQualifiedTopic(const std::string& _partition, const std::string& _ns,
+                        const std::string& _topic)
         : partition(_partition), ns(_ns), topic(_topic) {
-      this->fullTopic.emplace();
-      if (!TopicUtils::FullyQualifiedName(_partition, _ns, _topic,
-                                          *this->fullTopic)) {
-        this->fullTopic.reset();
-      }
+        this->fullTopic.emplace();
+        if (!TopicUtils::FullyQualifiedName(_partition, _ns, _topic,
+                                            *this->fullTopic)) {
+            this->fullTopic.reset();
+        }
     }
+
     /**
      * @brief Gets the partition
      * @return partition
      */
-    const std::string &Partition() const {
-      return this->partition;
+    const std::string& Partition() const {
+        return this->partition;
     }
+
     /**
      * @brief Gets the namespace
      * @return namespace
      */
-    const std::string &Namespace() const {
-      return this->ns;
+    const std::string& Namespace() const {
+        return this->ns;
     }
     /**
      * @brief Gets the topic
      * @return topic
      */
-    const std::string &Topic() const {
-      return this->topic;
-    }
-    /**
-     * @brief Gets the fully qualified topic if it is valid
-     * @return The fully qualified topic if valid, otherwise std::nullopt.
-     */
-    std::optional<std::string> FullTopic() const {
-      return this->fullTopic;
+    const std::string& Topic() const {
+        return this->topic;
     }
 
     /**
+     * @brief Gets the fully qualified topic if it is valid
+     * @return THe fully qualified topic if valid, otherwise std::nullopt
+     */
+    std::optional<std::string> FullTopic() const {
+        return this->fullTopic;
+    }
+
+private:
+    /**
      * @brief The partition
      */
-   private:
     const std::string partition;
 
     /**
@@ -484,7 +466,7 @@ namespace aerozen {
      * topic are correct)
      */
     std::optional<std::string> fullTopic;
-  };
+};
 }  // namespace aerozen
 
 #endif  // AEROZEN_TOPIC_UTILS_HPP_

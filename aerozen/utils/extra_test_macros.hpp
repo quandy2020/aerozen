@@ -15,91 +15,90 @@
  *
  */
 
- #ifndef AEROZEN_UTILS_EXTRATESTMACROS_HPP_
- #define AEROZEN_UTILS_EXTRATESTMACROS_HPP_
- 
- #include "aerozen/utils/detail/extra_test_macros.hpp"
- 
- /// \brief Restrict the execution of the test to just the Windows platform
- /// Other platforms will get the test compiled but it won't be run
- /// as part of the test suite execution.
- /// The macro uses the Disabled_ prefix provided by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- /// TODO(gz-utils4): remove the windows alias
+#ifndef AEROZEN_UTILS_EXTRATESTMACROS_HPP_
+#define AEROZEN_UTILS_EXTRATESTMACROS_HPP_
+
+#include "aerozen/utils/detail/extra_test_macros.hpp"
+
+/// \brief Restrict the execution of the test to just the Windows platform
+/// Other platforms will get the test compiled but it won't be run
+/// as part of the test suite execution.
+/// The macro uses the Disabled_ prefix provided by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+/// TODO(gz-utils4): remove the windows alias
 #define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(TestName) \
-  DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(TestName)
- 
- /// \brief Restrict the execution of the test for the Windows platform.
- /// The test will be compiled on Windows too but will never be run as
- /// part of the test suite. The macro uses the Disabled_ prefix provided
- /// by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+    DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_WINDOWS(TestName)
+
+/// \brief Restrict the execution of the test for the Windows platform.
+/// The test will be compiled on Windows too but will never be run as
+/// part of the test suite. The macro uses the Disabled_ prefix provided
+/// by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
 #define AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(TestName) \
-  DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(TestName)
- 
- /// \brief Restrict the execution of the test to just the MacOS platform
- /// Other platforms will get the test compiled but it won't be run
- /// as part of the test suite execution.
- /// The macro uses the Disabled_ prefix provided by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(TestName)
- 
- /// \brief Restrict the execution of the test for the Mac platform.
- /// The test will be compiled on Mac too but will never be run as
- /// part of the test suite. The macro uses the Disabled_ prefix provided
- /// by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_DISABLED_ON_MAC(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_MAC(TestName)
- 
- /// \brief Restrict the execution of the test to just the Linux platform
- /// Other platforms will get the test compiled but it won't be run
- /// as part of the test suite execution.
- /// The macro uses the Disabled_ prefix provided by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(TestName)
- 
- /// \brief Restrict the execution of the test for the Linux platform
- /// The test will be compiled on Linux too but will never be run as
- /// part of the test suite. The macro uses the Disabled_ prefix provided
- /// by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(TestName)
- 
- /// \brief Restrict the execution of the test to just the ARM32 architecture
- /// Other platforms will get the test compiled but it won't be run
- /// as part of the test suite execution.
- /// The macro uses the Disabled_ prefix provided by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(TestName)
- 
- /// \brief Restrict the execution of the test for the ARM32 architecture
- /// The test will be compiled on ARM32 too but will never be run as
- /// part of the test suite. The macro uses the Disabled_ prefix provided
- /// by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(TestName)
- 
- /// \brief Restrict the execution of the test to just the ARM64 architecture
- /// Other platforms will get the test compiled but it won't be run
- /// as part of the test suite execution.
- /// The macro uses the Disabled_ prefix provided by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(TestName)
- 
- /// \brief Restrict the execution of the test for the ARM64 architecture
- /// The test will be compiled on Linux too but will never be run as
- /// part of the test suite. The macro uses the Disabled_ prefix provided
- /// by googletest. See
- /// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
- #define AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(TestName) \
-   DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(TestName)
- 
- #endif  // AEROZEN_UTILS_EXTRATESTMACROS_HPP_
- 
+    DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_WINDOWS(TestName)
+
+/// \brief Restrict the execution of the test to just the MacOS platform
+/// Other platforms will get the test compiled but it won't be run
+/// as part of the test suite execution.
+/// The macro uses the Disabled_ prefix provided by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_MAC(TestName)
+
+/// \brief Restrict the execution of the test for the Mac platform.
+/// The test will be compiled on Mac too but will never be run as
+/// part of the test suite. The macro uses the Disabled_ prefix provided
+/// by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_DISABLED_ON_MAC(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_MAC(TestName)
+
+/// \brief Restrict the execution of the test to just the Linux platform
+/// Other platforms will get the test compiled but it won't be run
+/// as part of the test suite execution.
+/// The macro uses the Disabled_ prefix provided by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_LINUX(TestName)
+
+/// \brief Restrict the execution of the test for the Linux platform
+/// The test will be compiled on Linux too but will never be run as
+/// part of the test suite. The macro uses the Disabled_ prefix provided
+/// by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_LINUX(TestName)
+
+/// \brief Restrict the execution of the test to just the ARM32 architecture
+/// Other platforms will get the test compiled but it won't be run
+/// as part of the test suite execution.
+/// The macro uses the Disabled_ prefix provided by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM32(TestName)
+
+/// \brief Restrict the execution of the test for the ARM32 architecture
+/// The test will be compiled on ARM32 too but will never be run as
+/// part of the test suite. The macro uses the Disabled_ prefix provided
+/// by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_ARM32(TestName)
+
+/// \brief Restrict the execution of the test to just the ARM64 architecture
+/// Other platforms will get the test compiled but it won't be run
+/// as part of the test suite execution.
+/// The macro uses the Disabled_ prefix provided by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_ENABLED_ONLY_ON_ARM64(TestName)
+
+/// \brief Restrict the execution of the test for the ARM64 architecture
+/// The test will be compiled on Linux too but will never be run as
+/// part of the test suite. The macro uses the Disabled_ prefix provided
+/// by googletest. See
+/// https://chromium.googlesource.com/external/github.com/google/googletest/+/HEAD/googletest/docs/advanced.md
+#define AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(TestName) \
+    DETAIL_AEROZEN_UTILS_TEST_DISABLED_ON_ARM64(TestName)
+
+#endif  // AEROZEN_UTILS_EXTRATESTMACROS_HPP_

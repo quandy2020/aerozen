@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
+#include "aerozen/rep_handler.hpp"
 #include <memory>
 #include <string>
-#include "aerozen/rep_handler.hpp"
 #include "aerozen/topic_utils.hpp"
 #include "aerozen/uuid.hpp"
 
@@ -26,92 +26,83 @@
 #endif
 
 namespace aerozen {
-  /// \internal
-  /// \brief Private data for IRepHandler class.
-  class IRepHandlerPrivate
-  {
+/// \internal
+/// \brief Private data for IRepHandler class.
+class IRepHandlerPrivate
+{
     /// \brief Default constructor.
-    public: IRepHandlerPrivate(
-      const std::string& _pUuid,
-      const std::string& _nUuid)
-    : pUuid(_pUuid),
-      nUuid(_nUuid),
-      hUuid(Uuid().ToString())
-    {
-    }
+public:
+    IRepHandlerPrivate(const std::string& _pUuid, const std::string& _nUuid)
+        : pUuid(_pUuid), nUuid(_nUuid), hUuid(Uuid().ToString()) {}
 
     /// \brief Destructor.
-    public: virtual ~IRepHandlerPrivate() = default;
+public:
+    virtual ~IRepHandlerPrivate() = default;
 
     /// \brief Process UUID.
-    public: std::string pUuid;
+public:
+    std::string pUuid;
 
     /// \brief Node UUID.
-    public: std::string nUuid;
+public:
+    std::string nUuid;
 
     /// \brief Handler UUID.
-    public: std::string hUuid;
+public:
+    std::string hUuid;
 
 #ifdef HAVE_ZENOH
     /// \brief Zenoh queriable to receive requests.
     std::unique_ptr<zenoh::Queryable<void>> zQueryable;
 
     /// \brief The liveliness token.
-    public: std::unique_ptr<zenoh::LivelinessToken> zToken;
+public:
+    std::unique_ptr<zenoh::LivelinessToken> zToken;
 #endif
-  };
+};
 
-  /////////////////////////////////////////////////
-  IRepHandler::IRepHandler(const std::string& _pUuid,
-      const std::string& _nUuid)
-    : dataPtr(new IRepHandlerPrivate(_pUuid, _nUuid))
-  {
-  }
+/////////////////////////////////////////////////
+IRepHandler::IRepHandler(const std::string& _pUuid, const std::string& _nUuid)
+    : dataPtr(new IRepHandlerPrivate(_pUuid, _nUuid)) {}
 
-  /////////////////////////////////////////////////
-  IRepHandler::~IRepHandler()
-  {
-  }
+/////////////////////////////////////////////////
+IRepHandler::~IRepHandler() {}
 
-  /////////////////////////////////////////////////
-  std::string IRepHandler::HandlerUuid() const
-  {
+/////////////////////////////////////////////////
+std::string IRepHandler::HandlerUuid() const {
     return this->dataPtr->hUuid;
-  }
+}
 
 #ifdef HAVE_ZENOH
-  /////////////////////////////////////////////////
-  void IRepHandler::CreateZenohQueriable(
-    std::shared_ptr<zenoh::Session> _session,
-    const std::string& _service)
-  {
-    auto onQuery = [this, _service](const zenoh::Query &_query)
-    {
-      std::string output;
-      std::string input = "";
-      if (_query.get_payload())
-        input = _query.get_payload()->get().as_string();
+/////////////////////////////////////////////////
+void IRepHandler::CreateZenohQueriable(std::shared_ptr<zenoh::Session> _session,
+                                       const std::string& _service) {
+    auto onQuery = [this, _service](const zenoh::Query& _query) {
+        std::string output;
+        std::string input = "";
+        if (_query.get_payload())
+            input = _query.get_payload()->get().as_string();
 
-      if (this->RunCallback(input, output))
-        _query.reply(_service, output);
+        if (this->RunCallback(input, output))
+            _query.reply(_service, output);
     };
 
     auto onDropQueryable = []() {};
 
     zenoh::Session::QueryableOptions opts;
-    this->dataPtr->zQueryable = std::make_unique<zenoh::Queryable<void>>(
-      _session->declare_queryable(
-        _service, onQuery, onDropQueryable, std::move(opts)));
+    this->dataPtr->zQueryable =
+        std::make_unique<zenoh::Queryable<void>>(_session->declare_queryable(
+            _service, onQuery, onDropQueryable, std::move(opts)));
 
     std::string token = TopicUtils::CreateLivelinessToken(
-      _service, this->dataPtr->pUuid, this->dataPtr->nUuid, "SS",
-      this->ReqTypeName(), this->RepTypeName());
+        _service, this->dataPtr->pUuid, this->dataPtr->nUuid, "SS",
+        this->ReqTypeName(), this->RepTypeName());
 
     if (token.empty())
-      return;
+        return;
 
     this->dataPtr->zToken = std::make_unique<zenoh::LivelinessToken>(
-      _session->liveliness_declare_token(token));
-  }
+        _session->liveliness_declare_token(token));
+}
 #endif
 }  // namespace aerozen

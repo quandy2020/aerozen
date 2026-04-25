@@ -13,112 +13,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <string>
+
 #include "aerozen/req_handler.hpp"
 #include "aerozen/uuid.hpp"
+#include "aerozen/config.hpp"
 
 #ifdef HAVE_ZENOH
 #include <zenoh.hxx>
 #endif
 
 namespace aerozen {
-  /// \internal
-  /// \brief Private data for IReqHandler class.
-  class IReqHandlerPrivate
-  {
-    /// \brief Default constructor.
-    public: IReqHandlerPrivate(const std::string &_nUuid)
-    : hUuid(Uuid().ToString()),
-      nUuid(_nUuid),
-      requested(false)
-    {
-    }
 
-    /// \brief Destructor.
-    public: virtual ~IReqHandlerPrivate() = default;
+/**
+ * @brief Private data for IReqHandler class.
+ */
+class IReqHandlerPrivate
+{
+public:
+     /**
+     * @brief Default constructor.
+     */
+    IReqHandlerPrivate(const std::string& _nUuid)
+        : hUuid(Uuid().ToString()), nUuid(_nUuid), requested(false) {}
 
-    /// \brief Unique handler's UUID.
-    public: std::string hUuid;
+    /**
+     * @brief Destructor.
+     */
+    virtual ~IReqHandlerPrivate() = default;
 
-    /// \brief Node UUID.
-    public: std::string nUuid;
+    /**
+     * @brief Unique handler's UUID.
+     */
+    std::string hUuid;
 
-    /// \brief When true, the REQ was already sent and the REP should be on
-    /// its way. Used to not resend the same REQ more than one time.
-    public: bool requested;
-  };
+    /**
+     * @brief Node UUID.
+     */
+    std::string nUuid;
 
-  /////////////////////////////////////////////////
-  IReqHandler::IReqHandler(const std::string& _nUuid)
+    /**
+     * @brief When true, the REQ was already sent and the REP should be on
+     * its way. Used to not resend the same REQ more than one time.
+     */
+    bool requested;
+};
+
+/**
+ * //////////////////////////////////////////////
+ */
+IReqHandler::IReqHandler(const std::string& _nUuid)
     : dataPtr(new IReqHandlerPrivate(_nUuid)),
       rep(""),
       result(false),
-      repAvailable(false)
-  {
-  }
+      repAvailable(false) {}
 
-  /////////////////////////////////////////////////
-  IReqHandler::~IReqHandler()
-  {
-  }
+IReqHandler::~IReqHandler() {}
 
-  /////////////////////////////////////////////////
-  std::string IReqHandler::HandlerUuid() const
-  {
+std::string IReqHandler::HandlerUuid() const {
     return this->dataPtr->hUuid;
-  }
+}
 
-  /////////////////////////////////////////////////
-  std::string IReqHandler::NodeUuid() const
-  {
+std::string IReqHandler::NodeUuid() const {
     return this->dataPtr->nUuid;
-  }
+}
 
-  /////////////////////////////////////////////////
-  bool IReqHandler::Requested() const
-  {
+bool IReqHandler::Requested() const {
     return this->dataPtr->requested;
-  }
+}
 
-  /////////////////////////////////////////////////
-  void IReqHandler::Requested(bool _value)
-  {
+void IReqHandler::Requested(const bool _value) {
     this->dataPtr->requested = _value;
-  }
+}
 
 #ifdef HAVE_ZENOH
-  /////////////////////////////////////////////////
-  void IReqHandler::CreateZenohGet(
-    std::shared_ptr<zenoh::Session> _session,
-    const std::string& _service)
-  {
+/**
+ * //////////////////////////////////////////////
+ */
+void IReqHandler::CreateZenohGet(std::shared_ptr<zenoh::Session> _session,
+                                 const std::string& _service) {
     std::mutex m;
     std::condition_variable doneSignal;
     bool done = false;
-    auto onReply = [this](const zenoh::Reply &_reply)
-    {
-      if (_reply.is_ok())
-      {
-        const auto &sample = _reply.get_ok();
-        this->NotifyResult(sample.get_payload().as_string(), true);
-      }
-      else
-      {
-        std::cerr << "Received an error :"
-                  << _reply.get_err().get_payload().as_string() << "\n";
-      }
+    auto onReply = [this](const zenoh::Reply& _reply) {
+        if (_reply.is_ok()) {
+            const auto& sample = _reply.get_ok();
+            this->NotifyResult(sample.get_payload().as_string(), true);
+        } else {
+            std::cerr << "Received an error :"
+                      << _reply.get_err().get_payload().as_string() << "\n";
+        }
     };
 
-    auto onDone = [&m, &done, &doneSignal]()
-    {
-      std::lock_guard lock(m);
-      done = true;
-      doneSignal.notify_all();
+    auto onDone = [&m, &done, &doneSignal]() {
+        std::lock_guard lock(m);
+        done = true;
+        doneSignal.notify_all();
     };
 
     zenoh::Session::GetOptions options;
@@ -126,12 +121,12 @@ namespace aerozen {
     this->Serialize(payload);
 
     if (!payload.empty())
-      options.payload = payload;
+        options.payload = payload;
 
     _session->get(_service, "", onReply, onDone, std::move(options));
 
     std::unique_lock lock(m);
     doneSignal.wait(lock, [&done] { return done; });
-  }
+}
 #endif
 }  // namespace aerozen

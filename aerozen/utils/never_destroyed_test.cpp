@@ -15,143 +15,131 @@
  *
  */
 
- #include "aerozen/utils/never_destroyed.hpp"
+#include "aerozen/utils/never_destroyed.hpp"
 
- #include <gtest/gtest.h>
- 
- #include <cstdint>
- #include <exception>
- #include <initializer_list>
- #include <random>
- #include <string>
- #include <vector>
- #include <unordered_map>
- 
- using namespace aerozen;
- 
- class Boom : public std::exception
- {
- };
- struct DtorGoesBoom
- {
+#include <gtest/gtest.h>
+
+#include <cstdint>
+#include <exception>
+#include <initializer_list>
+#include <random>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+using namespace aerozen;
+
+class Boom : public std::exception
+{
+};
+struct DtorGoesBoom {
 #ifdef AEROZEN_WINDOWS_DISABLED
- // Disable warning C4722 which is triggered by the exception thrown in the dtor
- #pragma warning(push)
- #pragma warning(disable : 4722)
- #endif
-   ~DtorGoesBoom() noexcept(false)
-   {
-     throw Boom();
-   }
+// Disable warning C4722 which is triggered by the exception thrown in the dtor
+#pragma warning(push)
+#pragma warning(disable : 4722)
+#endif
+    ~DtorGoesBoom() noexcept(false) {
+        throw Boom();
+    }
 #ifdef AEROZEN_WINDOWS_DISABLED
- #pragma warning(pop)
- #endif
- };
- 
- // Confirm that we see booms by default.
- GTEST_TEST(NeverDestroyed, BoomTest)
- {
-   try
-   {
-     {
-       DtorGoesBoom foo;
-     }
-     GTEST_FAIL();
-   }
-   catch (const Boom &)
-   {
-     ASSERT_TRUE(true);
-   }
- }
- 
- // Confirm that our wrapper stops the booms.
- GTEST_TEST(NeverDestroyed, NoBoomTest)
- {
-   try
-   {
-     {
-       utils::NeverDestroyed<DtorGoesBoom> foo;
-     }
-     ASSERT_TRUE(true);
-   }
-   catch (const Boom &e)
-   {
-     GTEST_FAIL();
-   }
- }
- 
- // This is an example from the class overview API docs; we repeat it here to
- // ensure it remains valid.
- class Singleton
- {
-   public: Singleton(const Singleton &) = delete;
-   public: void operator=(const Singleton &) = delete;
-   public: Singleton(Singleton &&) = delete;
-   public: void operator=(Singleton &&) = delete;
-   public: static Singleton &getInstance()
-   {
-     static utils::NeverDestroyed<Singleton> instance;
-     return instance.Access();
-   }
- 
-   private: friend utils::NeverDestroyed<Singleton>;
-   private: Singleton() = default;
- };
- 
- GTEST_TEST(NeverDestroyedExample, Singleton)
- {
-   const Singleton *get1 = &Singleton::getInstance();
-   const Singleton *get2 = &Singleton::getInstance();
-   EXPECT_EQ(get1, get2);
- }
- 
- // This is an example from the class overview API docs; we repeat it here to
- // ensure it remains valid.
- enum class Foo
- {
-   kBar,
-   kBaz
- };
- Foo ParseFoo(const std::string &foo_string)
- {
-   using Dict = std::unordered_map<std::string, Foo>;
-   static const utils::NeverDestroyed<Dict> string_to_enum{
-       std::initializer_list<Dict::value_type>{
-           {"bar", Foo::kBar},
-           {"baz", Foo::kBaz},
-       }};
-   return string_to_enum.Access().at(foo_string);
- }
- 
- GTEST_TEST(NeverDestroyedExample, ParseFoo)
- {
-   EXPECT_EQ(ParseFoo("bar"), Foo::kBar);
-   EXPECT_EQ(ParseFoo("baz"), Foo::kBaz);
- }
- 
- // This is an example from the class overview API docs; we repeat it here to
- // ensure it remains valid.
- using Result = std::vector<std::uint_fast32_t>;
- const Result &GetConstantMagicNumbers()
- {
-   static const utils::NeverDestroyed<Result> result{
-       []()
-       {
-         Result prototype;
-         std::mt19937 random_generator;
-         for (int i = 0; i < 10; ++i)
-         {
-           auto new_value = random_generator();
-           prototype.push_back(new_value);
-         }
-         return prototype;
-       }()};
-   return result.Access();
- }
- 
- GTEST_TEST(NeverDestroyedExample, GetConstantMagicNumbers)
- {
-   const auto &numbers = GetConstantMagicNumbers();
-   EXPECT_EQ(numbers.size(), 10u);
- }
- 
+#pragma warning(pop)
+#endif
+};
+
+// Confirm that we see booms by default.
+GTEST_TEST(NeverDestroyed, BoomTest) {
+    try {
+        {
+            DtorGoesBoom foo;
+        }
+        GTEST_FAIL();
+    } catch (const Boom&) {
+        ASSERT_TRUE(true);
+    }
+}
+
+// Confirm that our wrapper stops the booms.
+GTEST_TEST(NeverDestroyed, NoBoomTest) {
+    try {
+        {
+            utils::NeverDestroyed<DtorGoesBoom> foo;
+        }
+        ASSERT_TRUE(true);
+    } catch (const Boom& e) {
+        GTEST_FAIL();
+    }
+}
+
+// This is an example from the class overview API docs; we repeat it here to
+// ensure it remains valid.
+class Singleton
+{
+public:
+    Singleton(const Singleton&) = delete;
+
+public:
+    void operator=(const Singleton&) = delete;
+
+public:
+    Singleton(Singleton&&) = delete;
+
+public:
+    void operator=(Singleton&&) = delete;
+
+public:
+    static Singleton& getInstance() {
+        static utils::NeverDestroyed<Singleton> instance;
+        return instance.Access();
+    }
+
+private:
+    friend utils::NeverDestroyed<Singleton>;
+
+private:
+    Singleton() = default;
+};
+
+GTEST_TEST(NeverDestroyedExample, Singleton) {
+    const Singleton* get1 = &Singleton::getInstance();
+    const Singleton* get2 = &Singleton::getInstance();
+    EXPECT_EQ(get1, get2);
+}
+
+// This is an example from the class overview API docs; we repeat it here to
+// ensure it remains valid.
+enum class Foo { kBar, kBaz };
+Foo ParseFoo(const std::string& foo_string) {
+    using Dict = std::unordered_map<std::string, Foo>;
+    static const utils::NeverDestroyed<Dict> string_to_enum{
+        std::initializer_list<Dict::value_type>{
+            {"bar", Foo::kBar},
+            {"baz", Foo::kBaz},
+        }};
+    return string_to_enum.Access().at(foo_string);
+}
+
+GTEST_TEST(NeverDestroyedExample, ParseFoo) {
+    EXPECT_EQ(ParseFoo("bar"), Foo::kBar);
+    EXPECT_EQ(ParseFoo("baz"), Foo::kBaz);
+}
+
+// This is an example from the class overview API docs; we repeat it here to
+// ensure it remains valid.
+using Result = std::vector<std::uint_fast32_t>;
+const Result& GetConstantMagicNumbers() {
+    static const utils::NeverDestroyed<Result> result{[]() {
+        Result prototype;
+        std::mt19937 random_generator;
+        for (int i = 0; i < 10; ++i) {
+            auto new_value = random_generator();
+            prototype.push_back(new_value);
+        }
+        return prototype;
+    }()};
+    return result.Access();
+}
+
+GTEST_TEST(NeverDestroyedExample, GetConstantMagicNumbers) {
+    const auto& numbers = GetConstantMagicNumbers();
+    EXPECT_EQ(numbers.size(), 10u);
+}

@@ -17,6 +17,7 @@
 
 syntax = "proto3";
 package aerozen.msgs;
+
 option java_package = "com.aerozen.msgs";
 option java_outer_classname = "EmptyProtos";
 

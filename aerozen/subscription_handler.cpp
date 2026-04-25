@@ -16,335 +16,284 @@
  */
 
 #include "aerozen/subscription_handler.hpp"
+#include "aerozen/config.hpp"
 #include "aerozen/topic_utils.hpp"
 
+#ifdef HAVE_ZENOH
 #include <zenoh.hxx>
+#endif
 
-namespace aerozen
+namespace aerozen {
+/**
+ * @brief Private data for SubscriptionHandlerBase class.
+ */
+class SubscriptionHandlerBasePrivate
 {
-  /**
-   * @brief Private data for SubscriptionHandlerBase.
-   */
-  class SubscriptionHandlerBasePrivate
-  {
+public:
     /**
      * @brief Constructor.
-     * @param[in] _pUuid Process UUID.
-     * @param[in] _nUuid Node UUID.
-     * @param[in] _opts Subscribe options.
      */
-    public: 
-    SubscriptionHandlerBasePrivate(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts)
-    : opts(_opts),
-      periodNs(0.0),
-      hUuid(Uuid().ToString()),
-      lastCbTimestamp(std::chrono::seconds{0}),
-      pUuid(_pUuid),
-      nUuid(_nUuid)
-    {
-      if (this->opts.Throttled())
-        this->periodNs = 1e9 / this->opts.MsgsPerSec();
+    SubscriptionHandlerBasePrivate(const std::string& _pUuid,
+                                   const std::string& _nUuid,
+                                   const SubscribeOptions& _opts)
+        : opts(_opts),
+          periodNs(0.0),
+          hUuid(Uuid().ToString()),
+          lastCbTimestamp(std::chrono::seconds{0}),
+          pUuid(_pUuid),
+          nUuid(_nUuid) {
+        if (this->opts.Throttled())
+            this->periodNs = 1e9 / this->opts.MsgsPerSec();
     }
 
     /**
      * @brief Destructor.
      */
-    public: virtual ~SubscriptionHandlerBasePrivate() = default;
+    virtual ~SubscriptionHandlerBasePrivate() = default;
 
     /**
      * @brief Subscribe options.
      */
-    public: SubscribeOptions opts;
+    SubscribeOptions opts;
 
     /**
-     * @brief Minimum period for receiving messages in nanoseconds.
+     * @brief If throttling is enabled, the minimum period for receiving a
+     * message in nanoseconds.
      */
-    public: double periodNs;
+    double periodNs;
 
     /**
      * @brief Partition name.
      */
-    public: std::string partition;
+    std::string partition;
 
     /**
-     * @brief Unique handler UUID.
+     * @brief Unique handler's UUID.
      */
-    public: std::string hUuid;
+    std::string hUuid;
 
     /**
      * @brief Timestamp of the last callback executed.
      */
-    public: Timestamp lastCbTimestamp;
+    Timestamp lastCbTimestamp;
 
     /**
      * @brief Process UUID.
      */
-    public: std::string pUuid;
+    std::string pUuid;
 
     /**
      * @brief Node UUID.
      */
-    public: std::string nUuid;
+    std::string nUuid;
 
 #ifdef HAVE_ZENOH
     /**
-     * @brief Zenoh subscriber handler.
+     * @brief The zenoh subscriber handler.
      */
-    public: std::unique_ptr<zenoh::Subscriber<void>> zSub;
+    std::unique_ptr<zenoh::Subscriber<void>> zSub;
 
     /**
-     * @brief Liveliness token.
+     * @brief The liveliness token.
      */
-    public: std::unique_ptr<zenoh::LivelinessToken> zToken;
+    std::unique_ptr<zenoh::LivelinessToken> zToken;
 #endif
-  };
+};
 
-  /////////////////////////////////////////////////
-  SubscriptionHandlerBase::SubscriptionHandlerBase(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts)
-    : dataPtr(new SubscriptionHandlerBasePrivate(_pUuid, _nUuid, _opts))
-  {
-  }
+SubscriptionHandlerBase::SubscriptionHandlerBase(const std::string& _pUuid,
+                                                 const std::string& _nUuid,
+                                                 const SubscribeOptions& _opts)
+    : dataPtr(new SubscriptionHandlerBasePrivate(_pUuid, _nUuid, _opts)) {}
 
-  /////////////////////////////////////////////////
-  SubscriptionHandlerBase::~SubscriptionHandlerBase()
-  {
-  }
+SubscriptionHandlerBase::~SubscriptionHandlerBase() {}
 
-  /////////////////////////////////////////////////
-  std::string SubscriptionHandlerBase::ProcUuid() const
-  {
+std::string SubscriptionHandlerBase::ProcUuid() const {
     return this->dataPtr->pUuid;
-  }
+}
 
-  /////////////////////////////////////////////////
-  std::string SubscriptionHandlerBase::NodeUuid() const
-  {
+std::string SubscriptionHandlerBase::NodeUuid() const {
     return this->dataPtr->nUuid;
-  }
+}
 
-  /////////////////////////////////////////////////
-  std::string SubscriptionHandlerBase::HandlerUuid() const
-  {
+std::string SubscriptionHandlerBase::HandlerUuid() const {
     return this->dataPtr->hUuid;
-  }
+}
 
-  /////////////////////////////////////////////////
-  bool SubscriptionHandlerBase::IgnoreLocalMessages() const
-  {
+bool SubscriptionHandlerBase::IgnoreLocalMessages() const {
     return this->dataPtr->opts.IgnoreLocalMessages();
-  }
+}
 
-  /////////////////////////////////////////////////
-  bool SubscriptionHandlerBase::UpdateThrottling()
-  {
+bool SubscriptionHandlerBase::UpdateThrottling() {
     if (!this->dataPtr->opts.Throttled())
-      return true;
+        return true;
 
     Timestamp now = std::chrono::steady_clock::now();
 
     // Elapsed time since the last callback execution.
     auto elapsed = now - this->dataPtr->lastCbTimestamp;
 
-    if (std::chrono::duration_cast<std::chrono::nanoseconds>(
-          elapsed).count() < this->dataPtr->periodNs)
-    {
-      return false;
+    if (std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count() <
+        this->dataPtr->periodNs) {
+        return false;
     }
 
     // Update the last callback execution.
     this->dataPtr->lastCbTimestamp = now;
     return true;
-  }
+}
 
-  /////////////////////////////////////////////////
-  ISubscriptionHandler::ISubscriptionHandler(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const SubscribeOptions &_opts)
-    : SubscriptionHandlerBase(_pUuid, _nUuid, _opts)
-  {
+ISubscriptionHandler::ISubscriptionHandler(const std::string& _pUuid,
+                                           const std::string& _nUuid,
+                                           const SubscribeOptions& _opts)
+    : SubscriptionHandlerBase(_pUuid, _nUuid, _opts) {
     // Do nothing
-  }
+}
 
 #ifdef HAVE_ZENOH
-  /////////////////////////////////////////////////
-  void ISubscriptionHandler::CreateGenericZenohSubscriber(
+
+void ISubscriptionHandler::CreateGenericZenohSubscriber(
     std::shared_ptr<zenoh::Session> _session,
-    const FullyQualifiedTopic &_fullyQualifiedTopic)
-  {
+    const FullyQualifiedTopic& _fullyQualifiedTopic) {
     MessageInfo msgInfo;
     msgInfo.SetTopic(_fullyQualifiedTopic.Topic());
     msgInfo.SetType(this->TypeName());
-    auto dataHandler = [this, msgInfo](const zenoh::Sample &_sample)
-    {
-      auto attachment = _sample.get_attachment();
-      if (attachment.has_value())
-      {
-        // Same topic but different type, not interested.
-        auto msgType = attachment->get().as_string();
-        if (this->TypeName() != kGenericMessageType &&
-            this->TypeName() != msgType)
-        {
-          return;
-        }
+    auto dataHandler = [this, msgInfo](const zenoh::Sample& _sample) {
+        auto attachment = _sample.get_attachment();
+        if (attachment.has_value()) {
+            // Same topic but different type, not interested.
+            auto msgType = attachment->get().as_string();
+            if (this->TypeName() != kGenericMessageType &&
+                this->TypeName() != msgType) {
+                return;
+            }
 
-        auto output = this->CreateMsg(
-          _sample.get_payload().as_string(), msgType);
-        if (output)
-          this->RunLocalCallback(*output, msgInfo);
-      }
-      else
-      {
-        std::cerr << "SubscriptionHandler::SetCallback(): Unable to find "
-                  << "attachment. Ignoring message..." << std::endl;
-      }
+            auto output =
+                this->CreateMsg(_sample.get_payload().as_string(), msgType);
+            if (output)
+                this->RunLocalCallback(*output, msgInfo);
+        } else {
+            std::cerr << "SubscriptionHandler::SetCallback(): Unable to find "
+                      << "attachment. Ignoring message..." << std::endl;
+        }
     };
 
     this->dataPtr->zSub = std::make_unique<zenoh::Subscriber<void>>(
-      _session->declare_subscriber(
-        *_fullyQualifiedTopic.FullTopic(), dataHandler, zenoh::closures::none));
-
-    std::string token = TopicUtils::CreateLivelinessToken(
-      *_fullyQualifiedTopic.FullTopic(), this->ProcUuid(), this->NodeUuid(),
-      "MS", this->TypeName());
-
-    if (token.empty())
-      return;
-
-    this->dataPtr->zToken = std::make_unique<zenoh::LivelinessToken>(
-      _session->liveliness_declare_token(token));
-  }
-#endif
-
-  /////////////////////////////////////////////////
-  class RawSubscriptionHandler::Implementation
-  {
-    public: explicit Implementation(const std::string &_msgType)
-      : msgType(_msgType)
-    {
-      // Do nothing
-    }
-
-    public: std::string msgType;
-
-    public: RawCallback callback;
-  };
-
-  /////////////////////////////////////////////////
-  RawSubscriptionHandler::RawSubscriptionHandler(
-      const std::string &_pUuid,
-      const std::string &_nUuid,
-      const std::string &_msgType,
-      const SubscribeOptions &_opts)
-    : SubscriptionHandlerBase(_pUuid, _nUuid, _opts),
-      pimpl(new Implementation(_msgType))
-  {
-    // Do nothing
-  }
-
-  /////////////////////////////////////////////////
-  std::string RawSubscriptionHandler::TypeName()
-  {
-    return pimpl->msgType;
-  }
-
-  /////////////////////////////////////////////////
-  void RawSubscriptionHandler::SetCallback(const RawCallback &_callback)
-  {
-    pimpl->callback = _callback;
-  }
-
-#ifdef HAVE_ZENOH
-  /////////////////////////////////////////////////
-  void RawSubscriptionHandler::SetCallback(
-    const RawCallback &_cb,
-    std::shared_ptr<zenoh::Session> _session,
-    const FullyQualifiedTopic &_fullyQualifiedTopic)
-  {
-    if (!_fullyQualifiedTopic.FullTopic())
-    {
-      std::cerr << "Fully qualified topic is not valid\n";
-      return;
-    }
-    zenoh::KeyExpr keyexpr(*_fullyQualifiedTopic.FullTopic());
-
-    auto dataHandler =
-        [this, _fullyQualifiedTopic](const zenoh::Sample &_sample)
-    {
-      MessageInfo msgInfo;
-      msgInfo.SetTopic(_fullyQualifiedTopic.Topic());
-      auto attachment = _sample.get_attachment();
-      if (attachment.has_value())
-      {
-        // Same topic but different type, not interested.
-        auto msgType = attachment->get().as_string();
-        if (this->TypeName() != kGenericMessageType &&
-            this->TypeName() != msgType)
-        {
-          return;
-        }
-
-        msgInfo.SetType(msgType);
-        auto payload = _sample.get_payload().as_string();
-
-        this->RunRawCallback(payload.c_str(), payload.size(), msgInfo);
-      }
-      else
-      {
-        std::cerr << "RawSubscriptionHandler::SetCallback(): Unable to find "
-                  << "attachment. Ignoring message..." << std::endl;
-      }
-    };
-
-    this->dataPtr->zSub = std::make_unique<zenoh::Subscriber<void>>(
-      _session->declare_subscriber(
-        keyexpr, dataHandler, zenoh::closures::none));
+        _session->declare_subscriber(*_fullyQualifiedTopic.FullTopic(),
+                                     dataHandler, zenoh::closures::none));
 
     std::string token = TopicUtils::CreateLivelinessToken(
         *_fullyQualifiedTopic.FullTopic(), this->ProcUuid(), this->NodeUuid(),
         "MS", this->TypeName());
 
     if (token.empty())
-      return;
+        return;
+
+    this->dataPtr->zToken = std::make_unique<zenoh::LivelinessToken>(
+        _session->liveliness_declare_token(token));
+}
+#endif
+
+class RawSubscriptionHandler::Implementation
+{
+public:
+    explicit Implementation(const std::string& _msgType) : msgType(_msgType) {
+        // Do nothing
+    }
+
+    std::string msgType;
+
+    RawCallback callback;
+};
+
+RawSubscriptionHandler::RawSubscriptionHandler(const std::string& _pUuid,
+                                               const std::string& _nUuid,
+                                               const std::string& _msgType,
+                                               const SubscribeOptions& _opts)
+    : SubscriptionHandlerBase(_pUuid, _nUuid, _opts),
+      pimpl(new Implementation(_msgType)) {
+    // Do nothing
+}
+
+std::string RawSubscriptionHandler::TypeName() {
+    return pimpl->msgType;
+}
+
+void RawSubscriptionHandler::SetCallback(const RawCallback& _callback) {
+    pimpl->callback = _callback;
+}
+
+#ifdef HAVE_ZENOH
+void RawSubscriptionHandler::SetCallback(
+    const RawCallback& _cb, std::shared_ptr<zenoh::Session> _session,
+    const FullyQualifiedTopic& _fullyQualifiedTopic) {
+    if (!_fullyQualifiedTopic.FullTopic()) {
+        std::cerr << "Fully qualified topic is not valid\n";
+        return;
+    }
+    zenoh::KeyExpr keyexpr(*_fullyQualifiedTopic.FullTopic());
+
+    auto dataHandler = [this,
+                        _fullyQualifiedTopic](const zenoh::Sample& _sample) {
+        MessageInfo msgInfo;
+        msgInfo.SetTopic(_fullyQualifiedTopic.Topic());
+        auto attachment = _sample.get_attachment();
+        if (attachment.has_value()) {
+            // Same topic but different type, not interested.
+            auto msgType = attachment->get().as_string();
+            if (this->TypeName() != kGenericMessageType &&
+                this->TypeName() != msgType) {
+                return;
+            }
+
+            msgInfo.SetType(msgType);
+            auto payload = _sample.get_payload().as_string();
+
+            this->RunRawCallback(payload.c_str(), payload.size(), msgInfo);
+        } else {
+            std::cerr
+                << "RawSubscriptionHandler::SetCallback(): Unable to find "
+                << "attachment. Ignoring message..." << std::endl;
+        }
+    };
+
+    this->dataPtr->zSub =
+        std::make_unique<zenoh::Subscriber<void>>(_session->declare_subscriber(
+            keyexpr, dataHandler, zenoh::closures::none));
+
+    std::string token = TopicUtils::CreateLivelinessToken(
+        *_fullyQualifiedTopic.FullTopic(), this->ProcUuid(), this->NodeUuid(),
+        "MS", this->TypeName());
+
+    if (token.empty())
+        return;
 
     this->dataPtr->zToken = std::make_unique<zenoh::LivelinessToken>(
         _session->liveliness_declare_token(token));
 
     this->SetCallback(std::move(_cb));
-  }
+}
 #endif
 
-  /////////////////////////////////////////////////
-  bool RawSubscriptionHandler::RunRawCallback(
-      const char *_msgData, const size_t _size,
-      const MessageInfo &_info)
-  {
+bool RawSubscriptionHandler::RunRawCallback(const char* _msgData,
+                                            const size_t _size,
+                                            const MessageInfo& _info) {
     // Make sure we have a callback
-    if (!this->pimpl->callback)
-    {
-      std::cerr << "RawSubscriptionHandler::RunRawCallback() "
-                << "error: Callback is NULL" << std::endl;
-      return false;
+    if (!this->pimpl->callback) {
+        std::cerr << "RawSubscriptionHandler::RunRawCallback() "
+                  << "error: Callback is NULL" << std::endl;
+        return false;
     }
 
     // Check if we need to throttle
     if (!this->UpdateThrottling())
-      return true;
+        return true;
 
     // Trigger the callback
     this->pimpl->callback(_msgData, _size, _info);
     return true;
-  }
+}
 
-  /////////////////////////////////////////////////
-  RawSubscriptionHandler::~RawSubscriptionHandler()
-  {
+RawSubscriptionHandler::~RawSubscriptionHandler() {
     // Do nothing. This is here for pimpl.
-  }
+}
 }  // namespace aerozen

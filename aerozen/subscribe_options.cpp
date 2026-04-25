@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,60 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <cstdint>
 
 #include "aerozen/helpers.hpp"
 #include "aerozen/subscribe_options.hpp"
-
-#include "SubscribeOptionsPrivate.hh"
+#include "aerozen/subscribe_options_private.hpp"
 
 namespace aerozen {
-//////////////////////////////////////////////////
-SubscribeOptions::SubscribeOptions()
-  : dataPtr(new SubscribeOptionsPrivate())
-{
-}
+SubscribeOptions::SubscribeOptions() : dataPtr(new SubscribeOptionsPrivate()) {}
 
-//////////////////////////////////////////////////
 SubscribeOptions::SubscribeOptions(const SubscribeOptions& _otherSubscribeOpts)
-  : dataPtr(new SubscribeOptionsPrivate(*_otherSubscribeOpts.dataPtr))
-{
+    : dataPtr(new SubscribeOptionsPrivate(*_otherSubscribeOpts.dataPtr)) {}
+
+SubscribeOptions::~SubscribeOptions() {}
+
+bool SubscribeOptions::Throttled() const {
+    return this->MsgsPerSec() != kUnthrottled;
 }
 
-//////////////////////////////////////////////////
-SubscribeOptions::~SubscribeOptions()
-{
+uint64_t SubscribeOptions::MsgsPerSec() const {
+    return this->dataPtr->msgsPerSec;
 }
 
-//////////////////////////////////////////////////
-bool SubscribeOptions::Throttled() const
-{
-  return this->MsgsPerSec() != kUnthrottled;
+void SubscribeOptions::SetMsgsPerSec(const uint64_t _newMsgsPerSec) {
+    this->dataPtr->msgsPerSec = _newMsgsPerSec;
 }
 
-//////////////////////////////////////////////////
-uint64_t SubscribeOptions::MsgsPerSec() const
-{
-  return this->dataPtr->msgsPerSec;
+bool SubscribeOptions::IgnoreLocalMessages() const {
+    return this->dataPtr->ignoreLocalMessages;
 }
-
-//////////////////////////////////////////////////
-void SubscribeOptions::SetMsgsPerSec(uint64_t _newMsgsPerSec)
-{
-  this->dataPtr->msgsPerSec = _newMsgsPerSec;
-}
-
-//////////////////////////////////////////////////
-bool SubscribeOptions::IgnoreLocalMessages() const
-{
-  return this->dataPtr->ignoreLocalMessages;
-}
-
-//////////////////////////////////////////////////
-void SubscribeOptions::SetIgnoreLocalMessages(bool _ignore)
-{
-  this->dataPtr->ignoreLocalMessages = _ignore;
+void SubscribeOptions::SetIgnoreLocalMessages(bool _ignore) {
+    this->dataPtr->ignoreLocalMessages = _ignore;
 }
 }  // namespace aerozen
