@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 
 using namespace aerozen;
+namespace transport = aerozen;
 
 TEST(TopicUtilsTest, testTopics) {
     EXPECT_TRUE(TopicUtils::IsValidTopic("abc"));

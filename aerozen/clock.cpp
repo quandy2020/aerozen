@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 duyongquan <quandy2020@126.com>
+ * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,97 +14,101 @@
  * limitations under the License.
  *
  */
-
-#include "aerozen/clock.hpp"
+#include "aerozen/proto/clock.pb.h"
+#include "aerozen/proto/time.pb.h"
 
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <memory>
 #include <mutex>
 
-#include <gz/msgs/clock.pb.h>
-#include <gz/msgs/time.pb.h>
+#include "aerozen/clock.hpp"
 #include "aerozen/node.hpp"
 
 namespace aerozen {
-
 class NetworkClock::Implementation
 {
+    /// \brief Implementation constructor.
+    /// \param[in] _topicName Name of the aerozen::msgs::Clock type
+    /// topic to be used
+    /// \param[in] _timeBase Time base for this clock, defaults to
+    /// simulation time
 public:
-    /**
-     * @brief Constructs the pimpl for a network clock.
-     *
-     * @param[in] _topicName Name of the gz::msgs::Clock topic to use.
-     * @param[in] _timeBase Time base for this clock.
-     */
     Implementation(const std::string& _topicName,
-                   NetworkClock::TimeBase _time_base);
+                   const NetworkClock::TimeBase _timeBase);
 
-    /**
-     * @brief Returns the current clock time (thread-safe read).
-     *
-     * @return Current clock time in nanoseconds.
-     */
-    std::chrono::nanoseconds Time() const;
+    /// \brief Gets clock time
+    /// \return Current clock time, in nanoseconds
+    /// \remarks Reads are synchronized
+public:
+    std::chrono::nanoseconds Time();
 
-    /**
-     * @brief Sets and publishes the given clock time.
-     *
-     * @param[in] _time Clock time to set.
-     *
-     * @remarks No clock arbitration is performed.
-     */
-    void SetTime(std::chrono::nanoseconds _time);
+    /// \brief Sets and distributes the given clock time
+    /// \param[in] _time The clock time to be set
+    /// \remarks No clock arbitration is performed
+public:
+    void SetTime(const std::chrono::nanoseconds _time);
 
-    /**
-     * @brief Updates stored time from a time message (thread-safe write).
-     *
-     * @param[in] _msg Time fields from a clock message.
-     */
-    void UpdateTimeFromMessage(const gz::msgs::Time& _msg);
+    /// \brief Updates current clock time from a message
+    /// \param[in] _msg Message to update clock time from
+    /// \remarks Writes are synchronized
+public:
+    void UpdateTimeFromMessage(const aerozen::msgs::Time& _msg);
 
-    /**
-     * @brief Subscriber callback for incoming clock messages.
-     *
-     * @param[in] _msg Received clock message.
-     */
-    void OnClockMessageReceived(const gz::msgs::Clock& _msg);
+    /// \brief Clock message subscriber callback.
+    /// \param[in] _msg Received clock message
+public:
+    void OnClockMessageReceived(const aerozen::msgs::Clock& _msg);
 
-    std::chrono::nanoseconds clock_time_ns;
-    NetworkClock::TimeBase clock_time_base;
-    mutable std::mutex clock_mutex;
+    /// \brief Current clock time, in nanoseconds.
+public:
+    std::chrono::nanoseconds clockTimeNS;
+
+    /// \brief Time base to use for the clock.
+public:
+    NetworkClock::TimeBase clockTimeBase;
+
+    /// \brief Lock to synchronize clock accesses.
+public:
+    std::mutex clockMutex;
+
+    /// \brief Node to publish/subscribe clock messages.
+public:
     Node node;
+
+    /// \brief Publisher to distribute clock messages.
+public:
     Node::Publisher pub;
 };
 
+//////////////////////////////////////////////////
 NetworkClock::Implementation::Implementation(const std::string& _topicName,
-                                             NetworkClock::TimeBase _time_base)
-    : clock_time_ns(std::chrono::nanoseconds::zero()),
-      clock_time_base(_time_base) {
+                                             NetworkClock::TimeBase _timeBase)
+    : clockTimeNS(std::chrono::nanoseconds::zero()), clockTimeBase(_timeBase) {
     if (!node.Subscribe(_topicName, &Implementation::OnClockMessageReceived,
                         this)) {
         std::cerr << "Could not subscribe to [" << _topicName << "] topic\n";
     }
-    pub = node.Advertise<gz::msgs::Clock>(_topicName);
+    this->pub = node.Advertise<aerozen::msgs::Clock>(_topicName);
 }
 
-std::chrono::nanoseconds NetworkClock::Implementation::Time() const {
-    std::lock_guard<std::mutex> lock(clock_mutex);
-    return clock_time_ns;
+//////////////////////////////////////////////////
+std::chrono::nanoseconds NetworkClock::Implementation::Time() {
+    std::lock_guard<std::mutex> lock(this->clockMutex);
+    return this->clockTimeNS;
 }
 
+//////////////////////////////////////////////////
 void NetworkClock::Implementation::SetTime(std::chrono::nanoseconds _time) {
-    const std::chrono::seconds time_as_secs =
+    const std::chrono::seconds timeAsSecs =
         std::chrono::duration_cast<std::chrono::seconds>(_time);
-    const int secs = static_cast<int>(time_as_secs.count());
-    const int nsecs = static_cast<int>(
-        (_time -
-         std::chrono::duration_cast<std::chrono::nanoseconds>(time_as_secs))
-            .count());
+    int secs = timeAsSecs.count();
+    int nsecs = (_time - std::chrono::duration_cast<std::chrono::nanoseconds>(
+                             timeAsSecs))
+                    .count();
 
-    gz::msgs::Clock msg;
-    switch (clock_time_base) {
+    aerozen::msgs::Clock msg;
+    switch (this->clockTimeBase) {
         case NetworkClock::TimeBase::SIM:
             msg.mutable_sim()->set_sec(secs);
             msg.mutable_sim()->set_nsec(nsecs);
@@ -121,37 +125,38 @@ void NetworkClock::Implementation::SetTime(std::chrono::nanoseconds _time) {
             std::cerr << "Invalid clock time base\n";
             return;
     }
-    // Distributes clock message to every subscriber, including this object.
-    pub.Publish(msg);
+    // Distributes clock message to every subscriber,
+    // including this very same object.
+    this->pub.Publish(msg);
 }
 
+//////////////////////////////////////////////////
 void NetworkClock::Implementation::UpdateTimeFromMessage(
-    const gz::msgs::Time& _msg) {
-    std::lock_guard<std::mutex> lock(clock_mutex);
-    clock_time_ns = std::chrono::seconds(_msg.sec()) +
-                    std::chrono::nanoseconds(_msg.nsec());
+    const aerozen::msgs::Time& msg) {
+    std::lock_guard<std::mutex> lock(this->clockMutex);
+    this->clockTimeNS =
+        std::chrono::seconds(msg.sec()) + std::chrono::nanoseconds(msg.nsec());
 }
-
 void NetworkClock::Implementation::OnClockMessageReceived(
-    const gz::msgs::Clock& _msg) {
-    switch (clock_time_base) {
+    const aerozen::msgs::Clock& msg) {
+    switch (this->clockTimeBase) {
         case NetworkClock::TimeBase::REAL:
-            if (_msg.has_real()) {
-                UpdateTimeFromMessage(_msg.real());
+            if (msg.has_real()) {
+                this->UpdateTimeFromMessage(msg.real());
             } else {
                 std::cerr << "Real time not present in clock message\n";
             }
             break;
         case NetworkClock::TimeBase::SIM:
-            if (_msg.has_sim()) {
-                UpdateTimeFromMessage(_msg.sim());
+            if (msg.has_sim()) {
+                this->UpdateTimeFromMessage(msg.sim());
             } else {
                 std::cerr << "Sim time not present in clock message\n";
             }
             break;
         case NetworkClock::TimeBase::SYS:
-            if (_msg.has_system()) {
-                UpdateTimeFromMessage(_msg.system());
+            if (msg.has_system()) {
+                this->UpdateTimeFromMessage(msg.system());
             } else {
                 std::cerr << "System time not present in clock message\n";
             }
@@ -162,50 +167,58 @@ void NetworkClock::Implementation::OnClockMessageReceived(
     }
 }
 
-NetworkClock::NetworkClock(const std::string& _topicName, TimeBase _time_base)
-    : dataPtr(std::make_unique<Implementation>(_topicName, _time_base)) {}
+NetworkClock::NetworkClock(const std::string& _topicName, TimeBase _timeBase)
+    : dataPtr(new NetworkClock::Implementation(_topicName, _timeBase)) {}
 
-NetworkClock::~NetworkClock() = default;
+NetworkClock::~NetworkClock() {
+    // Destroys the pimpl
+}
 
 std::chrono::nanoseconds NetworkClock::Time() const {
-    return dataPtr->Time();
+    return this->dataPtr->Time();
 }
 
 void NetworkClock::SetTime(std::chrono::nanoseconds _time) {
-    dataPtr->SetTime(_time);
+    return this->dataPtr->SetTime(_time);
 }
 
 bool NetworkClock::IsReady() const {
     // At least one non-zero clock message has arrived.
-    return dataPtr->Time().count() != 0;
+    return (this->dataPtr->Time().count() != 0);
 }
 
 class WallClock::Implementation
 {
+    /// \brief Default constructor
 public:
     Implementation();
 
-    /**
-     * @brief Returns wall clock time in nanoseconds (UTC-based).
-     */
+    /// \brief Gets clock time
+    /// \return Current clock time, in nanoseconds
+public:
     std::chrono::nanoseconds Time() const;
 
-    /** Offset so steady clock maps to UTC, in nanoseconds. */
-    std::chrono::nanoseconds wall_minus_mono;
+    /// \brief Offset duration for a monotonic clock to
+    /// become an UTC one, in nanoseconds
+public:
+    std::chrono::nanoseconds wallMinusMono;
 };
 
 WallClock::Implementation::Implementation() {
-    const std::chrono::nanoseconds wall_start_ns(
-        std::chrono::seconds(std::time(nullptr)));
-    const std::chrono::nanoseconds mono_start_ns(
+    // Set the offset used to get UTC from steady clock
+    const std::chrono::nanoseconds wallStartNS(
+        std::chrono::seconds(std::time(NULL)));
+    const std::chrono::nanoseconds monoStartNS(
         std::chrono::steady_clock::now().time_since_epoch());
-    wall_minus_mono = wall_start_ns - mono_start_ns;
+    this->wallMinusMono = wallStartNS - monoStartNS;
 }
 
 std::chrono::nanoseconds WallClock::Implementation::Time() const {
-    const std::chrono::nanoseconds now_ns(
+    // Get time RX using monotonic
+    const std::chrono::nanoseconds nowNS(
         std::chrono::steady_clock::now().time_since_epoch());
-    return wall_minus_mono + now_ns;
+    // monotonic -> utc in nanoseconds
+    return this->wallMinusMono + nowNS;
 }
 
 WallClock* WallClock::Instance() {
@@ -213,16 +226,17 @@ WallClock* WallClock::Instance() {
     return &clock;
 }
 
-WallClock::WallClock() : dataPtr(std::make_unique<Implementation>()) {}
+WallClock::WallClock() : dataPtr(new WallClock::Implementation) {}
 
-WallClock::~WallClock() = default;
+WallClock::~WallClock() {
+    // Destroys the pimpl
+}
 
 std::chrono::nanoseconds WallClock::Time() const {
-    return dataPtr->Time();
+    return this->dataPtr->Time();
 }
 
 bool WallClock::IsReady() const {
-    return true;
+    return true;  // Always ready.
 }
-
 }  // namespace aerozen

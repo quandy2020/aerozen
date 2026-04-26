@@ -15,17 +15,16 @@
  *
  */
 
+#include <unistd.h>
 #include <cstdlib>
 #include <string>
 
-#include <unistd.h>
+#include "aerozen/helpers.hpp"
 
 namespace aerozen {
-//////////////////////////////////////////////////
 bool env(const std::string& _name, std::string& _value) {
     char* v;
     v = std::getenv(_name.c_str());
-
     if (v) {
         _value = v;
         return true;
@@ -33,7 +32,6 @@ bool env(const std::string& _name, std::string& _value) {
     return false;
 }
 
-//////////////////////////////////////////////////
 std::vector<std::string> split(const std::string& _orig, char _delim) {
     std::vector<std::string> pieces;
     size_t pos1 = 0;
@@ -47,15 +45,17 @@ std::vector<std::string> split(const std::string& _orig, char _delim) {
     return pieces;
 }
 
-//////////////////////////////////////////////////
 unsigned int getProcessId() {
     return ::getpid();
 }
 
-//////////////////////////////////////////////////
 std::string getTransportImplementation() {
-    if (const char* implEnv = std::getenv("AEROZEN_TRANSPORT_IMPLEMENTATION"))
+    if (const char* implEnv = std::getenv("AEROZEN_IMPLEMENTATION"))
         return std::string(implEnv);
-    return std::string(AEROZEN_TRANSPORT_DEFAULT_IMPLEMENTATION);
+#ifdef AEROZEN_DEFAULT_IMPLEMENTATION
+    return std::string(AEROZEN_DEFAULT_IMPLEMENTATION);
+#else
+    return "zeromq";
+#endif
 }
 }  // namespace aerozen

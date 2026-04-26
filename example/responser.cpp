@@ -17,13 +17,15 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/net_utils.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Provide an "echo" service.
-bool srvEcho(const gz::msgs::StringMsg &_req,
-  gz::msgs::StringMsg &_rep)
+bool srvEcho(const aerozen::msgs::StringMsg &_req,
+  aerozen::msgs::StringMsg &_rep)
 {
   // Set the response's content.
   _rep.set_data(_req.data());
@@ -37,11 +39,11 @@ int main(int argc, char **argv)
 {
   // Let's print the list of our network interfaces.
   std::cout << "List of network interfaces in this machine:" << std::endl;
-  for (const auto &netIface : gz::transport::determineInterfaces())
+  for (const auto &netIface : aerozen::DetermineInterfaces())
     std::cout << "\t" << netIface << std::endl;
 
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string service = "/echo";
 
   // Advertise a service.
@@ -52,5 +54,5 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 }

@@ -1,0 +1,3 @@
+// Automatically generated
+#include <aerozen/config.hh>
+${aerozen_headers}

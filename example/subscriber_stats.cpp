@@ -17,13 +17,14 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
-void cb(const gz::msgs::StringMsg &_msg)
+void cb(const aerozen::msgs::StringMsg &_msg)
 {
   std::cout << "Msg: " << _msg.data() << std::endl << std::endl;
 }
@@ -31,7 +32,7 @@ void cb(const gz::msgs::StringMsg &_msg)
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string topic = "/foo";
 
   // Statistics are published on the `/statistics` topic. You echo the
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 
   return 0;
 }

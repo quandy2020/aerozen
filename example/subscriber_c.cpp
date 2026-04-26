@@ -15,15 +15,15 @@
  *
 */
 #include <stdio.h>
-#include <gz/msgs/stringmsg.pb.h>
-#include <gz/transport/CIface.h>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/ciface.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
 void cb(const char *_data, const size_t _size, const char *_msgType,
         void *_userData)
 {
-  gz::msgs::StringMsg msg;
+  aerozen::msgs::StringMsg msg;
   msg.ParseFromArray(_data, _size);
   const char *partition;
 
@@ -42,20 +42,20 @@ int main(int argc, char **argv)
 {
   const char *partName = "red";
   // Create a transport node.
-  GzTransportNode *node = gzTransportNodeCreate(nullptr);
-  GzTransportNode *nodeRed = gzTransportNodeCreate(partName);
+  TransportNode *node = TransportNodeCreate(nullptr);
+  TransportNode *nodeRed = TransportNodeCreate(partName);
 
   const char *topic = "/foo";
 
   // Subscribe to a topic by registering a callback.
-  if (gzTransportSubscribe(node, topic, cb, nullptr) != 0)
+  if (TransportSubscribe(node, topic, cb, nullptr) != 0)
   {
     printf("Error subscribing to topic %s.\n", topic);
     return -1;
   }
 
   // Subscribe to a topic by registering a callback.
-  if (gzTransportSubscribe(nodeRed, topic, cb,
+  if (TransportSubscribe(nodeRed, topic, cb,
       const_cast<char*>(partName)) != 0)
   {
     printf("Error subscribing to topic %s.\n", topic);
@@ -63,9 +63,9 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gzTransportWaitForShutdown();
-  gzTransportNodeDestroy(&node);
-  gzTransportNodeDestroy(&nodeRed);
+  TransportWaitForShutdown();
+  TransportNodeDestroy(&node);
+  TransportNodeDestroy(&nodeRed);
 
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  *
  */
 
-#ifndef AEROZEN_HANDLER_STORAGE_HPP_
-#define AEROZEN_HANDLER_STORAGE_HPP_
+#ifndef AEROZEN_HANDLERSTORAGE_HPP_
+#define AEROZEN_HANDLERSTORAGE_HPP_
 
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "aerozen/config.hpp"
 #include "aerozen/transport_types.hpp"
 
 namespace aerozen {
-/// \class HandlerStorage handler_storage.hpp
+/// \class HandlerStorage HandlerStorage.hpp
 /// aerozen/handler_storage.hpp
 /// \brief Class to store and manage service call handlers.
 template <typename T>
@@ -250,4 +251,4 @@ private:
 };
 }  // namespace aerozen
 
-#endif  // AEROZEN_HANDLER_STORAGE_HPP_
+#endif  // AEROZEN_HANDLERSTORAGE_HPP_

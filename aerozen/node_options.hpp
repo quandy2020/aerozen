@@ -142,7 +142,7 @@ public:
      * @brief Smart pointer to private data.
      */
 protected:
-    std::unique_ptr<transport::NodeOptionsPrivate> dataPtr;
+    std::unique_ptr<NodeOptionsPrivate> dataPtr;
 };
 }  // namespace aerozen
 #endif  // AEROZEN_NODE_OPTIONS_HPP_

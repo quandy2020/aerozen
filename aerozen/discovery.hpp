@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef GZ_TRANSPORT_DISCOVERY_HH_
-#define GZ_TRANSPORT_DISCOVERY_HH_
+#ifndef AEROZEN_DISCOVERY_HPP_
+#define AEROZEN_DISCOVERY_HPP_
 #include <errno.h>
 #include <string.h>
 
@@ -35,7 +35,7 @@
 // Type used for raw data on this platform
 using raw_type = void;
 
-#include <gz/msgs/discovery.pb.h>
+#include "aerozen/proto/discovery.pb.h"
 
 #include <algorithm>
 #include <condition_variable>
@@ -47,8 +47,6 @@ using raw_type = void;
 #include <thread>
 #include <utility>
 #include <vector>
-
-#include <gz/msgs/Utility.hh>
 
 #include "aerozen/helpers.hpp"
 #include "aerozen/net_utils.hpp"
@@ -102,7 +100,7 @@ public:
               const int _port, const bool _verbose = false)
         : multicastGroup(_ip),
           port(_port),
-          hostAddr(determineHost()),
+          hostAddr(DetermineHost()),
           pUuid(_pUuid),
           silenceInterval(kDefSilenceInterval),
           activityInterval(kDefActivityInterval),
@@ -119,7 +117,7 @@ public:
             this->hostInterfaces = {gzIp};
         } else {
             // Get the list of network interfaces in this host.
-            this->hostInterfaces = determineInterfaces();
+            this->hostInterfaces = DetermineInterfaces();
         }
 
         // Update the wire version if GZ_TRANSPORT_TOPIC_STATISTICS is set.
@@ -1024,7 +1022,7 @@ private:
 private:
     void DispatchDiscoveryMsg(const std::string& _fromIp, char* _msg,
                               uint16_t _len) {
-        gz::msgs::Discovery msg;
+        msgs::Discovery msg;
 
         // Parse the message, and return if parsing failed. Parsing could
         // fail when another discovery node is publishing messages using an
@@ -1266,7 +1264,7 @@ private:
     template <typename T>
     void SendMsg(const DestinationType& _destType,
                  const msgs::Discovery::Type _type, const T& _pub) const {
-        gz::msgs::Discovery discoveryMsg;
+        msgs::Discovery discoveryMsg;
         discoveryMsg.set_version(this->Version());
         discoveryMsg.set_type(_type);
         discoveryMsg.set_process_uuid(this->pUuid);
@@ -1309,7 +1307,7 @@ private:
         }
 
         if (this->verbose) {
-            std::cout << "\t* Sending " << msgs::ToString(_type) << " msg ["
+            std::cout << "\t* Sending " << msgs::Discovery_Type_Name(_type) << " msg ["
                       << _pub.Topic() << "]" << std::endl;
         }
     }

@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  */
-#include <errno.h>
 
 #include <arpa/inet.h>
+#include <errno.h>
 #include <net/if.h>
 #include <netdb.h>
 #include <pwd.h>
@@ -30,6 +30,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "aerozen/config.hpp"
 #include "aerozen/helpers.hpp"
 #include "aerozen/net_utils.hpp"
 #include "aerozen/uuid.hpp"
@@ -40,11 +41,12 @@
 #endif
 
 namespace aerozen {
+
 /// \brief Get the preferred local IP address.
 /// Note that we don't consider private IP addresses.
 /// \param[out] _ip The preferred local IP address.
 /// \return true if a public local IP was found or false otherwise.
-bool preferredPublicIP(std::string& _ip) {
+bool PreferredPublicIP(std::string& _ip) {
     char host[1024];
     memset(host, 0, sizeof(host));
     if (gethostname(host, sizeof(host) - 1) != 0)
@@ -56,13 +58,13 @@ bool preferredPublicIP(std::string& _ip) {
 
     std::string hostIP;
     const std::string kPrefix = "127.0.";
-    if ((hostnameToIp(host, hostIP) != 0) || isPrivateIP(hostIP.c_str()) ||
+    if ((HostnameToIp(host, hostIP) != 0) || IsPrivateIP(hostIP.c_str()) ||
         hostIP.compare(0, kPrefix.size(), kPrefix) == 0) {
         return false;
     }
 
     // Get the complete list of compatible interfaces.
-    auto interfaces = determineInterfaces();
+    auto interfaces = DetermineInterfaces();
 
     // Make sure that this interface is compatible with Discovery.
     if (std::find(interfaces.begin(), interfaces.end(), hostIP) ==
@@ -74,15 +76,13 @@ bool preferredPublicIP(std::string& _ip) {
     return true;
 }
 
-//////////////////////////////////////////////////
-bool isPrivateIP(const char* _ip) {
+bool IsPrivateIP(const char* _ip) {
     bool b = !strncmp("192.168", _ip, 7) || !strncmp("10.", _ip, 3) ||
              !strncmp("169.254", _ip, 7);
     return b;
 }
 
-//////////////////////////////////////////////////
-int hostnameToIp(char* _hostname, std::string& _ip) {
+int HostnameToIp(char* _hostname, std::string& _ip) {
     struct hostent* he;
     struct in_addr** addr_list;
     int i;
@@ -101,8 +101,7 @@ int hostnameToIp(char* _hostname, std::string& _ip) {
     return 1;
 }
 
-//////////////////////////////////////////////////
-std::string determineHost() {
+std::string DetermineHost() {
     // First, did the user set GZ_IP?
     std::string gzIp;
     if (env("GZ_IP", gzIp) && !gzIp.empty()) {
@@ -111,22 +110,21 @@ std::string determineHost() {
 
     // Second, try the preferred local and public IP address.
     std::string hostIP;
-    if (preferredPublicIP(hostIP))
+    if (PreferredPublicIP(hostIP))
         return hostIP;
 
     // Third, fall back on interface search, which will yield an IP address
-    auto interfaces = determineInterfaces();
+    auto interfaces = DetermineInterfaces();
     for (const auto& ip : interfaces) {
         // Return the first public IP address.
-        if (!isPrivateIP(ip.c_str()))
+        if (!IsPrivateIP(ip.c_str()))
             return ip;
     }
 
     return interfaces.front();
 }
 
-//////////////////////////////////////////////////
-std::vector<std::string> determineInterfaces() {
+std::vector<std::string> DetermineInterfaces() {
 #ifdef HAVE_IFADDRS
     std::vector<std::string> result;
     struct ifaddrs *ifa = nullptr, *ifp = NULL;
@@ -233,18 +231,17 @@ std::vector<std::string> determineInterfaces() {
 #endif
 }
 
-//////////////////////////////////////////////////
-std::string hostname() {
+std::string HostName() {
     char hostname[200 + 1];
     gethostname(hostname, sizeof hostname);
 
     return hostname;
 }
 
-//////////////////////////////////////////////////
-std::string username() {
+std::string UserName() {
     char buffer[200 + 1];
     size_t bufferLen = sizeof(buffer);
+
     // First, try to get the username through the standard environment variable
     // for it.
     const auto userVariable = std::getenv("USER");

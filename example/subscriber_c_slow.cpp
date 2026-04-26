@@ -15,15 +15,15 @@
  *
 */
 #include <stdio.h>
-#include <gz/msgs/stringmsg.pb.h>
-#include <gz/transport/CIface.h>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/ciface.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
 void cb(const char *_data, const size_t _size, const char *_msgType,
         void *_userData)
 {
-  gz::msgs::StringMsg msg;
+  aerozen::msgs::StringMsg msg;
   msg.ParseFromArray(_data, _size);
   const char *userData;
 
@@ -41,7 +41,7 @@ void cb(const char *_data, const size_t _size, const char *_msgType,
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  GzTransportNode *node = gzTransportNodeCreate(nullptr);
+  TransportNode *node = TransportNodeCreate(nullptr);
 
   const char *topic = "/foo";
 
@@ -49,15 +49,15 @@ int main(int argc, char **argv)
   opts.msgsPerSec = 1;
 
   // Subscribe to a topic by registering a callback.
-  if (gzTransportSubscribeOptions(node, topic, opts, cb, nullptr) != 0)
+  if (TransportSubscribeOptions(node, topic, opts, cb, nullptr) != 0)
   {
     printf("Error subscribing to topic %s.\n", topic);
     return -1;
   }
 
   // Zzzzzz.
-  gzTransportWaitForShutdown();
-  gzTransportNodeDestroy(&node);
+  TransportWaitForShutdown();
+  TransportNodeDestroy(&node);
 
   return 0;
 }

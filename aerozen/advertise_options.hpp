@@ -15,40 +15,31 @@
  *
  */
 
-#ifndef AEROZEN_ADVERTISE_OPTIONS_HPP_
-#define AEROZEN_ADVERTISE_OPTIONS_HPP_
+#ifndef AEROZEN_ADVERTISEOPTIONS_HPP_
+#define AEROZEN_ADVERTISEOPTIONS_HPP_
 
 #include <cstdint>
 #include <iostream>
 #include <memory>
 
-namespace aerozen {
+#include "aerozen/config.hpp"
 
+namespace aerozen {
 // Forward declarations.
 class AdvertiseOptionsPrivate;
 class AdvertiseMessageOptionsPrivate;
 class AdvertiseServiceOptionsPrivate;
 
-/**
- * @brief This strongly typed enum defines the different options for
- *        the scope of a topic/service.
- */
+/// \brief This strongly typed enum defines the different options for
+/// the scope of a topic/service.
 enum class Scope_t {
-    /**
-     * @brief Topic/service only available to subscribers in the same
-     *         process as the publisher.
-     */
+    /// \brief Topic/service only available to subscribers in the same
+    /// process as the publisher.
     PROCESS,
-
-    /**
-     * @brief Topic/service only available to subscribers in the same
-     *        machine as the publisher.
-     */
+    /// \brief Topic/service only available to subscribers in the same
+    /// machine as the publisher.
     HOST,
-
-    /**
-     * @brief Topic/service available to any subscriber (default scope).
-     */
+    /// \brief Topic/service available to any subscriber (default scope).
     ALL
 };
 
@@ -59,16 +50,13 @@ enum class Scope_t {
 /// E.g.: Set the scope of a topic/service.
 class AdvertiseOptions
 {
+    /// \brief Constructor.
 public:
-    /**
-     * @brief Constructor.
-     */
     AdvertiseOptions();
 
-    /**
-     * @brief Copy constructor.
-     * @param[in] _other AdvertiseOptions to copy.
-     */
+    /// \brief Copy constructor.
+    /// \param[in] _other AdvertiseOptions to copy.
+public:
     AdvertiseOptions(const AdvertiseOptions& _other);
 
     /// \brief Destructor.
@@ -78,23 +66,27 @@ public:
     /// \brief Assignment operator.
     /// \param[in] _other The new AdvertiseOptions.
     /// \return A reference to this instance.
+public:
     AdvertiseOptions& operator=(const AdvertiseOptions& _other);
 
     /// \brief Equality operator. This function checks if the given
     /// AdvertiseOptions has identical content to this object.
     /// \param[in] _other The options to compare against.
     /// \return True if this object matches the provided object.
+public:
     bool operator==(const AdvertiseOptions& _other) const;
 
     /// \brief Inequality operator. This function checks if the given
     /// options do not have identical values to this object.
     /// \param[in] _other The options to compare against.
     /// \return True if this object does not match the provided object.
+public:
     bool operator!=(const AdvertiseOptions& _other) const;
 
     /// \brief Stream insertion operator.
     /// \param[out] _out The output stream.
     /// \param[in] _other AdvertiseOptions to write to the stream.
+public:
     friend std::ostream& operator<<(std::ostream& _out,
                                     const AdvertiseOptions& _other) {
         _out << "Advertise options:\n"
@@ -121,7 +113,6 @@ public:
     /// \sa Scope_t.
 public:
     void SetScope(const Scope_t& _scope);
-
     /// \internal
     /// \brief Smart pointer to private data.
 private:
@@ -261,4 +252,4 @@ private:
     std::unique_ptr<AdvertiseServiceOptionsPrivate> dataPtr;
 };
 }  // namespace aerozen
-#endif  // AEROZEN_ADVERTISE_OPTIONS_HPP_
+#endif  // AEROZEN_ADVERTISEOPTIONS_HPP_

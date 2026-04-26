@@ -16,20 +16,20 @@
 */
 
 #include <iostream>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
 
   // Prepare the input parameters.
-  gz::msgs::StringMsg req;
+  aerozen::msgs::StringMsg req;
   req.set_data("HELLO");
 
-  gz::msgs::StringMsg rep;
+  aerozen::msgs::StringMsg rep;
   bool result;
   unsigned int timeout = 5000;
 

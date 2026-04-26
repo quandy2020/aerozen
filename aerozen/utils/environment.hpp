@@ -123,4 +123,13 @@ std::string printenv();
 }  // namespace utils
 }  // namespace aerozen
 
+namespace gz {
+namespace utils {
+using ::aerozen::utils::clearenv;
+using ::aerozen::utils::env;
+using ::aerozen::utils::setenv;
+using ::aerozen::utils::unsetenv;
+}  // namespace utils
+}  // namespace gz
+
 #endif  // AEROZEN_UTILS_ENVIRONMENT_HPP_

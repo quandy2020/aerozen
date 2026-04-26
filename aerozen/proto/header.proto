@@ -21,6 +21,8 @@ package aerozen.msgs;
 option java_package = "com.aerozen.msgs";
 option java_outer_classname = "HeaderProtos";
 
+import "aerozen/proto/time.proto";
+
 /**
  * @ingroup aerozen.msgs
  * @interface Header 

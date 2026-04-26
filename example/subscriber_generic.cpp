@@ -22,14 +22,15 @@
 #include <iostream>
 #include <string>
 
-#include <gz/transport.hh>
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
 /// Note that this callback uses the generic signature, hence it may receive
 /// messages with different types.
 void cb(const google::protobuf::Message &_msg,
-        const gz::transport::MessageInfo &_info)
+        const aerozen::MessageInfo &_info)
 {
   std::cout << "Topic: [" << _info.Topic() << "]" << std::endl;
 
@@ -42,7 +43,7 @@ void cb(const google::protobuf::Message &_msg,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string topic = "/foo";
 
   // Subscribe to a topic by registering a callback.
@@ -53,7 +54,7 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 
   return 0;
 }

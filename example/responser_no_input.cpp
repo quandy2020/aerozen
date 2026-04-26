@@ -17,13 +17,14 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Provide a "quote" service.
 /// Well OK, it's just single-quote service but do you really need more?
-bool srvQuote(gz::msgs::StringMsg &_rep)
+bool srvQuote(aerozen::msgs::StringMsg &_rep)
 {
   std::string awesomeQuote = "This is it! This is the answer. It says here..."
     "that a bolt of lightning is going to strike the clock tower at precisely "
@@ -42,7 +43,7 @@ bool srvQuote(gz::msgs::StringMsg &_rep)
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string service = "/quote";
 
   // Advertise a service call.
@@ -53,5 +54,5 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 }

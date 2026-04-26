@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "aerozen/msgs/stringmsg.pb.h"
+#include "aerozen/proto/stringmsg.pb.h"
 #include "aerozen/ciface.hpp"
 
 static bool g_terminatePub = false;
@@ -41,8 +41,8 @@ int main(int argc, char **argv)
   signal(SIGTERM, signalHandler);
 
   // Create a transport node.
-  aerozen::TransportNode *node = aerozen::TransportNodeCreate(nullptr);
-  aerozen::TransportNode *nodeRed = aerozen::TransportNodeCreate("red");
+  TransportNode *node = TransportNodeCreate(nullptr);
+  TransportNode *nodeRed = TransportNodeCreate("red");
 
   const char *topic = "/foo";
 
@@ -82,8 +82,9 @@ int main(int argc, char **argv)
 
   // Publish messages at 1Hz.
   while (!g_terminatePub) {
-    aerozen::TransportPublishRaw(node, topic, buffer, size, msg.GetTypeName().c_str());
-    aerozen::TransportPublishRaw(nodeRed, topic, bufferRed, sizeRed, msgRed.GetTypeName().c_str());
+    TransportPublishRaw(node, topic, buffer, size, msg.GetTypeName().c_str());
+    TransportPublishRaw(nodeRed, topic, bufferRed, sizeRed,
+                        msgRed.GetTypeName().c_str());
 
     printf("Publishing hello on topic %s.\n", topic);
     sleep(1);
@@ -91,8 +92,8 @@ int main(int argc, char **argv)
 
   free(buffer);
   free(bufferRed);
-  aerozen::TransportNodeDestroy(&node);
-  aerozen::TransportNodeDestroy(&nodeRed);
+  TransportNodeDestroy(&node);
+  TransportNodeDestroy(&nodeRed);
 
   return 0;
 }

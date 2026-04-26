@@ -22,8 +22,8 @@
 #include <string>
 #include <thread>
 
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
 
 /**
  * @brief Flag used to break the publisher loop and terminate the program.
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   aerozen::Node node;
   std::string topic = "/foo";
 
-  gz::msgs::StringMsg msg;
+  aerozen::msgs::StringMsg msg;
   msg.set_data("HELLO");
 
   auto pub = node.Advertise(topic, msg.GetTypeName());

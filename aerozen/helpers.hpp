@@ -27,8 +27,22 @@
 #include <string>
 #include <vector>
 
+#include "aerozen/config.hpp"
+
+// Avoid using deprecated message send/receive function when possible.
+#if ZMQ_VERSION > ZMQ_MAKE_VERSION(4, 3, 1)
+#define GZ_ZMQ_POST_4_3_1
+#endif
+
+// Avoid using deprecated set function when possible
+#if CPPZMQ_VERSION >= ZMQ_MAKE_VERSION(4, 7, 0)
+// Ubuntu Focal (20.04) packages a different "4.7.0"
+#ifndef UBUNTU_FOCAL
+#define GZ_CPPZMQ_POST_4_7_0
+#endif
+#endif
+
 namespace aerozen {
-//
 /// \brief Constant used when not interested in throttling.
 static const uint64_t kUnthrottled = std::numeric_limits<uint64_t>::max();
 
@@ -59,4 +73,5 @@ std::string getTransportImplementation();
 #define aerozen_strdup strdup
 }  // namespace aerozen
 
-#endif  // AEROZEN_HELPERS_HPP_
+// GZ_TRANSPORT_HELPERS_HH_
+#endif

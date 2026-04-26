@@ -661,7 +661,7 @@ Node::Node(const NodeOptions& _options) : dataPtr(new NodePrivate()) {
 }
 
 // --------------------------------------------------
-Node::Node() : Node(gz::transport::NodeOptions()) {}
+Node::Node() : Node(NodeOptions()) {}
 
 // --------------------------------------------------
 Node::~Node() {
@@ -1134,7 +1134,7 @@ bool Node::RequestRaw(const std::string& _topic, const std::string& _request,
                       const std::string& _responseType, unsigned int _timeout,
                       std::string& _response, bool& _result) {
     std::unique_ptr<google::protobuf::Message> req =
-        msgs::Factory::New(_requestType);
+        Factory::New(_requestType);
     if (!req) {
         std::cerr << "Unable to create request of type[" << _requestType
                   << "].\n";
@@ -1147,7 +1147,7 @@ bool Node::RequestRaw(const std::string& _topic, const std::string& _request,
     }
 
     std::unique_ptr<google::protobuf::Message> res =
-        msgs::Factory::New(_responseType);
+        Factory::New(_responseType);
     if (!res) {
         std::cerr << "Unable to create response of type[" << _responseType
                   << "].\n";

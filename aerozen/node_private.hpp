@@ -64,7 +64,7 @@ public:
     /**
      * @brief Partition for this node.
      */
-    std::string partition = hostname() + ":" + username();
+    std::string partition = HostName() + ":" + UserName();
 
     /**
      * @brief Default namespace for this node.

@@ -63,7 +63,7 @@ macro(aerozen_import_target package)
   if(aerozen_import_target_TARGET_NAME)
     set(target_name ${aerozen_import_target_TARGET_NAME})
   else()
-    set(target_name ${aerozen_import_target_TARGET_NAME})
+    set(target_name ${package}::${package})
   endif()
 
   if(NOT TARGET ${target_name})

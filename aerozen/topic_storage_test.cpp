@@ -25,6 +25,8 @@
 #include "aerozen/topic_storage.hpp"
 #include "gtest/gtest.h"
 
+using namespace aerozen;
+
 // Global variables.
 static const std::string g_topic1 = "foo";   // NOLINT(*)
 static const std::string g_topic2 = "foo2";  // NOLINT(*)

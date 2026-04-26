@@ -22,107 +22,116 @@
 #include <memory>
 #include <string>
 
-#include <gz/utils/SuppressWarning.hh>
+#include "aerozen/utils/suppress_warning.hpp"
+
+#include "aerozen/config.hpp"
 
 namespace aerozen {
-
-/**
- * @brief Clock interface for time tracking.
- */
+//////////////////////////////////////////////////
+/// \brief A Clock interface for time tracking
 class Clock
 {
+    /// \brief Gets clock time
+    /// \return Current clock time, in nanoseconds
 public:
-    /**
-     * @brief Returns the current clock time.
-     *
-     * @return Current clock time in nanoseconds.
-     */
     virtual std::chrono::nanoseconds Time() const = 0;
 
-    /**
-     * @brief Returns whether the clock is ready to use.
-     *
-     * @return True if the clock is ready, false otherwise.
-     */
+    /// \brief Checks whether the clock is ready to be used or not.
+    /// \return True if clock is ready to be used, false otherwise
+public:
     virtual bool IsReady() const = 0;
 
+    /// \brief Virtual destructor
+public:
     virtual ~Clock() = default;
 };
 
-/**
- * @brief Clock implementation driven by gz::msgs::Clock messages on the
- * network.
- */
+////////////////////////////////////////////////////////////////
+/// \brief A Clock interface implementation that uses
+/// gz::msgs::Clock messages distributed across
+/// the network
 class NetworkClock : public Clock
 {
+    /// \brief Network clock time bases
 public:
-    /**
-     * @brief Time base selection for network clock messages.
-     */
     enum class TimeBase : int64_t {
-        REAL,  ///< Use Clock message `real` time field as time base.
-        SIM,   ///< Use Clock message `sim` time field as time base.
-        SYS    ///< Use Clock message `sys` time field as time base.
+        REAL,  ///< Use Clock message `real` time field as time base
+        SIM,   ///< Use Clock message `sim` time field as time base
+        SYS    ///< Use Clock message `sys` time field as time base
     };
 
-    /**
-     * @brief Constructs a network clock for the given topic and time base.
-     *
-     * @param[in] _topicName Name of the gz::msgs::Clock topic to use.
-     * @param[in] _timeBase Time base for this clock; defaults to simulation
-     * time.
-     */
+    /// \brief Constructor that sets the initial time range option
+    /// \param[in] _topicName Name of the gz::msgs::Clock type
+    /// topic to be used
+    /// \param[in] _timeBase Time base for this clock, defaults to
+    /// simulation time
+public:
     explicit NetworkClock(const std::string& _topicName,
-                          TimeBase _timeBase = TimeBase::SIM);
+                          const TimeBase _timeBase = TimeBase::SIM);
 
+    /// \brief Destructor
+public:
     ~NetworkClock() override;
 
+    // Documentation inherited
+public:
     std::chrono::nanoseconds Time() const override;
 
-    /**
-     * @brief Sets and publishes the given clock time.
-     *
-     * @param[in] _time Clock time to set.
-     *
-     * @remarks No clock arbitration is performed.
-     */
-    void SetTime(std::chrono::nanoseconds _time);
+    /// \brief Sets and distributes the given clock time
+    /// \param[in] _time The clock time to be set
+    /// \remarks No clock arbitration is performed
+public:
+    void SetTime(const std::chrono::nanoseconds _time);
 
+    // Documentation inherited
+public:
     bool IsReady() const override;
 
+    /// \internal Implementation of this class
 private:
     class Implementation;
 
+    /// \internal Pointer to the implementation of this class
+    AEROZEN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+private:
     std::unique_ptr<Implementation> dataPtr;
+    AEROZEN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
 };
 
-/**
- * @brief Clock implementation using the host OS wall-clock APIs.
- */
+//////////////////////////////////////////////////
+/// \brief A Clock implementation that leverages host OS time APIs
 class WallClock : public Clock
 {
+    /// \brief Returns system wall clock interface
+    /// \return The sole wall clock instance (a singleton)
 public:
-    /**
-     * @brief Returns the singleton wall clock instance.
-     *
-     * @return Pointer to the sole WallClock instance.
-     */
     static WallClock* Instance();
 
+    // Documentation inherited
+public:
     std::chrono::nanoseconds Time() const override;
 
+    // Documentation inherited
+public:
     bool IsReady() const override;
 
+    /// \internal Private singleton constructor
 private:
     WallClock();
 
+    /// \brief Destructor
+private:
     ~WallClock() override;
 
+    /// \internal Implementation of this class
+private:
     class Implementation;
 
+    /// \internal Pointer to the implementation of this class
+    AEROZEN_UTILS_WARN_IGNORE__DLL_INTERFACE_MISSING
+private:
     std::unique_ptr<Implementation> dataPtr;
+    AEROZEN_UTILS_WARN_RESUME__DLL_INTERFACE_MISSING
 };
-
 }  // namespace aerozen
-
 #endif  // AEROZEN_CLOCK_HPP_

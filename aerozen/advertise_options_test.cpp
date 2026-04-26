@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Aerozen Robotics
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,14 @@
 
 using namespace aerozen;
 
+//////////////////////////////////////////////////
 /// \brief Check the default constructor.
 TEST(AdvertiseOptionsTest, defConstructor) {
     AdvertiseOptions opts;
     EXPECT_EQ(opts.Scope(), Scope_t::ALL);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the copy constructor.
 TEST(AdvertiseOptionsTest, copyConstructor) {
     AdvertiseOptions opts1;
@@ -39,6 +41,7 @@ TEST(AdvertiseOptionsTest, copyConstructor) {
     EXPECT_EQ(opts2.Scope(), opts1.Scope());
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the assignment operator.
 TEST(AdvertiseOptionsTest, assignmentOp) {
     AdvertiseOptions opts1;
@@ -48,6 +51,7 @@ TEST(AdvertiseOptionsTest, assignmentOp) {
     EXPECT_EQ(opts2.Scope(), opts1.Scope());
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the == and != operators.
 TEST(AdvertiseOptionsTest, equalityOp) {
     AdvertiseOptions opts1;
@@ -60,6 +64,7 @@ TEST(AdvertiseOptionsTest, equalityOp) {
     EXPECT_FALSE(opts1 != opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the << operator
 TEST(AdvertiseOptionsTest, streamInsertion) {
     AdvertiseOptions opts;
@@ -72,6 +77,7 @@ TEST(AdvertiseOptionsTest, streamInsertion) {
     EXPECT_EQ(output.str(), expectedOutput);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the accessors.
 TEST(AdvertiseOptionsTest, accessors) {
     // Scope.
@@ -81,6 +87,7 @@ TEST(AdvertiseOptionsTest, accessors) {
     EXPECT_EQ(opts.Scope(), Scope_t::HOST);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the default constructor.
 TEST(AdvertiseOptionsTest, msgDefConstructor) {
     AdvertiseMessageOptions opts;
@@ -89,6 +96,7 @@ TEST(AdvertiseOptionsTest, msgDefConstructor) {
     EXPECT_EQ(opts.MsgsPerSec(), kUnthrottled);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the copy constructor.
 TEST(AdvertiseOptionsTest, msgCopyConstructor) {
     AdvertiseMessageOptions opts1;
@@ -98,6 +106,7 @@ TEST(AdvertiseOptionsTest, msgCopyConstructor) {
     EXPECT_EQ(opts1, opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the assignment operator.
 TEST(AdvertiseOptionsTest, msgAssignmentOp) {
     AdvertiseMessageOptions opts1;
@@ -108,6 +117,7 @@ TEST(AdvertiseOptionsTest, msgAssignmentOp) {
     EXPECT_EQ(opts1, opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the == and != operators.
 TEST(AdvertiseOptionsTest, msgEqualityOp) {
     AdvertiseMessageOptions opts1;
@@ -122,6 +132,7 @@ TEST(AdvertiseOptionsTest, msgEqualityOp) {
     EXPECT_FALSE(opts1 != opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the << operator
 TEST(AdvertiseOptionsTest, msgStreamInsertion) {
     AdvertiseMessageOptions opts;
@@ -146,6 +157,7 @@ TEST(AdvertiseOptionsTest, msgStreamInsertion) {
     EXPECT_EQ(output.str(), expectedOutput);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the accessors.
 TEST(AdvertiseOptionsTest, msgAccessors) {
     // Scope.
@@ -162,12 +174,14 @@ TEST(AdvertiseOptionsTest, msgAccessors) {
     EXPECT_TRUE(opts.Throttled());
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the default constructor.
 TEST(AdvertiseOptionsTest, srvDefConstructor) {
     AdvertiseServiceOptions opts;
     EXPECT_EQ(opts.Scope(), Scope_t::ALL);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the copy constructor.
 TEST(AdvertiseOptionsTest, srvCopyConstructor) {
     AdvertiseServiceOptions opts1;
@@ -176,6 +190,7 @@ TEST(AdvertiseOptionsTest, srvCopyConstructor) {
     EXPECT_EQ(opts1, opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the assignment operator.
 TEST(AdvertiseOptionsTest, srvAssignmentOp) {
     AdvertiseServiceOptions opts1;
@@ -185,6 +200,7 @@ TEST(AdvertiseOptionsTest, srvAssignmentOp) {
     EXPECT_EQ(opts1, opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the == and != operators.
 TEST(AdvertiseOptionsTest, srvEqualityOp) {
     AdvertiseServiceOptions opts1;
@@ -197,6 +213,7 @@ TEST(AdvertiseOptionsTest, srvEqualityOp) {
     EXPECT_FALSE(opts1 != opts2);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the << operator
 TEST(AdvertiseOptionsTest, srvStreamInsertion) {
     AdvertiseServiceOptions opts;
@@ -208,6 +225,7 @@ TEST(AdvertiseOptionsTest, srvStreamInsertion) {
     EXPECT_EQ(output.str(), expectedOutput);
 }
 
+//////////////////////////////////////////////////
 /// \brief Check the accessors.
 TEST(AdvertiseOptionsTest, srvAccessors) {
     // Scope.

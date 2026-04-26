@@ -16,12 +16,13 @@
  */
 
 #include <iostream>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Service response callback.
-void responseCb(const gz::msgs::StringMsg &_rep, const bool _result)
+void responseCb(const aerozen::msgs::StringMsg &_rep, const bool _result)
 {
   if (_result)
     std::cout << "Response: [" << _rep.data() << "]" << std::endl;
@@ -33,10 +34,10 @@ void responseCb(const gz::msgs::StringMsg &_rep, const bool _result)
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
 
   // Prepare the input parameters.
-  gz::msgs::StringMsg req;
+  aerozen::msgs::StringMsg req;
   req.set_data("HELLO");
 
   std::cout << "Press <CTRL-C> to exit" << std::endl;
@@ -45,5 +46,5 @@ int main(int argc, char **argv)
   node.Request("/echo", req, responseCb);
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 }

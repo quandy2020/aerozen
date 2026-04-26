@@ -21,6 +21,8 @@ package aerozen.msgs;
 option java_package = "com.aerozen.msgs";
 option java_outer_classname = "Int32Protos";
 
+import "aerozen/proto/header.proto";
+
 /**
  * @ingroup aerozen.msgs
  * @interface Int32

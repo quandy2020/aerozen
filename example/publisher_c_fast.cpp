@@ -18,7 +18,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include "aerozen/msgs/stringmsg.pb.h"
+#include "aerozen/proto/stringmsg.pb.h"
 #include "aerozen/ciface.hpp"
 
 static bool g_terminatePub = false;
@@ -43,8 +43,8 @@ int main(int argc, char **argv)
   signal(SIGTERM, signalHandler);
 
   // Create a transport node.
-  aerozen::TransportNode *node = aerozen::TransportNodeCreate(nullptr);
-  aerozen::TransportNode *nodeRed = aerozen::TransportNodeCreate("red");
+  TransportNode *node = TransportNodeCreate(nullptr);
+  TransportNode *nodeRed = TransportNodeCreate("red");
 
   const char *topic = "/foo";
 

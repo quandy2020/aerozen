@@ -111,6 +111,8 @@ protected:
     /**
      * @brief Private data.
      */
+protected:
+    std::unique_ptr<IRepHandlerPrivate> dataPtr;
 };
 
 /**

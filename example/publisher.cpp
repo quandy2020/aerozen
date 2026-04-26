@@ -22,8 +22,8 @@
 #include <string>
 #include <thread>
 
-#include <gz/msgs.hh>
-#include "aerozen/transport.hpp"
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
 
 /**
  * @brief Flag used to break the publisher loop and terminate the program.
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   aerozen::Node node;
   std::string topic = "/foo";
 
-  auto pub = node.Advertise<gz::msgs::StringMsg>(topic);
+  auto pub = node.Advertise<aerozen::msgs::StringMsg>(topic);
   if (!pub)
   {
     std::cerr << "Error advertising topic [" << topic << "]" << std::endl;
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
   }
 
   // Prepare the message.
-  gz::msgs::StringMsg msg;
+  aerozen::msgs::StringMsg msg;
   msg.set_data("HELLO");
 
   // Publish messages at 1Hz.

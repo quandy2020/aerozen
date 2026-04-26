@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 duyongquan <quandy2020@126.com>
+ * Copyright (C) 2026 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 
 namespace aerozen {
 /**
+ * @class Exception Exception.hpp aerozen/exception.hpp
  * @brief Exception class for aerozen errors.
  */
 class Exception : public std::runtime_error
@@ -33,6 +34,5 @@ public:
      */
     using std::runtime_error::runtime_error;
 };
-
 }  // namespace aerozen
 #endif  // AEROZEN_EXCEPTION_HPP_

@@ -22,7 +22,7 @@
 #include <string>
 #include <thread>
 
-#include <gz/transport.hh>
+#include "aerozen/node.hpp"
 #include "msgs/stringmsg.pb.h"
 
 /**

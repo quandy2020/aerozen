@@ -223,4 +223,12 @@ const int kDefaultRcvHwm = 1000;
 const int kDefaultSndHwm = 1000;
 }  // namespace aerozen
 
+namespace transport = ::aerozen;
+namespace msgs = ::aerozen::msgs;
+
+namespace gz {
+namespace transport = ::aerozen;
+namespace msgs = ::aerozen::msgs;
+}
+
 #endif  // AEROZEN_TRANSPORT_TYPES_HPP_

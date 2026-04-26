@@ -16,17 +16,18 @@
 */
 
 #include <iostream>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
 
   // Prepare the input parameters.
-  gz::msgs::StringMsg req;
+  aerozen::msgs::StringMsg req;
   req.set_data("HELLO");
 
   // Request the "/oneway" service.
@@ -38,5 +39,5 @@ int main(int argc, char **argv)
   std::cout << "Press <CTRL-C> to exit" << std::endl;
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 }

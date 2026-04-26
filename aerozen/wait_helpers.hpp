@@ -80,6 +80,10 @@ bool WaitForService(
 bool WaitForTopic(
     const Node& _node, const std::string& _topic,
     std::chrono::milliseconds _timeout = std::chrono::milliseconds(10000));
+
+inline void waitForShutdown() {
+    WaitForShutdown();
+}
 }  // namespace aerozen
 
 #endif  // AEROZEN_WAITHELPERS_HPP_

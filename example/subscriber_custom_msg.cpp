@@ -17,7 +17,8 @@
 
 #include <iostream>
 #include <string>
-#include <gz/transport.hh>
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 #include "msgs/stringmsg.pb.h"
 
@@ -31,7 +32,7 @@ void cb(const example::msgs::StringMsg &_msg)
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string topic = "/foo";
 
   // Subscribe to a topic by registering a callback.
@@ -42,7 +43,7 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 
   return 0;
 }

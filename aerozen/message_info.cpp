@@ -21,102 +21,80 @@
 #include "aerozen/topic_utils.hpp"
 
 namespace aerozen {
-/**
- * @internal
- * @brief Private data for MessageInfo class.
- */
+/// \internal
+/// \brief Private data for MessageInfo class.
 class MessageInfoPrivate
 {
+    /// \brief Default constructor.
 public:
-    /**
-     * @brief Default constructor.
-     */
     MessageInfoPrivate() = default;
 
-    /**
-     * @brief Destructor.
-     */
+    /// \brief Destructor.
+public:
     virtual ~MessageInfoPrivate() = default;
 
-    /**
-     * @brief Topic name.
-     */
+    /// \brief Topic name.
+public:
     std::string topic;
 
-    /**
-     * @brief Message type name.
-     */
+    /// \brief Message type name.
+public:
     std::string type;
 
-    /**
-     * @brief Partition name.
-     */
+    /// \brief Partition name.
+public:
     std::string partition;
 
-    /**
-     * @brief Whether the message was sent via intra-process.
-     */
+    /// \brief Was the message sent via intra-process?
+public:
     bool isIntraProcess = false;
 };
 
-//////////////////////////////////////////////////
 MessageInfo::MessageInfo() : dataPtr(new MessageInfoPrivate()) {}
 
-//////////////////////////////////////////////////
 MessageInfo::MessageInfo(const MessageInfo& _other)
     : dataPtr(new MessageInfoPrivate()) {
     *this->dataPtr = *_other.dataPtr;
 }
 
-//////////////////////////////////////////////////
 MessageInfo::MessageInfo(MessageInfo&& _other)  // NOLINT
     : dataPtr(std::move(_other.dataPtr)) {}
 
-//////////////////////////////////////////////////
 MessageInfo::~MessageInfo() {}
 
-//////////////////////////////////////////////////
 const std::string& MessageInfo::Topic() const {
     return this->dataPtr->topic;
 }
 
-//////////////////////////////////////////////////
 void MessageInfo::SetTopic(const std::string& _topic) {
     this->dataPtr->topic = _topic;
 }
 
-//////////////////////////////////////////////////
 const std::string& MessageInfo::Type() const {
     return this->dataPtr->type;
 }
 
-//////////////////////////////////////////////////
 void MessageInfo::SetType(const std::string& _type) {
     this->dataPtr->type = _type;
 }
 
-//////////////////////////////////////////////////
 const std::string& MessageInfo::Partition() const {
     return this->dataPtr->partition;
 }
 
-//////////////////////////////////////////////////
 void MessageInfo::SetPartition(const std::string& _partition) {
     this->dataPtr->partition = _partition;
 }
 
-//////////////////////////////////////////////////
 bool MessageInfo::SetTopicAndPartition(const std::string& _fullyQualifiedName) {
     return TopicUtils::DecomposeFullyQualifiedTopic(
         _fullyQualifiedName, this->dataPtr->partition, this->dataPtr->topic);
 }
 
-//////////////////////////////////////////////////
 bool MessageInfo::IntraProcess() const {
     return this->dataPtr->isIntraProcess;
 }
 
-//////////////////////////////////////////////////
 void MessageInfo::SetIntraProcess(bool _value) {
     this->dataPtr->isIntraProcess = _value;
 }

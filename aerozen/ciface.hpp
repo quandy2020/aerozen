@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Aerozen Robotics
+ * Copyright (C) 2019 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 
 #include <cstddef>
 
+#include "aerozen/config.hpp"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +38,7 @@ typedef struct TransportNode TransportNode;
 /// Use nullptr to use the default value, which is specified via the
 /// GZ_PARTITION environment variable.
 /// \return A pointer to a new transport node. Do not manually delete this
-/// pointer, instead use TransportNodeDestroy.
+/// pointer, instead use gzTransportNodeDestroy.
 TransportNode* TransportNodeCreate(const char* _partition);
 
 /// \brief Destroy a transport node.
@@ -77,10 +79,10 @@ int TransportPublish(TransportNode* _node, const char* _topic,
 /// \param[in] _callback The function to call when a message is received.
 /// \param[in] _userData Arbitrary user data pointer.
 /// \return 0 on success.
-int gzTransportSubscribe(TransportNode* _node, const char* _topic,
-                         void (*_callback)(const char*, size_t, const char*,
-                                           void*),
-                         void* _userData);
+int TransportSubscribe(TransportNode* _node, const char* _topic,
+                       void (*_callback)(const char*, size_t, const char*,
+                                         void*),
+                       void* _userData);
 
 /// \brief Subscribe to a topic, and register a callback.
 /// \param[in] _node Pointer to a node.
@@ -101,20 +103,33 @@ int TransportSubscribeOptions(TransportNode* _node, const char* _topic,
 /// \param[in] _callback The function to call when a message is received.
 /// \param[in] _userData Arbitrary user data pointer.
 /// \return 0 on success.
-int gzTransportSubscribeNonConst(TransportNode* _node, char* _topic,
-                                 void (*_callback)(char*, size_t, char*, void*),
-                                 void* _userData);
+int TransportSubscribeNonConst(TransportNode* _node, char* _topic,
+                               void (*_callback)(char*, size_t, char*, void*),
+                               void* _userData);
 
 /// \brief Unsubscribe from a topic.
 /// \param[in] _node Pointer to a node.
 /// \param[in] _topic Name of the topic.
 /// \return 0 on success.
-int gzTransportUnsubscribe(TransportNode* _node, const char* _topic);
+int TransportUnsubscribe(TransportNode* _node, const char* _topic);
 
 /// \brief Block the current thread until a SIGINT or SIGTERM is received.
 /// Note that this function registers a signal handler. Do not use this
 /// function if you want to manage yourself SIGINT/SIGTERM.
 void TransportWaitForShutdown();
+
+// Backward-compatible C API aliases
+typedef TransportNode GzTransportNode;
+#define gzTransportNodeCreate TransportNodeCreate
+#define gzTransportNodeDestroy TransportNodeDestroy
+#define gzTransportAdvertise TransportAdvertise
+#define gzTransportPublishRaw TransportPublishRaw
+#define gzTransportPublish TransportPublish
+#define gzTransportSubscribe TransportSubscribe
+#define gzTransportSubscribeOptions TransportSubscribeOptions
+#define gzTransportSubscribeNonConst TransportSubscribeNonConst
+#define gzTransportUnsubscribe TransportUnsubscribe
+#define gzTransportWaitForShutdown TransportWaitForShutdown
 
 #ifdef __cplusplus
 }

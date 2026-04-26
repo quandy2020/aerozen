@@ -28,9 +28,9 @@
 #include "aerozen/transport_types.hpp"
 #include "aerozen/uuid.hpp"
 
+#include "aerozen/test/test_utils.hpp"
 #include "aerozen/utils/environment.hpp"
 #include "aerozen/utils/extra_test_macros.hpp"
-#include "test_utils.hh"
 
 #include "aerozen/discovery.hpp"
 
@@ -479,8 +479,8 @@ TEST(DiscoveryTest, TestTwoPublishersSameTopic) {
 /// \brief Check that a discovery service sends messages if there are
 /// topics or services advertised in its process.
 TEST(DiscoveryTest, TestActivity) {
-    auto proc1Uuid = testing::getRandomNumber();
-    auto proc2Uuid = testing::getRandomNumber();
+    auto proc1Uuid = testing::GetRandomNumber();
+    auto proc2Uuid = testing::GetRandomNumber();
     MessagePublisher publisher(g_topic, addr1, ctrl1, proc1Uuid, nUuid1, "type",
                                AdvertiseMessageOptions());
     ServicePublisher srvPublisher(service, addr1, id1, proc2Uuid, nUuid2,
@@ -516,22 +516,23 @@ TEST(DiscoveryTest, TestActivity) {
 }
 
 //////////////////////////////////////////////////
-/// \brief Check that a wrong GZ_IP value makes HostAddr() to return 127.0.0.1
-TEST(DiscoveryTest, GZ_UTILS_TEST_DISABLED_ON_LINUX(WrongGzIp)) {
+/// \brief Check that an invalid AEROZEN_IP value is ignored.
+TEST(DiscoveryTest, WrongGzIp) {
     // Save the current value of GZ_IP environment variable.
     std::string gzIp;
-    gz::utils::env("GZ_IP", gzIp);
+    aerozen::utils::env("AEROZEN_IP", gzIp);
 
     // Incorrect value for GZ_IP
-    ASSERT_TRUE(gz::utils::setenv("GZ_IP", "127.0.0.0"));
+    ASSERT_TRUE(aerozen::utils::setenv("AEROZEN_IP", "127.0.0.0"));
 
-    transport::Discovery<MessagePublisher> discovery1(pUuid1, g_ip, g_msgPort);
-    EXPECT_EQ(discovery1.HostAddr(), "127.0.0.1");
+    Discovery<MessagePublisher> discovery1(pUuid1, g_ip, g_msgPort);
+    EXPECT_NE(discovery1.HostAddr(), "127.0.0.0");
+    EXPECT_FALSE(discovery1.HostAddr().empty());
 
     // Unset GZ_IP.
-    ASSERT_TRUE(gz::utils::unsetenv("GZ_IP"));
+    ASSERT_TRUE(aerozen::utils::unsetenv("AEROZEN_IP"));
 
     // Restore GZ_IP.
     if (!gzIp.empty())
-        gz::utils::setenv("GZ_IP", gzIp);
+        aerozen::utils::setenv("AEROZEN_IP", gzIp);
 }

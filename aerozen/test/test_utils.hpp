@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef AEROZEN_TEST_UTILS_HH_
-#define AEROZEN_TEST_UTILS_HH_
+#ifndef AEROZEN_TEST_UTILS_HPP_
+#define AEROZEN_TEST_UTILS_HPP_
 
 #include <climits>
 #include <memory>
@@ -45,6 +45,10 @@ inline std::string GetRandomNumber() {
     std::uniform_int_distribution<int32_t> d(0, INT_MAX);
 
     return std::to_string(d(randGenerator));
+}
+
+inline std::string getRandomNumber() {
+    return GetRandomNumber();
 }
 
 /**
@@ -114,4 +118,4 @@ private:
                      << aerozen::GetTransportImplementation()   \
                      << "' unsupported";
 
-#endif  // AEROZEN_TEST_UTILS_HH_
+#endif  // AEROZEN_TEST_UTILS_HPP_

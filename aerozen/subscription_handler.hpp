@@ -327,8 +327,8 @@ public:
                              ->GetPrototype(desc)
                              ->New());
         } else {
-            // Fallback on Gazebo Msgs if the message type is not found.
-            msgPtr = gz::msgs::Factory::New(_type);
+            // Fallback on factory-loaded descriptors if generated_pool misses.
+            msgPtr = aerozen::Factory::New(_type);
         }
 
         if (!msgPtr)

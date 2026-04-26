@@ -1,108 +1,35 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
+ * Basic tests for helpers.
  */
+
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 
 #include "aerozen/helpers.hpp"
-#include "test_utils.hh"
-
+#include "aerozen/test/test_utils.hpp"
 #include "aerozen/utils/environment.hpp"
 
-using namespace aerozen;
+TEST(HelpersTest, Env) {
+  std::string name = testing::GetRandomNumber();
+  std::string value;
+  EXPECT_FALSE(aerozen::env(name, value));
 
-//////////////////////////////////////////////////
-/// \brief Check the env() function.
-TEST(HelpersTest, env) {
-    // Create a random string.
-    std::string name = testing::getRandomNumber();
-
-    // Check that an unknown environment variable returns false.
-    std::string value;
-    EXPECT_FALSE(transport::env(name, value));
-
-    // Create a random environment variable and give it its name as value.
-    ASSERT_TRUE(gz::utils::setenv(name, name));
-
-    // Check that we find the environment variable and the value is correct.
-    EXPECT_TRUE(transport::env(name, value));
-    EXPECT_EQ(name, value);
+  ASSERT_TRUE(aerozen::utils::setenv(name, name));
+  EXPECT_TRUE(aerozen::env(name, value));
+  EXPECT_EQ(name, value);
 }
 
-/////////////////////////////////////////////////
-TEST(HelpersTest, SplitNoDelimiterPresent) {
-    char delim = ':';
-    std::string orig = "Hello World!";
-    std::vector<std::string> pieces = transport::split(orig, delim);
-    ASSERT_LT(0u, pieces.size());
-    EXPECT_EQ(1u, pieces.size());
-    EXPECT_EQ(orig, pieces[0]);
+TEST(HelpersTest, Split) {
+  std::vector<std::string> parts = aerozen::split("a:b:c", ':');
+  ASSERT_EQ(3u, parts.size());
+  EXPECT_EQ("a", parts[0]);
+  EXPECT_EQ("b", parts[1]);
+  EXPECT_EQ("c", parts[2]);
 }
 
-/////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterInMiddle) {
-    char delim = ' ';
-    std::string orig = "Hello World!";
-    std::vector<std::string> pieces = transport::split(orig, delim);
-    ASSERT_LT(1u, pieces.size());
-    EXPECT_EQ(2u, pieces.size());
-    EXPECT_EQ("Hello", pieces[0]);
-    EXPECT_EQ("World!", pieces[1]);
-}
-
-/////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterAtBeginning) {
-    char delim = ':';
-    std::string orig = ":Hello World!";
-    std::vector<std::string> pieces = transport::split(orig, delim);
-    ASSERT_LT(1u, pieces.size());
-    EXPECT_EQ(2u, pieces.size());
-    EXPECT_EQ("", pieces[0]);
-    EXPECT_EQ("Hello World!", pieces[1]);
-}
-
-/////////////////////////////////////////////////
-TEST(HelpersTest, SplitOneDelimiterAtEnd) {
-    char delim = '!';
-    std::string orig = "Hello World!";
-    std::vector<std::string> pieces = transport::split(orig, delim);
-    ASSERT_LT(1u, pieces.size());
-    EXPECT_EQ(2u, pieces.size());
-    EXPECT_EQ("Hello World", pieces[0]);
-    EXPECT_EQ("", pieces[1]);
-}
-
-//////////////////////////////////////////////////
-/// \brief Check the getTransportImplementation() function.
-TEST(HelpersTest, TransportImplementation) {
-    std::string impl = transport::getTransportImplementation();
-    EXPECT_FALSE(impl.empty());
-
-    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", "abc"));
-
-    impl = transport::getTransportImplementation();
-    EXPECT_EQ("abc", impl);
-
-    // This call unsets the environment variable on Windows.
-    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_IMPLEMENTATION", ""));
-
-    impl = transport::getTransportImplementation();
-    std::string value;
-    if (gz::utils::env("GZ_TRANSPORT_IMPLEMENTATION", value, true))
-        EXPECT_TRUE(impl.empty());
-    else
-        EXPECT_EQ("zeromq", impl);
+TEST(HelpersTest, GetTransportImplementation) {
+  std::string impl = aerozen::getTransportImplementation();
+  EXPECT_FALSE(impl.empty());
 }

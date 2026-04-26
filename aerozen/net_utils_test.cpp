@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 duyongquan <quandy2020@126.com>
+ * Copyright (C) 2015 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,16 @@
 
 using namespace aerozen;
 
+/**
+ * @brief Check the hostname() function.
+ */
 TEST(NetUtilsTest, hostname) {
-    EXPECT_FALSE(hostname().empty());
+    EXPECT_FALSE(HostName().empty());
 }
 
+/**
+ * @brief Check the username() function.
+ */
 TEST(NetUtilsTest, username) {
-    EXPECT_TRUE(!username().empty());
+    EXPECT_TRUE(!UserName().empty());
 }

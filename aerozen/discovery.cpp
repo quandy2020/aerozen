@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "Discovery.hh"
+#include "aerozen/discovery.hpp"
 
 // Compatibility macro for ZMQ_FD_T
 #if (ZMQ_VERSION >= 40303)

@@ -17,20 +17,21 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 /**
  * @brief Function called each time a topic update is received.
  */
-void cb(const gz::msgs::StringMsg &_msg)
+void cb(const aerozen::msgs::StringMsg &_msg)
 {
   std::cout << "Msg: " << _msg.data() << std::endl << std::endl;
 }
 
 int main(int argc, char **argv)
 {
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string topic = "/foo";
 
   // Subscribe to a topic by registering a callback.

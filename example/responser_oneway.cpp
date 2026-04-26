@@ -17,11 +17,12 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
-void srvOneway(const gz::msgs::StringMsg &_req)
+void srvOneway(const aerozen::msgs::StringMsg &_req)
 {
   std::cout << "Request received: [" << _req.data() << "]" << std::endl;
 }
@@ -30,7 +31,7 @@ void srvOneway(const gz::msgs::StringMsg &_req)
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string service = "/oneway";
 
   // Advertise a oneway service.
@@ -41,5 +42,5 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 }

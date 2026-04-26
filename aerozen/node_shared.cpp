@@ -140,7 +140,7 @@ void sendAuthErrorHelper(zmq::socket_t& _socket, const std::string& _err) {
 #endif
 }
 
-namespace gz::transport {
+namespace aerozen {
 
 NodeShared* NodeShared::Instance() {
     // Create an instance of NodeShared per process so the ZMQ context
@@ -380,7 +380,7 @@ bool NodeShared::Publish(const std::string& _topic, char* _data,
 
         if (this->dataPtr->topicStatsEnabled) {
             // Create publication metadata.
-            PublicationMetadata meta;
+            NodeSharedPrivate::PublicationMetadata meta;
             // Send the sequence number, which can be used to detect dropped
             // messages.
             meta.seq = this->dataPtr->topicPubSeq[_topic]++;
@@ -467,8 +467,8 @@ void NodeShared::RecvMsgUpdate() {
                 if (!this->dataPtr->subscriber->recv(&msg, 0))
 #endif
                     return;
-                PublicationMetadata* meta =
-                    reinterpret_cast<PublicationMetadata*>(msg.data());
+                NodeSharedPrivate::PublicationMetadata* meta =
+                    reinterpret_cast<NodeSharedPrivate::PublicationMetadata*>(msg.data());
 
                 // Update topic statistics.
                 if (this->dataPtr->enabledTopicStatistics.find(topic) !=
@@ -1304,6 +1304,30 @@ void NodeShared::OnSubscribers() {
 
 bool NodeShared::InitializeSockets() {
     try {
+        if (!this->dataPtr->context) {
+            this->dataPtr->context = std::make_unique<zmq::context_t>(1);
+        }
+        if (!this->dataPtr->publisher) {
+            this->dataPtr->publisher =
+                std::make_unique<zmq::socket_t>(*this->dataPtr->context, ZMQ_PUB);
+        }
+        if (!this->dataPtr->subscriber) {
+            this->dataPtr->subscriber =
+                std::make_unique<zmq::socket_t>(*this->dataPtr->context, ZMQ_SUB);
+        }
+        if (!this->dataPtr->requester) {
+            this->dataPtr->requester = std::make_unique<zmq::socket_t>(
+                *this->dataPtr->context, ZMQ_ROUTER);
+        }
+        if (!this->dataPtr->replier) {
+            this->dataPtr->replier = std::make_unique<zmq::socket_t>(
+                *this->dataPtr->context, ZMQ_ROUTER);
+        }
+        if (!this->dataPtr->responseReceiver) {
+            this->dataPtr->responseReceiver = std::make_unique<zmq::socket_t>(
+                *this->dataPtr->context, ZMQ_ROUTER);
+        }
+
         // Set the hostname's ip address.
         this->dataPtr->hostAddr = this->dataPtr->msgDiscovery->HostAddr();
 
@@ -1599,12 +1623,12 @@ void NodeSharedPrivate::SecurityInit() {
 
 #ifdef GZ_CPPZMQ_POST_4_7_0
         this->publisher->set(zmq::sockopt::plain_server, asPlainSecurityServer);
-        this->publisher->set(zmq::sockopt::zap_domain, kGzAuthDomain);
+        this->publisher->set(zmq::sockopt::zap_domain, kAerozenAuthDomain);
 #else
         this->publisher->setsockopt(ZMQ_PLAIN_SERVER, &asPlainSecurityServer,
                                     sizeof(asPlainSecurityServer));
-        this->publisher->setsockopt(ZMQ_ZAP_DOMAIN, kGzAuthDomain,
-                                    std::strlen(kGzAuthDomain));
+        this->publisher->setsockopt(ZMQ_ZAP_DOMAIN, kAerozenAuthDomain,
+                                    std::strlen(kAerozenAuthDomain));
 #endif
     }
 }
@@ -1702,7 +1726,7 @@ void NodeSharedPrivate::AccessControlHandler() {
                 }
 
                 // Check the domain
-                if (std::strcmp(domain.c_str(), kGzAuthDomain) != 0) {
+                if (std::strcmp(domain.c_str(), kAerozenAuthDomain) != 0) {
                     sendAuthErrorHelper(*sock, "Invalid domain");
                     continue;
                 }
@@ -1860,7 +1884,7 @@ void NodeShared::SrvPublishThread() {
     }
 }
 
-std::optional<transport::TopicStatistics> NodeShared::TopicStats(
+std::optional<TopicStatistics> NodeShared::TopicStats(
     const std::string& _topic) const {
     if (this->dataPtr->topicStats.find(_topic) !=
         this->dataPtr->topicStats.end())
@@ -2151,4 +2175,4 @@ HandlerStorage<IReqHandler>& NodeShared::Requests() {
 HandlerStorage<IRepHandler>& NodeShared::Repliers() {
     return this->dataPtr->repliers;
 }
-}  // namespace gz::transport
+}  // namespace aerozen

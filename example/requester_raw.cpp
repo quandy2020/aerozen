@@ -16,17 +16,17 @@
 */
 
 #include <iostream>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
 
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Create a transport node.
-  gz::transport::Node node;
+  aerozen::Node node;
 
   // Prepare the input parameters.
-  gz::msgs::StringMsg req;
+  aerozen::msgs::StringMsg req;
   req.set_data("HELLO");
 
   bool result;
@@ -36,14 +36,14 @@ int main(int argc, char **argv)
   req.SerializeToString(&reqStr);
 
   // Request the "/echo" service.
-  bool executed = node.RequestRaw("/echo", reqStr, "gz.msgs.StringMsg",
-      "gz.msgs.StringMsg", timeout, repStr, result);
+  bool executed = node.RequestRaw("/echo", reqStr, "aerozen.msgs.StringMsg",
+      "aerozen.msgs.StringMsg", timeout, repStr, result);
 
   if (executed)
   {
     if (result)
     {
-      gz::msgs::StringMsg rep;
+      aerozen::msgs::StringMsg rep;
       rep.ParseFromString(repStr);
       std::cout << "Response: [" << rep.data() << "]" << std::endl;
     }

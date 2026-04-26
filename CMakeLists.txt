@@ -83,6 +83,11 @@ aerozen_find_package(AerozenProtobuf
                 PRETTY Protobuf)
 
 #--------------------------------------
+# Find cppzmq
+aerozen_find_package(CPPZMQ REQUIRED PRIVATE
+  PKGCONFIG_IGNORE # NOTE: cppzmq does not seem to offer a pkg-config file
+  PRETTY CppZMQ)
+
 
 ########################################
 # Find Zenoh
@@ -108,12 +113,7 @@ endif()
 
 #--------------------------------------
 # Find uuid
-if (MSVC)
-  set(skip_pybind11_default_value ON)
-  message (STATUS "UUID: Using Windows RPC UuidCreate function\n")
-else()
-  aerozen_find_package(UUID REQUIRED)
-endif()
+aerozen_find_package(UUID REQUIRED)
 
 #--------------------------------------
 # Find aerozen-utils
@@ -136,7 +136,7 @@ endif()
 # Note that CLI files are installed regardless of whether the dependency is
 # available during build time
 find_program(HAVE_AEROZEN_TOOLS aerozen)
-set (GZ_TOOLS_VER 2)
+set (AEROZEN_TOOLS_VER 2)
 
 #--------------------------------------
 # Find GoogleTest and provide legacy target names expected by aerozen-cmake.
@@ -191,6 +191,11 @@ endif()
 # aerozen core library
 #============================================================================
 add_subdirectory(aerozen)
+
+#============================================================================
+# aerozen examples
+#============================================================================
+add_subdirectory(example)
 
 #============================================================================
 # Create package information

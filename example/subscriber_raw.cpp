@@ -17,15 +17,16 @@
 
 #include <iostream>
 #include <string>
-#include <gz/msgs.hh>
-#include <gz/transport.hh>
+#include "aerozen/proto/stringmsg.pb.h"
+#include "aerozen/node.hpp"
+#include "aerozen/wait_helpers.hpp"
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
 void cb(const char *_data, const size_t _size,
-        const gz::transport::MessageInfo &_info)
+        const aerozen::MessageInfo &_info)
 {
-  gz::msgs::StringMsg msg;
+  aerozen::msgs::StringMsg msg;
   msg.ParseFromArray(_data, _size);
 
   std::cout << "Msg length: " << _size << " bytes" << std::endl;
@@ -35,7 +36,7 @@ void cb(const char *_data, const size_t _size,
 //////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
-  gz::transport::Node node;
+  aerozen::Node node;
   std::string topic = "/foo";
 
   // Subscribe to a topic by registering a callback.
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
   }
 
   // Zzzzzz.
-  gz::transport::waitForShutdown();
+  aerozen::WaitForShutdown();
 
   return 0;
 }

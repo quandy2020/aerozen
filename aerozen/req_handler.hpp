@@ -171,12 +171,11 @@ protected:
      * @brief Stores the service response as raw bytes.
      */
     std::string rep;
-    f
 
-        /**
-         * @brief Stores the result of the service call.
-         */
-        bool result;
+    /**
+     * @brief Stores the result of the service call.
+     */
+    bool result;
 
     /**
      * @brief When there is a blocking service call request, the call can

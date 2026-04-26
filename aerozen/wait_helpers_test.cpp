@@ -30,6 +30,8 @@
 #include "aerozen/utils/environment.hpp"
 #include "aerozen/wait_helpers.hpp"
 
+using namespace aerozen;
+
 /**
  * @brief WaitUntil: predicate immediately returns true near-instantly.
  */
