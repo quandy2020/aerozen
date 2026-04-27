@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/vector3d.pb.h>
 
 #include <atomic>
@@ -39,104 +39,102 @@ using namespace gz;
 static std::atomic<bool> g_responseExecuted;
 static std::atomic<bool> g_wrongResponseExecuted;
 
-static std::string g_partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_partition;       // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 static std::atomic<int> g_counter = 0;
 
 //////////////////////////////////////////////////
-class twoProcSrvCallWithoutOutput: public testing::TwoProcSrvCallFixture {
-  std::string ReplierExecutable() const override {
-    return test_executables::kTwoProcsSrvCallWithoutOutputReplier;
-  }
+class twoProcSrvCallWithoutOutput : public testing::TwoProcSrvCallFixture
+{
+    std::string ReplierExecutable() const override {
+        return test_executables::kTwoProcsSrvCallWithoutOutputReplier;
+    }
 };
 
 //////////////////////////////////////////////////
 /// \brief Initialize some global variables.
-void reset()
-{
-  g_responseExecuted = false;
-  g_wrongResponseExecuted = false;
-  g_counter = 0;
+void reset() {
+    g_responseExecuted = false;
+    g_wrongResponseExecuted = false;
+    g_counter = 0;
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns a service that doesn't wait for output parameters.
 /// The requester uses a wrong type for the request argument. The test should
 /// verify that the service call does not succeed.
-TEST_F(twoProcSrvCallWithoutOutput, SrvRequestWrongReq)
-{
-  msgs::Vector3d wrongReq;
+TEST_F(twoProcSrvCallWithoutOutput, SrvRequestWrongReq) {
+    msgs::Vector3d wrongReq;
 
-  wrongReq.set_x(1);
-  wrongReq.set_y(2);
-  wrongReq.set_z(3);
+    wrongReq.set_x(1);
+    wrongReq.set_y(2);
+    wrongReq.set_z(3);
 
-  reset();
+    reset();
 
-  transport::Node node;
+    transport::Node node;
 
-  // Request an asynchronous service call with wrong type in the request.
-  EXPECT_TRUE(node.Request(g_topic, wrongReq));
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  EXPECT_FALSE(g_responseExecuted);
+    // Request an asynchronous service call with wrong type in the request.
+    EXPECT_TRUE(node.Request(g_topic, wrongReq));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_FALSE(g_responseExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a service without output and the other uses ServiceList() for
 /// getting the list of available services.
-TEST_F(twoProcSrvCallWithoutOutput, ServiceList)
-{
-  reset();
+TEST_F(twoProcSrvCallWithoutOutput, ServiceList) {
+    reset();
 
-  transport::Node node;
+    transport::Node node;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic));
+    ASSERT_TRUE(transport::waitForService(node, g_topic));
 
-  std::vector<std::string> services;
-  node.ServiceList(services);
-  ASSERT_EQ(services.size(), 1u);
-  EXPECT_EQ(services.at(0), g_topic);
-  services.clear();
+    std::vector<std::string> services;
+    node.ServiceList(services);
+    ASSERT_EQ(services.size(), 1u);
+    EXPECT_EQ(services.at(0), g_topic);
+    services.clear();
 
-  // The second call should never block since discovery already completed.
-  auto start2 = std::chrono::steady_clock::now();
-  node.ServiceList(services);
-  auto end2 = std::chrono::steady_clock::now();
-  EXPECT_EQ(services.size(), 1u);
-  EXPECT_EQ(services.at(0), g_topic);
+    // The second call should never block since discovery already completed.
+    auto start2 = std::chrono::steady_clock::now();
+    node.ServiceList(services);
+    auto end2 = std::chrono::steady_clock::now();
+    EXPECT_EQ(services.size(), 1u);
+    EXPECT_EQ(services.at(0), g_topic);
 
-  auto elapsed2 = std::chrono::duration_cast<std::chrono::milliseconds>
-      (end2 - start2).count();
-  EXPECT_LT(elapsed2, 2);
+    auto elapsed2 =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2)
+            .count();
+    EXPECT_LT(elapsed2, 2);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a service without output and the other uses ServiceInfo() for
 /// getting information about the service.
-TEST_F(twoProcSrvCallWithoutOutput, ServiceInfo)
-{
-  reset();
+TEST_F(twoProcSrvCallWithoutOutput, ServiceInfo) {
+    reset();
 
-  transport::Node node;
-  std::vector<transport::ServicePublisher> publishers;
+    transport::Node node;
+    std::vector<transport::ServicePublisher> publishers;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic));
+    ASSERT_TRUE(transport::waitForService(node, g_topic));
 
-  EXPECT_FALSE(node.ServiceInfo("@", publishers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_FALSE(node.ServiceInfo("@", publishers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_FALSE(node.ServiceInfo("/bogus", publishers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_FALSE(node.ServiceInfo("/bogus", publishers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_TRUE(node.ServiceInfo("/foo", publishers));
-  EXPECT_EQ(publishers.size(), 1u);
-  EXPECT_EQ(publishers.front().ReqTypeName(), "gz.msgs.Int32");
+    EXPECT_TRUE(node.ServiceInfo("/foo", publishers));
+    EXPECT_EQ(publishers.size(), 1u);
+    EXPECT_EQ(publishers.front().ReqTypeName(), "gz.msgs.Int32");
 
-  reset();
+    reset();
 }

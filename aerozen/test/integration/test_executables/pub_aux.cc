@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -29,40 +29,37 @@
 
 using namespace gz;
 
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
 /// \brief A publisher node.
-void advertiseAndPublish()
-{
-  msgs::Int32 msg;
-  msg.set_data(1);
+void advertiseAndPublish() {
+    msgs::Int32 msg;
+    msg.set_data(1);
 
-  transport::Node node;
+    transport::Node node;
 
-  auto pub = node.Advertise<msgs::Int32>(g_topic);
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    auto pub = node.Advertise<msgs::Int32>(g_topic);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-  for (auto i = 0; i < 15; ++i)
-  {
-    EXPECT_TRUE(pub.Publish(msg));
+    for (auto i = 0; i < 15; ++i) {
+        EXPECT_TRUE(pub.Publish(msg));
 
-    // Rate: 10 msgs/sec.
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
+        // Rate: 10 msgs/sec.
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc < 2)
-  {
-    std::cerr << "Partition name has not be passed as argument" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Partition name has not be passed as argument"
+                  << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  advertiseAndPublish();
+    advertiseAndPublish();
 }

@@ -1133,8 +1133,7 @@ bool Node::RequestRaw(const std::string& _topic, const std::string& _request,
                       const std::string& _requestType,
                       const std::string& _responseType, unsigned int _timeout,
                       std::string& _response, bool& _result) {
-    std::unique_ptr<google::protobuf::Message> req =
-        Factory::New(_requestType);
+    std::unique_ptr<google::protobuf::Message> req = Factory::New(_requestType);
     if (!req) {
         std::cerr << "Unable to create request of type[" << _requestType
                   << "].\n";

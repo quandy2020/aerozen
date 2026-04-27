@@ -11,10 +11,11 @@
 
 namespace aerozen {
 
-class SubscribeOptionsPrivate {
+class SubscribeOptionsPrivate
+{
 public:
-  uint64_t msgsPerSec = kUnthrottled;
-  bool ignoreLocalMessages = false;
+    uint64_t msgsPerSec = kUnthrottled;
+    bool ignoreLocalMessages = false;
 };
 
 }  // namespace aerozen

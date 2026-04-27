@@ -7,7 +7,7 @@
 namespace aerozen {
 
 std::string GetInstallPrefix() {
-  return "/usr/local";
+    return "/usr/local";
 }
 
 }  // namespace aerozen

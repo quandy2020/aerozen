@@ -10,11 +10,12 @@
 
 namespace aerozen {
 
-class NodeOptionsPrivate {
+class NodeOptionsPrivate
+{
 public:
-  std::string ns;
-  std::string partition;
-  std::map<std::string, std::string> topicsRemap;
+    std::string ns;
+    std::string partition;
+    std::map<std::string, std::string> topicsRemap;
 };
 
 }  // namespace aerozen

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -32,40 +32,38 @@
 
 using namespace gz;
 
-static std::string g_partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_partition;       // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
-TEST(twoProcSrvCallWithoutOuput, ThousandCalls)
-{
-  auto pi = gz::utils::Subprocess(
-      {test_executables::kTwoProcsSrvCallWithoutOutputReplierInc, g_partition});
+TEST(twoProcSrvCallWithoutOuput, ThousandCalls) {
+    auto pi = gz::utils::Subprocess(
+        {test_executables::kTwoProcsSrvCallWithoutOutputReplierInc,
+         g_partition});
 
-  msgs::Int32 req;
-  transport::Node node;
+    msgs::Int32 req;
+    transport::Node node;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic))
-      << "Service not discovered within timeout";
+    ASSERT_TRUE(transport::waitForService(node, g_topic))
+        << "Service not discovered within timeout";
 
-  for (int i = 0; i < 15000; i++)
-  {
-    req.set_data(i);
-    ASSERT_TRUE(node.Request(g_topic, req));
-  }
+    for (int i = 0; i < 15000; i++) {
+        req.set_data(i);
+        ASSERT_TRUE(node.Request(g_topic, req));
+    }
 
-  pi.Terminate();
-  pi.Join();
+    pi.Terminate();
+    pi.Join();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  g_partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    g_partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", g_partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", g_partition);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

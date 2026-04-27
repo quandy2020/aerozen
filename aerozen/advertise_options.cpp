@@ -26,141 +26,146 @@ namespace aerozen {
 
 /// \internal
 /// \brief Private data for AdvertiseOptions class.
-class AdvertiseOptionsPrivate {
-  /// \brief Constructor.
+class AdvertiseOptionsPrivate
+{
+    /// \brief Constructor.
 public:
-  AdvertiseOptionsPrivate() = default;
+    AdvertiseOptionsPrivate() = default;
 
-  /// \brief Destructor.
+    /// \brief Destructor.
 public:
-  virtual ~AdvertiseOptionsPrivate() = default;
+    virtual ~AdvertiseOptionsPrivate() = default;
 
-  /// \brief Default scope value.
+    /// \brief Default scope value.
 public:
-  Scope_t scope = Scope_t::ALL;
+    Scope_t scope = Scope_t::ALL;
 };
 
 /// \internal
 /// \brief Private data for AdvertiseMessageOptions class.
-class AdvertiseMessageOptionsPrivate {
-  /// \brief Constructor.
+class AdvertiseMessageOptionsPrivate
+{
+    /// \brief Constructor.
 public:
-  AdvertiseMessageOptionsPrivate() = default;
+    AdvertiseMessageOptionsPrivate() = default;
 
-  /// \brief Destructor.
+    /// \brief Destructor.
 public:
-  virtual ~AdvertiseMessageOptionsPrivate() = default;
+    virtual ~AdvertiseMessageOptionsPrivate() = default;
 
-  /// \brief Default message publication rate.
+    /// \brief Default message publication rate.
 public:
-  uint64_t msgsPerSec = kUnthrottled;
+    uint64_t msgsPerSec = kUnthrottled;
 };
 
 /// \internal
 /// \brief Private data for AdvertiseServiceOptions class.
-class AdvertiseServiceOptionsPrivate {
-  /// \brief Constructor.
+class AdvertiseServiceOptionsPrivate
+{
+    /// \brief Constructor.
 public:
-  AdvertiseServiceOptionsPrivate() = default;
+    AdvertiseServiceOptionsPrivate() = default;
 
-  /// \brief Destructor.
+    /// \brief Destructor.
 public:
-  virtual ~AdvertiseServiceOptionsPrivate() = default;
+    virtual ~AdvertiseServiceOptionsPrivate() = default;
 };
 
 AdvertiseOptions::AdvertiseOptions() : dataPtr(new AdvertiseOptionsPrivate()) {}
 
-AdvertiseOptions::AdvertiseOptions(const AdvertiseOptions &_other)
+AdvertiseOptions::AdvertiseOptions(const AdvertiseOptions& _other)
     : AdvertiseOptions() {
-  (*this) = _other;
+    (*this) = _other;
 }
 
 AdvertiseOptions::~AdvertiseOptions() {}
 
-AdvertiseOptions &AdvertiseOptions::operator=(const AdvertiseOptions &_other) {
-  this->SetScope(_other.Scope());
-  return *this;
+AdvertiseOptions& AdvertiseOptions::operator=(const AdvertiseOptions& _other) {
+    this->SetScope(_other.Scope());
+    return *this;
 }
 
-bool AdvertiseOptions::operator==(const AdvertiseOptions &_other) const {
-  return this->Scope() == _other.Scope();
+bool AdvertiseOptions::operator==(const AdvertiseOptions& _other) const {
+    return this->Scope() == _other.Scope();
 }
 
-bool AdvertiseOptions::operator!=(const AdvertiseOptions &_other) const {
-  return !(*this == _other);
+bool AdvertiseOptions::operator!=(const AdvertiseOptions& _other) const {
+    return !(*this == _other);
 }
 
-const Scope_t &AdvertiseOptions::Scope() const { return this->dataPtr->scope; }
+const Scope_t& AdvertiseOptions::Scope() const {
+    return this->dataPtr->scope;
+}
 
-void AdvertiseOptions::SetScope(const Scope_t &_scope) {
-  this->dataPtr->scope = _scope;
+void AdvertiseOptions::SetScope(const Scope_t& _scope) {
+    this->dataPtr->scope = _scope;
 }
 
 AdvertiseMessageOptions::AdvertiseMessageOptions()
     : AdvertiseOptions(), dataPtr(new AdvertiseMessageOptionsPrivate()) {}
 
 AdvertiseMessageOptions::AdvertiseMessageOptions(
-    const AdvertiseMessageOptions &_other)
+    const AdvertiseMessageOptions& _other)
     : AdvertiseMessageOptions() {
-  (*this) = _other;
+    (*this) = _other;
 }
 
 AdvertiseMessageOptions::~AdvertiseMessageOptions() {}
 
-AdvertiseMessageOptions &
-AdvertiseMessageOptions::operator=(const AdvertiseMessageOptions &_other) {
-  AdvertiseOptions::operator=(_other);
-  this->SetMsgsPerSec(_other.MsgsPerSec());
-  return *this;
+AdvertiseMessageOptions& AdvertiseMessageOptions::operator=(
+    const AdvertiseMessageOptions& _other) {
+    AdvertiseOptions::operator=(_other);
+    this->SetMsgsPerSec(_other.MsgsPerSec());
+    return *this;
 }
 
 bool AdvertiseMessageOptions::operator==(
-    const AdvertiseMessageOptions &_other) const {
-  return AdvertiseOptions::operator==(_other) &&
-         this->MsgsPerSec() == _other.MsgsPerSec();
+    const AdvertiseMessageOptions& _other) const {
+    return AdvertiseOptions::operator==(_other) &&
+           this->MsgsPerSec() == _other.MsgsPerSec();
 }
 
 bool AdvertiseMessageOptions::operator!=(
-    const AdvertiseMessageOptions &_other) const {
-  return !(*this == _other);
+    const AdvertiseMessageOptions& _other) const {
+    return !(*this == _other);
 }
 
 bool AdvertiseMessageOptions::Throttled() const {
-  return this->MsgsPerSec() != kUnthrottled;
+    return this->MsgsPerSec() != kUnthrottled;
 }
 
 uint64_t AdvertiseMessageOptions::MsgsPerSec() const {
-  return this->dataPtr->msgsPerSec;
+    return this->dataPtr->msgsPerSec;
 }
 
 void AdvertiseMessageOptions::SetMsgsPerSec(const uint64_t _newMsgsPerSec) {
-  this->dataPtr->msgsPerSec = _newMsgsPerSec;
+    this->dataPtr->msgsPerSec = _newMsgsPerSec;
 }
 
 AdvertiseServiceOptions::AdvertiseServiceOptions()
     : AdvertiseOptions(), dataPtr(new AdvertiseServiceOptionsPrivate()) {}
 
 AdvertiseServiceOptions::AdvertiseServiceOptions(
-    const AdvertiseServiceOptions &_other)
+    const AdvertiseServiceOptions& _other)
     : AdvertiseServiceOptions() {
-  (*this) = _other;
+    (*this) = _other;
 }
 
 AdvertiseServiceOptions::~AdvertiseServiceOptions() {}
 
-AdvertiseServiceOptions &
-AdvertiseServiceOptions::operator=(const AdvertiseServiceOptions &_other) {
-  AdvertiseOptions::operator=(_other);
-  return *this;
+AdvertiseServiceOptions& AdvertiseServiceOptions::operator=(
+    const AdvertiseServiceOptions& _other) {
+    AdvertiseOptions::operator=(_other);
+    return *this;
 }
 
 bool AdvertiseServiceOptions::operator==(
-    const AdvertiseServiceOptions &_other) const {
-  return AdvertiseOptions::operator==(_other);
+    const AdvertiseServiceOptions& _other) const {
+    return AdvertiseOptions::operator==(_other);
 }
 
 bool AdvertiseServiceOptions::operator!=(
-    const AdvertiseServiceOptions &_other) const {
-  return !(*this == _other);
+    const AdvertiseServiceOptions& _other) const {
+    return !(*this == _other);
 }
-} // namespace aerozen
+}  // namespace aerozen

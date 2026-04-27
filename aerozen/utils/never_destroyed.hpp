@@ -13,34 +13,35 @@ namespace aerozen {
 namespace utils {
 
 template <typename T>
-class NeverDestroyed {
+class NeverDestroyed
+{
 public:
-  NeverDestroyed() {
-    new (&this->storage_) T();
-  }
+    NeverDestroyed() {
+        new (&this->storage_) T();
+    }
 
-  template <typename... Args>
-  explicit NeverDestroyed(Args&&... _args) {
-    new (&this->storage_) T(std::forward<Args>(_args)...);
-  }
+    template <typename... Args>
+    explicit NeverDestroyed(Args&&... _args) {
+        new (&this->storage_) T(std::forward<Args>(_args)...);
+    }
 
-  NeverDestroyed(const NeverDestroyed&) = delete;
-  NeverDestroyed& operator=(const NeverDestroyed&) = delete;
-  NeverDestroyed(NeverDestroyed&&) = delete;
-  NeverDestroyed& operator=(NeverDestroyed&&) = delete;
+    NeverDestroyed(const NeverDestroyed&) = delete;
+    NeverDestroyed& operator=(const NeverDestroyed&) = delete;
+    NeverDestroyed(NeverDestroyed&&) = delete;
+    NeverDestroyed& operator=(NeverDestroyed&&) = delete;
 
-  ~NeverDestroyed() = default;
+    ~NeverDestroyed() = default;
 
-  T& Access() {
-    return *reinterpret_cast<T*>(&this->storage_);
-  }
+    T& Access() {
+        return *reinterpret_cast<T*>(&this->storage_);
+    }
 
-  const T& Access() const {
-    return *reinterpret_cast<const T*>(&this->storage_);
-  }
+    const T& Access() const {
+        return *reinterpret_cast<const T*>(&this->storage_);
+    }
 
 private:
-  typename std::aligned_storage<sizeof(T), alignof(T)>::type storage_;
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type storage_;
 };
 
 }  // namespace utils

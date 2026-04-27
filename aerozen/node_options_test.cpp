@@ -56,7 +56,8 @@ TEST(NodeOptionsTest, accessors) {
     EXPECT_TRUE(opts.NameSpace().empty());
     auto defaultPartition = aerozen::HostName() + ":" + aerozen::UserName();
     // Current implementation may leave partition empty if no env is set.
-    EXPECT_TRUE(opts.Partition().empty() || opts.Partition() == defaultPartition);
+    EXPECT_TRUE(opts.Partition().empty() ||
+                opts.Partition() == defaultPartition);
 
     // NameSpace.
     std::string aNamespace = "validNamespace";
@@ -68,7 +69,8 @@ TEST(NodeOptionsTest, accessors) {
     // Partition.
     std::string aPartition = "validPartition";
     EXPECT_FALSE(opts.SetPartition("invalid partition"));
-    EXPECT_TRUE(opts.Partition().empty() || opts.Partition() == defaultPartition);
+    EXPECT_TRUE(opts.Partition().empty() ||
+                opts.Partition() == defaultPartition);
     EXPECT_TRUE(opts.SetPartition(aPartition));
     EXPECT_EQ(opts.Partition(), aPartition);
 }

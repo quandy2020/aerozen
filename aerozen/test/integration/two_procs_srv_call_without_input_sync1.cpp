@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -32,61 +32,59 @@
 
 using namespace gz;
 
-static std::string g_partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_partition;       // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
 /// \brief This test spawns a service that doesn't accept input parameters. The
 /// synchronous requester uses a wrong service's name. The test should verify
 /// that the service call does not succeed and the elapsed time was close to
 /// the timeout.
-TEST(twoProcSrvCallWithoutInputSync1, SrvTwoProcs)
-{
-  auto pi = gz::utils::Subprocess(
-      {test_executables::kTwoProcsSrvCallWithoutInputReplier, g_partition});
+TEST(twoProcSrvCallWithoutInputSync1, SrvTwoProcs) {
+    auto pi = gz::utils::Subprocess(
+        {test_executables::kTwoProcsSrvCallWithoutInputReplier, g_partition});
 
-  int64_t timeout = 500;
-  msgs::Int32 rep;
-  bool result;
+    int64_t timeout = 500;
+    msgs::Int32 rep;
+    bool result;
 
-  transport::Node node;
+    transport::Node node;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic))
-      << "Service not discovered within timeout";
+    ASSERT_TRUE(transport::waitForService(node, g_topic))
+        << "Service not discovered within timeout";
 
-  ASSERT_TRUE(node.Request(g_topic,
-      static_cast<unsigned int>(timeout), rep, result));
-  EXPECT_TRUE(result);
+    ASSERT_TRUE(
+        node.Request(g_topic, static_cast<unsigned int>(timeout), rep, result));
+    EXPECT_TRUE(result);
 
-  auto t1 = std::chrono::steady_clock::now();
-  EXPECT_FALSE(node.Request("unknown_service",
-    static_cast<unsigned int>(timeout), rep, result));
-  auto t2 = std::chrono::steady_clock::now();
+    auto t1 = std::chrono::steady_clock::now();
+    EXPECT_FALSE(node.Request("unknown_service",
+                              static_cast<unsigned int>(timeout), rep, result));
+    auto t2 = std::chrono::steady_clock::now();
 
-  int64_t elapsed =
-    std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+    int64_t elapsed =
+        std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-  // Check if the elapsed time was at least the timeout value.
-  // Under heavy system load, the actual elapsed time may be significantly
-  // longer than the timeout, so we only check the lower bound.
-  EXPECT_GE(elapsed, timeout - 100);
+    // Check if the elapsed time was at least the timeout value.
+    // Under heavy system load, the actual elapsed time may be significantly
+    // longer than the timeout, so we only check the lower bound.
+    EXPECT_GE(elapsed, timeout - 100);
 
-  pi.Terminate();
-  pi.Join();
+    pi.Terminate();
+    pi.Join();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  g_partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    g_partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", g_partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", g_partition);
 
-  // Enable verbose mode.
-  gz::utils::setenv("GZ_VERBOSE", "1");
+    // Enable verbose mode.
+    gz::utils::setenv("GZ_VERBOSE", "1");
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

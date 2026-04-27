@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -32,46 +32,44 @@
 
 using namespace gz;
 
-static std::string partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string partition;         // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 static int data = 5;
 
 //////////////////////////////////////////////////
 /// \brief Two different nodes, each one running in a different process. The
 /// publisher advertises the topic as "process". This test checks that the topic
 /// is not seen by the other node running in a different process.
-TEST(ScopedTopicTest, ProcessTest)
-{
-  auto pi = gz::utils::Subprocess(
-    {test_executables::kScopedTopicSubscriber, partition});
+TEST(ScopedTopicTest, ProcessTest) {
+    auto pi = gz::utils::Subprocess(
+        {test_executables::kScopedTopicSubscriber, partition});
 
-  msgs::Int32 msg;
-  msg.set_data(data);
+    msgs::Int32 msg;
+    msg.set_data(data);
 
-  transport::Node node;
-  transport::AdvertiseMessageOptions opts;
-  opts.SetScope(transport::Scope_t::PROCESS);
+    transport::Node node;
+    transport::AdvertiseMessageOptions opts;
+    opts.SetScope(transport::Scope_t::PROCESS);
 
-  auto pub = node.Advertise<msgs::Int32>(g_topic, opts);
-  EXPECT_TRUE(pub);
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  EXPECT_TRUE(pub.Publish(msg));
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  EXPECT_TRUE(pub.Publish(msg));
+    auto pub = node.Advertise<msgs::Int32>(g_topic, opts);
+    EXPECT_TRUE(pub);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_TRUE(pub.Publish(msg));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_TRUE(pub.Publish(msg));
 
-  pi.Terminate();
-  pi.Join();
+    pi.Terminate();
+    pi.Join();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", partition);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

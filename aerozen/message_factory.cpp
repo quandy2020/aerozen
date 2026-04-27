@@ -23,7 +23,7 @@
 #include "aerozen/dynamic_factory.hpp"
 #include "aerozen/message_factory.hpp"
 
-static constexpr const char *kGzMsgsPrefix = "gz.msgs.";
+static constexpr const char* kGzMsgsPrefix = "gz.msgs.";
 
 namespace aerozen {
 
@@ -32,78 +32,78 @@ MessageFactory::MessageFactory()
 
 MessageFactory::~MessageFactory() = default;
 
-void MessageFactory::Register(const std::string &_msgType,
+void MessageFactory::Register(const std::string& _msgType,
                               FactoryFn _factoryfn) {
-  msgMap[_msgType] = _factoryfn;
+    msgMap[_msgType] = _factoryfn;
 }
 
-MessageFactory::MessagePtr MessageFactory::New(const std::string &_msgType) {
-  std::string type;
+MessageFactory::MessagePtr MessageFactory::New(const std::string& _msgType) {
+    std::string type;
 
-  // Convert "gz_msgs." prefix
-  if (_msgType.find("gz_msgs.") == 0) {
-    type = kGzMsgsPrefix + _msgType.substr(8);
-  }
-  // Convert ".gz.msgs." prefix
-  else if (_msgType.find(".gz.msgs.") == 0) {
-    type = kGzMsgsPrefix + _msgType.substr(9);
-  }
-  // Convert ".gz_msgs." prefix
-  else if (_msgType.find(".gz_msgs.") == 0) {
-    type = kGzMsgsPrefix + _msgType.substr(9);
-  } else {
-    type = _msgType;
-  }
-
-  auto getMessagePtr = [this](const std::string &_type) {
-    MessageFactory::MessagePtr ret;
-    if (auto it = msgMap.find(_type); it != msgMap.end()) {
-      // Create a new message via FactoryFn
-      ret = it->second();
+    // Convert "gz_msgs." prefix
+    if (_msgType.find("gz_msgs.") == 0) {
+        type = kGzMsgsPrefix + _msgType.substr(8);
+    }
+    // Convert ".gz.msgs." prefix
+    else if (_msgType.find(".gz.msgs.") == 0) {
+        type = kGzMsgsPrefix + _msgType.substr(9);
+    }
+    // Convert ".gz_msgs." prefix
+    else if (_msgType.find(".gz_msgs.") == 0) {
+        type = kGzMsgsPrefix + _msgType.substr(9);
     } else {
-      // Create a new message via dynamic descriptors
-      ret = dynamicFactory->New(_type);
+        type = _msgType;
     }
+
+    auto getMessagePtr = [this](const std::string& _type) {
+        MessageFactory::MessagePtr ret;
+        if (auto it = msgMap.find(_type); it != msgMap.end()) {
+            // Create a new message via FactoryFn
+            ret = it->second();
+        } else {
+            // Create a new message via dynamic descriptors
+            ret = dynamicFactory->New(_type);
+        }
+        return ret;
+    };
+
+    auto ret = getMessagePtr(type);
     return ret;
-  };
-
-  auto ret = getMessagePtr(type);
-  return ret;
 }
 
-MessageFactory::MessagePtr MessageFactory::New(const std::string &_msgType,
-                                               const std::string &_args) {
-  std::unique_ptr<google::protobuf::Message> msg = New(_msgType);
-  if (msg) {
-    if (!google::protobuf::TextFormat::ParseFromString(_args, msg.get())) {
-      // The user-provided string was invalid,
-      // return nullptr rather than an empty message.
-      msg.reset();
+MessageFactory::MessagePtr MessageFactory::New(const std::string& _msgType,
+                                               const std::string& _args) {
+    std::unique_ptr<google::protobuf::Message> msg = New(_msgType);
+    if (msg) {
+        if (!google::protobuf::TextFormat::ParseFromString(_args, msg.get())) {
+            // The user-provided string was invalid,
+            // return nullptr rather than an empty message.
+            msg.reset();
+        }
     }
-  }
-  return msg;
+    return msg;
 }
 
-void MessageFactory::Types(std::vector<std::string> &_types) {
-  _types.clear();
+void MessageFactory::Types(std::vector<std::string>& _types) {
+    _types.clear();
 
-  // Add the types loaded from descriptor files
-  std::vector<std::string> dynTypes;
-  this->dynamicFactory->Types(dynTypes);
+    // Add the types loaded from descriptor files
+    std::vector<std::string> dynTypes;
+    this->dynamicFactory->Types(dynTypes);
 
-  // Use set to remove duplicates
-  std::unordered_set<std::string> typesSet(dynTypes.begin(), dynTypes.end());
+    // Use set to remove duplicates
+    std::unordered_set<std::string> typesSet(dynTypes.begin(), dynTypes.end());
 
-  // Return the list of all known message types.
-  for (auto iter = msgMap.begin(); iter != msgMap.end(); ++iter) {
-    typesSet.insert(iter->first);
-  }
+    // Return the list of all known message types.
+    for (auto iter = msgMap.begin(); iter != msgMap.end(); ++iter) {
+        typesSet.insert(iter->first);
+    }
 
-  std::copy(typesSet.begin(), typesSet.end(), std::back_inserter(_types));
+    std::copy(typesSet.begin(), typesSet.end(), std::back_inserter(_types));
 }
 
-void MessageFactory::LoadDescriptors(const std::string &_paths) {
-  dynamicFactory->LoadDescriptors(_paths);
+void MessageFactory::LoadDescriptors(const std::string& _paths) {
+    dynamicFactory->LoadDescriptors(_paths);
 }
 
-} // namespace aerozen
+}  // namespace aerozen

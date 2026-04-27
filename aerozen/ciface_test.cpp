@@ -209,8 +209,8 @@ TEST(CIfaceTest, PublishRawBinarySafe) {
     ASSERT_EQ(0, TransportAdvertise(node, topic, msgType));
 
     // Publish using the new binary-safe function
-    EXPECT_EQ(
-        0, TransportPublishRaw(node, topic, binaryData, dataSize, msgType));
+    EXPECT_EQ(0,
+              TransportPublishRaw(node, topic, binaryData, dataSize, msgType));
 
     // Verify subscriber receives all 6 bytes
     EXPECT_EQ(1, count);

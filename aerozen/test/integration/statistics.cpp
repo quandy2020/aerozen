@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/statistic.pb.h>
 #include <gz/msgs/stringmsg.pb.h>
 
@@ -29,63 +29,58 @@
 
 #include "test_utils.hh"
 
-
 using namespace gz;
 
 static std::atomic<int> statisticsCount{0};
 
-void cb(const msgs::StringMsg & /*_msg*/)
-{
-  // no-op
+void cb(const msgs::StringMsg& /*_msg*/) {
+    // no-op
 }
 
-void statsCb(const msgs::Metric & /*_msg*/)
-{
-  statisticsCount++;
+void statsCb(const msgs::Metric& /*_msg*/) {
+    statisticsCount++;
 }
 
-TEST(topicStatistics, SingleProcessPublishStatistics)
-{
-  statisticsCount = 0;
-  std::string topic = "/foo";
-  transport::Node node;
-  auto pub = node.Advertise<msgs::StringMsg>(topic);
-  EXPECT_TRUE(pub);
+TEST(topicStatistics, SingleProcessPublishStatistics) {
+    statisticsCount = 0;
+    std::string topic = "/foo";
+    transport::Node node;
+    auto pub = node.Advertise<msgs::StringMsg>(topic);
+    EXPECT_TRUE(pub);
 
-  msgs::StringMsg msg;
-  msg.set_data("Hello");
+    msgs::StringMsg msg;
+    msg.set_data("Hello");
 
-  EXPECT_TRUE(node.Subscribe(topic, cb));
-  EXPECT_TRUE(node.Subscribe("/statistics", statsCb));
+    EXPECT_TRUE(node.Subscribe(topic, cb));
+    EXPECT_TRUE(node.Subscribe("/statistics", statsCb));
 
-  // Now, we should have subscribers.
-  EXPECT_TRUE(pub.HasConnections());
+    // Now, we should have subscribers.
+    EXPECT_TRUE(pub.HasConnections());
 
-  EXPECT_EQ(0, statisticsCount);
+    EXPECT_EQ(0, statisticsCount);
 
-  EXPECT_TRUE(node.EnableStats(topic, true, "/statistics", 1000));
+    EXPECT_TRUE(node.EnableStats(topic, true, "/statistics", 1000));
 
-  for (auto i = 0; i < 10; ++i)
-  {
-    EXPECT_TRUE(pub.Publish(msg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }
+    for (auto i = 0; i < 10; ++i) {
+        EXPECT_TRUE(pub.Publish(msg));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
 
-  // Currently, within process subscribers and publishers won't have statistics.
-  EXPECT_EQ(0, statisticsCount);
-  EXPECT_EQ(std::nullopt,  node.TopicStats(topic));
+    // Currently, within process subscribers and publishers won't have
+    // statistics.
+    EXPECT_EQ(0, statisticsCount);
+    EXPECT_EQ(std::nullopt, node.TopicStats(topic));
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  std::string partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    std::string partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", partition);
-  gz::utils::setenv("GZ_TRANSPORT_TOPIC_STATISTICS", "1");
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", partition);
+    gz::utils::setenv("GZ_TRANSPORT_TOPIC_STATISTICS", "1");
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

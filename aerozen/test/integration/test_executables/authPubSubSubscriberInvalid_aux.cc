@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <chrono>
 #include <string>
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4251)
+#pragma warning(disable : 4251)
 #endif
 #include <gz/msgs/int32.pb.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 #ifdef _WIN32
-  #include <filesystem>
+#include <filesystem>
 #endif
 
 #include "gz/transport/Node.hh"
@@ -39,59 +39,55 @@
 using namespace gz;
 
 static bool cbExecuted;
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
 /// \brief Function is called every time a topic update is received.
-void cb(const msgs::Int32 &/*_msg*/)
-{
-  std::cerr << "CALLBACK\n";
-  cbExecuted = true;
+void cb(const msgs::Int32& /*_msg*/) {
+    std::cerr << "CALLBACK\n";
+    cbExecuted = true;
 }
 
 //////////////////////////////////////////////////
-TEST(authProcPubSub, PubSubTwoProcsTwoNodesSubscriber)
-{
-  cbExecuted = false;
+TEST(authProcPubSub, PubSubTwoProcsTwoNodesSubscriber) {
+    cbExecuted = false;
 
-  transport::Node node;
+    transport::Node node;
 
-  EXPECT_TRUE(node.Subscribe(g_topic, cb));
+    EXPECT_TRUE(node.Subscribe(g_topic, cb));
 
-  int interval = 100;
+    int interval = 100;
 
-  while (!cbExecuted)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    interval--;
+    while (!cbExecuted) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        interval--;
 
-    if (interval == 0)
-      break;
-  }
+        if (interval == 0)
+            break;
+    }
 
-  // Check that no messages were received.
-  EXPECT_FALSE(cbExecuted);
+    // Check that no messages were received.
+    EXPECT_FALSE(cbExecuted);
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc != 4)
-  {
-    std::cerr << "Partition name, username, and password have not be passed as "
-      << "arguments" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc != 4) {
+        std::cerr
+            << "Partition name, username, and password have not be passed as "
+            << "arguments" << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  // Set the username for this test.
-  gz::utils::setenv("GZ_TRANSPORT_USERNAME", argv[2]);
+    // Set the username for this test.
+    gz::utils::setenv("GZ_TRANSPORT_USERNAME", argv[2]);
 
-  // Set the password for this test.
-  gz::utils::setenv("GZ_TRANSPORT_PASSWORD", argv[3]);
+    // Set the password for this test.
+    gz::utils::setenv("GZ_TRANSPORT_PASSWORD", argv[3]);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

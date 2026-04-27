@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 #include <gz/msgs/vector3d.pb.h>
 
@@ -39,99 +39,95 @@ using namespace gz;
 static std::atomic<bool> g_responseExecuted;
 static std::atomic<bool> g_wrongResponseExecuted;
 
-static std::string g_partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_partition;       // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 static int g_data = 5;
 static std::atomic<int> g_counter = 0;
 
 //////////////////////////////////////////////////
-class twoProcSrvCallWithoutInput: public testing::TwoProcSrvCallFixture {
-  std::string ReplierExecutable() const override {
-    return test_executables::kTwoProcsSrvCallWithoutInputReplier;
-  }
+class twoProcSrvCallWithoutInput : public testing::TwoProcSrvCallFixture
+{
+    std::string ReplierExecutable() const override {
+        return test_executables::kTwoProcsSrvCallWithoutInputReplier;
+    }
 };
 
 //////////////////////////////////////////////////
 /// \brief Initialize some global variables.
-void reset()
-{
-  g_responseExecuted = false;
-  g_wrongResponseExecuted = false;
-  g_counter = 0;
+void reset() {
+    g_responseExecuted = false;
+    g_wrongResponseExecuted = false;
+    g_counter = 0;
 }
 
 //////////////////////////////////////////////////
 /// \brief Service call response callback.
-void response(const msgs::Int32 &_rep, const bool _result)
-{
-  EXPECT_EQ(_rep.data(), g_data);
-  EXPECT_TRUE(_result);
+void response(const msgs::Int32& _rep, const bool _result) {
+    EXPECT_EQ(_rep.data(), g_data);
+    EXPECT_TRUE(_result);
 
-  g_responseExecuted = true;
-  ++g_counter;
+    g_responseExecuted = true;
+    ++g_counter;
 }
 
 //////////////////////////////////////////////////
 /// \brief Service call response callback.
-void wrongResponse(const msgs::Vector3d &/*_rep*/, bool /*_result*/)
-{
-  g_wrongResponseExecuted = true;
+void wrongResponse(const msgs::Vector3d& /*_rep*/, bool /*_result*/) {
+    g_wrongResponseExecuted = true;
 }
 
 //////////////////////////////////////////////////
 /// \brief Two different nodes running in two different processes. One node
 /// advertises a service without input and the other requests a few service
 /// calls.
-TEST_F(twoProcSrvCallWithoutInput, SrvTwoProcs)
-{
-  reset();
+TEST_F(twoProcSrvCallWithoutInput, SrvTwoProcs) {
+    reset();
 
-  transport::Node node;
-  EXPECT_TRUE(node.Request(g_topic, response));
+    transport::Node node;
+    EXPECT_TRUE(node.Request(g_topic, response));
 
-  transport::waitUntil([&]{ return g_responseExecuted.load(); });
+    transport::waitUntil([&] { return g_responseExecuted.load(); });
 
-  // Check that the service call response was executed.
-  EXPECT_TRUE(g_responseExecuted);
-  EXPECT_EQ(g_counter, 1);
+    // Check that the service call response was executed.
+    EXPECT_TRUE(g_responseExecuted);
+    EXPECT_EQ(g_counter, 1);
 
-  // Make another request.
-  reset();
+    // Make another request.
+    reset();
 
-  EXPECT_TRUE(node.Request(g_topic, response));
+    EXPECT_TRUE(node.Request(g_topic, response));
 
-  transport::waitUntil([&]{ return g_responseExecuted.load(); });
+    transport::waitUntil([&] { return g_responseExecuted.load(); });
 
-  // Check that the service call response was executed.
-  EXPECT_TRUE(g_responseExecuted);
-  EXPECT_EQ(g_counter, 1);
+    // Check that the service call response was executed.
+    EXPECT_TRUE(g_responseExecuted);
+    EXPECT_EQ(g_counter, 1);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns a service that doesn't accept input parameters. The
 /// service requester uses a wrong type for the response argument. The test
 /// should verify that the service call does not succeed.
-TEST_F(twoProcSrvCallWithoutInput, SrvRequestWrongRep)
-{
-  msgs::Vector3d wrongRep;
-  bool result;
-  unsigned int timeout = 1000;
+TEST_F(twoProcSrvCallWithoutInput, SrvRequestWrongRep) {
+    msgs::Vector3d wrongRep;
+    bool result;
+    unsigned int timeout = 1000;
 
-  reset();
+    reset();
 
-  transport::Node node;
+    transport::Node node;
 
-  // Request an asynchronous service call with wrong type in the response.
-  EXPECT_TRUE(node.Request(g_topic, wrongResponse));
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  EXPECT_FALSE(g_wrongResponseExecuted);
+    // Request an asynchronous service call with wrong type in the response.
+    EXPECT_TRUE(node.Request(g_topic, wrongResponse));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_FALSE(g_wrongResponseExecuted);
 
-  // Request a synchronous service call with wrong type in the response.
-  EXPECT_FALSE(node.Request(g_topic, timeout, wrongRep, result));
+    // Request a synchronous service call with wrong type in the response.
+    EXPECT_FALSE(node.Request(g_topic, timeout, wrongRep, result));
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
@@ -139,91 +135,89 @@ TEST_F(twoProcSrvCallWithoutInput, SrvRequestWrongRep)
 /// service requesters use incorrect types in some of the requests. The test
 /// should verify that a response is received only when the appropriate types
 /// are used.
-TEST_F(twoProcSrvCallWithoutInput, SrvTwoRequestsOneWrong)
-{
-  msgs::Int32 goodRep;
-  msgs::Vector3d badRep;
-  bool result;
-  unsigned int timeout = 2000;
+TEST_F(twoProcSrvCallWithoutInput, SrvTwoRequestsOneWrong) {
+    msgs::Int32 goodRep;
+    msgs::Vector3d badRep;
+    bool result;
+    unsigned int timeout = 2000;
 
-  reset();
+    reset();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  transport::Node node;
+    transport::Node node;
 
-  // Request service calls with wrong types in the response.
-  EXPECT_FALSE(node.Request(g_topic, timeout, badRep, result));
-  EXPECT_TRUE(node.Request(g_topic, wrongResponse));
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  EXPECT_FALSE(g_wrongResponseExecuted);
+    // Request service calls with wrong types in the response.
+    EXPECT_FALSE(node.Request(g_topic, timeout, badRep, result));
+    EXPECT_TRUE(node.Request(g_topic, wrongResponse));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_FALSE(g_wrongResponseExecuted);
 
-  reset();
+    reset();
 
-  // Valid service requests.
-  EXPECT_TRUE(node.Request(g_topic, timeout, goodRep, result));
-  EXPECT_TRUE(node.Request(g_topic, response));
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
-  EXPECT_TRUE(g_responseExecuted);
+    // Valid service requests.
+    EXPECT_TRUE(node.Request(g_topic, timeout, goodRep, result));
+    EXPECT_TRUE(node.Request(g_topic, response));
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    EXPECT_TRUE(g_responseExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a service without input and the other uses ServiceList() for
 /// getting the list of available services.
-TEST_F(twoProcSrvCallWithoutInput, ServiceList)
-{
-  reset();
+TEST_F(twoProcSrvCallWithoutInput, ServiceList) {
+    reset();
 
-  transport::Node node;
+    transport::Node node;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic));
+    ASSERT_TRUE(transport::waitForService(node, g_topic));
 
-  std::vector<std::string> services;
-  node.ServiceList(services);
-  ASSERT_EQ(services.size(), 1u);
-  EXPECT_EQ(services.at(0), g_topic);
-  services.clear();
+    std::vector<std::string> services;
+    node.ServiceList(services);
+    ASSERT_EQ(services.size(), 1u);
+    EXPECT_EQ(services.at(0), g_topic);
+    services.clear();
 
-  // The second call should never block since discovery already completed.
-  auto start2 = std::chrono::steady_clock::now();
-  node.ServiceList(services);
-  auto end2 = std::chrono::steady_clock::now();
-  EXPECT_EQ(services.size(), 1u);
-  EXPECT_EQ(services.at(0), g_topic);
+    // The second call should never block since discovery already completed.
+    auto start2 = std::chrono::steady_clock::now();
+    node.ServiceList(services);
+    auto end2 = std::chrono::steady_clock::now();
+    EXPECT_EQ(services.size(), 1u);
+    EXPECT_EQ(services.at(0), g_topic);
 
-  auto elapsed2 = std::chrono::duration_cast<std::chrono::milliseconds>
-      (end2 - start2).count();
-  EXPECT_LT(elapsed2, 2);
+    auto elapsed2 =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2)
+            .count();
+    EXPECT_LT(elapsed2, 2);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a service without input and the other uses ServiceInfo() for
 /// getting information about the service.
-TEST_F(twoProcSrvCallWithoutInput, ServiceInfo)
-{
-  reset();
+TEST_F(twoProcSrvCallWithoutInput, ServiceInfo) {
+    reset();
 
-  transport::Node node;
-  std::vector<transport::ServicePublisher> publishers;
+    transport::Node node;
+    std::vector<transport::ServicePublisher> publishers;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic));
+    ASSERT_TRUE(transport::waitForService(node, g_topic));
 
-  EXPECT_FALSE(node.ServiceInfo("@", publishers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_FALSE(node.ServiceInfo("@", publishers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_FALSE(node.ServiceInfo("/bogus", publishers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_FALSE(node.ServiceInfo("/bogus", publishers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_TRUE(node.ServiceInfo("/foo", publishers));
-  EXPECT_EQ(publishers.size(), 1u);
-  EXPECT_EQ(publishers.front().ReqTypeName(), "gz.msgs.Empty");
-  EXPECT_EQ(publishers.front().RepTypeName(), "gz.msgs.Int32");
+    EXPECT_TRUE(node.ServiceInfo("/foo", publishers));
+    EXPECT_EQ(publishers.size(), 1u);
+    EXPECT_EQ(publishers.front().ReqTypeName(), "gz.msgs.Empty");
+    EXPECT_EQ(publishers.front().RepTypeName(), "gz.msgs.Int32");
 
-  reset();
+    reset();
 }

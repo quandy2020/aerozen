@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/vector3d.pb.h>
 
 #include <chrono>
@@ -27,38 +27,36 @@
 
 using namespace gz;
 
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
 /// \brief A publisher node.
-void advertiseAndPublish()
-{
-  msgs::Vector3d msg;
-  msg.set_x(1.0);
-  msg.set_y(2.0);
-  msg.set_z(3.0);
+void advertiseAndPublish() {
+    msgs::Vector3d msg;
+    msg.set_x(1.0);
+    msg.set_y(2.0);
+    msg.set_z(3.0);
 
-  transport::Node node;
+    transport::Node node;
 
-  auto pub = node.Advertise<msgs::Vector3d>(g_topic);
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  pub.Publish(msg);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-  pub.Publish(msg);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    auto pub = node.Advertise<msgs::Vector3d>(g_topic);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    pub.Publish(msg);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    pub.Publish(msg);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc != 2)
-  {
-    std::cerr << "Partition name has not be passed as argument" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Partition name has not be passed as argument"
+                  << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  advertiseAndPublish();
+    advertiseAndPublish();
 }

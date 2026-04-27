@@ -468,7 +468,8 @@ void NodeShared::RecvMsgUpdate() {
 #endif
                     return;
                 NodeSharedPrivate::PublicationMetadata* meta =
-                    reinterpret_cast<NodeSharedPrivate::PublicationMetadata*>(msg.data());
+                    reinterpret_cast<NodeSharedPrivate::PublicationMetadata*>(
+                        msg.data());
 
                 // Update topic statistics.
                 if (this->dataPtr->enabledTopicStatistics.find(topic) !=
@@ -1308,12 +1309,12 @@ bool NodeShared::InitializeSockets() {
             this->dataPtr->context = std::make_unique<zmq::context_t>(1);
         }
         if (!this->dataPtr->publisher) {
-            this->dataPtr->publisher =
-                std::make_unique<zmq::socket_t>(*this->dataPtr->context, ZMQ_PUB);
+            this->dataPtr->publisher = std::make_unique<zmq::socket_t>(
+                *this->dataPtr->context, ZMQ_PUB);
         }
         if (!this->dataPtr->subscriber) {
-            this->dataPtr->subscriber =
-                std::make_unique<zmq::socket_t>(*this->dataPtr->context, ZMQ_SUB);
+            this->dataPtr->subscriber = std::make_unique<zmq::socket_t>(
+                *this->dataPtr->context, ZMQ_SUB);
         }
         if (!this->dataPtr->requester) {
             this->dataPtr->requester = std::make_unique<zmq::socket_t>(

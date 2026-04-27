@@ -133,8 +133,7 @@ TEST(ClockTest, BadNetworkClock) {
     NetworkClock badTimebaseClock(clockTopicName, badTimebase);
     EXPECT_FALSE(badTimebaseClock.IsReady());
     Node node;
-    Node::Publisher clockPub =
-        node.Advertise<msgs::Clock>(clockTopicName);
+    Node::Publisher clockPub = node.Advertise<msgs::Clock>(clockTopicName);
     const std::chrono::milliseconds sleepTime{100};
     clockPub.Publish(msgs::Clock());
     std::this_thread::sleep_for(sleepTime);

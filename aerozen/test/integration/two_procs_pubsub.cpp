@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 #include <gz/msgs/vector3d.pb.h>
 
@@ -34,10 +34,10 @@
 
 using namespace gz;
 
-static std::string partition;  // NOLINT(*)
-static std::string g_FQNPartition;  // NOLINT(*)
+static std::string partition;               // NOLINT(*)
+static std::string g_FQNPartition;          // NOLINT(*)
 static const std::string g_topic = "/foo";  // NOLINT(*)
-static std::string data = "bar";  // NOLINT(*)
+static std::string data = "bar";            // NOLINT(*)
 static std::atomic<bool> cbExecuted{false};
 static std::atomic<bool> cbInfoExecuted{false};
 static std::atomic<bool> genericCbExecuted{false};
@@ -47,106 +47,97 @@ static std::atomic<int> counter{0};
 
 //////////////////////////////////////////////////
 /// \brief Initialize some global variables.
-void reset()
-{
-  cbExecuted = false;
-  cbInfoExecuted = false;
-  genericCbExecuted = false;
-  cbVectorExecuted = false;
-  cbRawExecuted = false;
-  counter = 0;
+void reset() {
+    cbExecuted = false;
+    cbInfoExecuted = false;
+    genericCbExecuted = false;
+    cbVectorExecuted = false;
+    cbRawExecuted = false;
+    counter = 0;
 }
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
-void cb(const msgs::Int32 &/*_msg*/)
-{
-  cbExecuted = true;
-  ++counter;
+void cb(const msgs::Int32& /*_msg*/) {
+    cbExecuted = true;
+    ++counter;
 }
 
 //////////////////////////////////////////////////
 /// \brief Function called each time a topic update is received.
-void cbInfo(const msgs::Int32 &_msg,
-            const transport::MessageInfo &_info)
-{
-  EXPECT_EQ(_info.Topic(), g_topic);
-  EXPECT_EQ(g_FQNPartition, _info.Partition());
-  EXPECT_EQ(_msg.GetTypeName(), _info.Type());
-  EXPECT_FALSE(_info.IntraProcess());
-  cbInfoExecuted = true;
-  ++counter;
+void cbInfo(const msgs::Int32& _msg, const transport::MessageInfo& _info) {
+    EXPECT_EQ(_info.Topic(), g_topic);
+    EXPECT_EQ(g_FQNPartition, _info.Partition());
+    EXPECT_EQ(_msg.GetTypeName(), _info.Type());
+    EXPECT_FALSE(_info.IntraProcess());
+    cbInfoExecuted = true;
+    ++counter;
 }
 
 //////////////////////////////////////////////////
 /// \brief A generic callback.
-void genericCb(const transport::ProtoMsg &/*_msg*/,
-               const transport::MessageInfo &_info)
-{
-  genericCbExecuted = true;
-  ++counter;
+void genericCb(const transport::ProtoMsg& /*_msg*/,
+               const transport::MessageInfo& _info) {
+    genericCbExecuted = true;
+    ++counter;
 
-  EXPECT_EQ(_info.Topic().find("@"), std::string::npos);
+    EXPECT_EQ(_info.Topic().find("@"), std::string::npos);
 }
 
 //////////////////////////////////////////////////
 /// \brief Callback for receiving Vector3d data.
-void cbVector(const msgs::Vector3d &/*_msg*/)
-{
-  cbVectorExecuted = true;
-  ++counter;
+void cbVector(const msgs::Vector3d& /*_msg*/) {
+    cbVectorExecuted = true;
+    ++counter;
 }
 
 //////////////////////////////////////////////////
-void cbRaw(const char * /*_msgData*/, const size_t /*_size*/,
-           const transport::MessageInfo &/*_info*/)
-{
-  cbRawExecuted = true;
-  ++counter;
+void cbRaw(const char* /*_msgData*/, const size_t /*_size*/,
+           const transport::MessageInfo& /*_info*/) {
+    cbRawExecuted = true;
+    ++counter;
 }
 
 //////////////////////////////////////////////////
 /// \brief Check that a message is not received if the callback does not use
 /// the advertised types.
-TEST(twoProcPubSub, PubSubWrongTypesOnSubscription)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, PubSubWrongTypesOnSubscription) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  transport::Node node;
-  EXPECT_TRUE(node.Subscribe(g_topic, cb));
+    transport::Node node;
+    EXPECT_TRUE(node.Subscribe(g_topic, cb));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
-  // Check that the message was not received.
-  EXPECT_FALSE(cbExecuted);
+    // Check that the message was not received.
+    EXPECT_FALSE(cbExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief Same as above, but using a raw subscription.
-TEST(twoProcPubSub, PubRawSubWrongTypesOnSubscription)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, PubRawSubWrongTypesOnSubscription) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  transport::Node node;
-  EXPECT_TRUE(node.SubscribeRaw(g_topic, cbRaw,
-                                std::string(msgs::Int32().GetTypeName())));
+    transport::Node node;
+    EXPECT_TRUE(node.SubscribeRaw(g_topic, cbRaw,
+                                  std::string(msgs::Int32().GetTypeName())));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
-  // Check that the message was not received.
-  EXPECT_FALSE(cbRawExecuted);
+    // Check that the message was not received.
+    EXPECT_FALSE(cbRawExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
@@ -155,31 +146,30 @@ TEST(twoProcPubSub, PubRawSubWrongTypesOnSubscription)
 /// advertised type). The second subscriber uses the correct callback. The third
 /// uses a generic callback. Check that only two of the callbacks are executed
 /// (correct and generic).
-TEST(twoProcPubSub, PubSubWrongTypesTwoSubscribers)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, PubSubWrongTypesTwoSubscribers) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  transport::Node node1;
-  transport::Node node2;
-  transport::Node node3;
-  EXPECT_TRUE(node1.Subscribe(g_topic, cb));
-  EXPECT_TRUE(node2.Subscribe(g_topic, cbVector));
-  EXPECT_TRUE(node3.Subscribe(g_topic, genericCb));
+    transport::Node node1;
+    transport::Node node2;
+    transport::Node node3;
+    EXPECT_TRUE(node1.Subscribe(g_topic, cb));
+    EXPECT_TRUE(node2.Subscribe(g_topic, cbVector));
+    EXPECT_TRUE(node3.Subscribe(g_topic, genericCb));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
-  // Check that the message was not received.
-  EXPECT_FALSE(cbExecuted);
-  EXPECT_TRUE(cbVectorExecuted);
-  EXPECT_TRUE(genericCbExecuted);
+    // Check that the message was not received.
+    EXPECT_FALSE(cbExecuted);
+    EXPECT_TRUE(cbVectorExecuted);
+    EXPECT_TRUE(genericCbExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
@@ -188,57 +178,51 @@ TEST(twoProcPubSub, PubSubWrongTypesTwoSubscribers)
 /// match the advertised type). The second subscriber requests the correct type.
 /// The third accepts the generic (default) type. Check that only two of the
 /// callbacks are executed (correct and generic).
-TEST(twoProcPubSub, PubSubWrongTypesTwoRawSubscribers)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, PubSubWrongTypesTwoRawSubscribers) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  bool wrongRawCbExecuted = false;
-  bool correctRawCbExecuted = false;
-  bool genericRawCbExecuted = false;
+    bool wrongRawCbExecuted = false;
+    bool correctRawCbExecuted = false;
+    bool genericRawCbExecuted = false;
 
-  auto wrongCb = [&](const char *, const size_t /*_size*/,
-                     const transport::MessageInfo &)
-  {
-    wrongRawCbExecuted = true;
-  };
+    auto wrongCb = [&](const char*, const size_t /*_size*/,
+                       const transport::MessageInfo&) {
+        wrongRawCbExecuted = true;
+    };
 
-  auto correctCb = [&](const char *, const size_t /*_size*/,
-                       const transport::MessageInfo &)
-  {
-    correctRawCbExecuted = true;
-  };
+    auto correctCb = [&](const char*, const size_t /*_size*/,
+                         const transport::MessageInfo&) {
+        correctRawCbExecuted = true;
+    };
 
-  auto genericCb = [&](const char *, const size_t /*_size*/,
-                       const transport::MessageInfo &_info)
-  {
-    genericRawCbExecuted = true;
-    EXPECT_EQ(_info.Topic().find("@"), std::string::npos);
-  };
+    auto genericCb = [&](const char*, const size_t /*_size*/,
+                         const transport::MessageInfo& _info) {
+        genericRawCbExecuted = true;
+        EXPECT_EQ(_info.Topic().find("@"), std::string::npos);
+    };
 
-  transport::Node node1;
-  transport::Node node2;
-  transport::Node node3;
-  EXPECT_TRUE(node1.SubscribeRaw(g_topic, wrongCb, "wrong.msg.type"));
-  EXPECT_TRUE(node2.SubscribeRaw(g_topic, correctCb,
-                                 std::string(msgs::Vector3d().GetTypeName())));
-  EXPECT_TRUE(node3.SubscribeRaw(g_topic, genericCb));
+    transport::Node node1;
+    transport::Node node2;
+    transport::Node node3;
+    EXPECT_TRUE(node1.SubscribeRaw(g_topic, wrongCb, "wrong.msg.type"));
+    EXPECT_TRUE(node2.SubscribeRaw(
+        g_topic, correctCb, std::string(msgs::Vector3d().GetTypeName())));
+    EXPECT_TRUE(node3.SubscribeRaw(g_topic, genericCb));
 
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+    // Check that the message was not received.
+    EXPECT_FALSE(wrongRawCbExecuted);
+    EXPECT_TRUE(correctRawCbExecuted);
+    EXPECT_TRUE(genericRawCbExecuted);
 
-
-  // Check that the message was not received.
-  EXPECT_FALSE(wrongRawCbExecuted);
-  EXPECT_TRUE(correctRawCbExecuted);
-  EXPECT_TRUE(genericRawCbExecuted);
-
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
@@ -246,153 +230,150 @@ TEST(twoProcPubSub, PubSubWrongTypesTwoRawSubscribers)
 /// subscribes to a topic and the other advertises, publishes a message and
 /// terminates. This test checks that the subscriber doesn't get affected by
 /// the prompt termination of the publisher.
-TEST(twoProcPubSub, FastPublisher)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kFastPub, partition});
+TEST(twoProcPubSub, FastPublisher) {
+    auto pi =
+        testing::SubprocessJoinWrapper({test_executables::kFastPub, partition});
 
-  reset();
+    reset();
 
-  transport::Node node;
+    transport::Node node;
 
-  EXPECT_TRUE(node.Subscribe(g_topic, cbVector));
+    EXPECT_TRUE(node.Subscribe(g_topic, cbVector));
 }
 
 //////////////////////////////////////////////////
 /// \brief This test creates one publisher and one subscriber on different
 /// processes. The publisher publishes at higher frequency than the rate set
 /// by the subscriber.
-TEST(twoProcPubSub, SubThrottled)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kPub, partition});
+TEST(twoProcPubSub, SubThrottled) {
+    auto pi =
+        testing::SubprocessJoinWrapper({test_executables::kPub, partition});
 
-  reset();
+    reset();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  transport::Node node;
-  transport::SubscribeOptions opts;
-  opts.SetMsgsPerSec(1u);
-  EXPECT_TRUE(node.Subscribe(g_topic, cb, opts));
+    transport::Node node;
+    transport::SubscribeOptions opts;
+    opts.SetMsgsPerSec(1u);
+    EXPECT_TRUE(node.Subscribe(g_topic, cb, opts));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
-  // Node published 15 messages in ~1.5 sec. We should only receive 2 messages.
-  EXPECT_LT(counter, 5);
+    // Node published 15 messages in ~1.5 sec. We should only receive 2
+    // messages.
+    EXPECT_LT(counter, 5);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test creates one publisher and one subscriber on different
 /// processes. The publisher publishes at a throttled frequency.
-TEST(twoProcPubSub, PubThrottled)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kPubThrottled, partition});
+TEST(twoProcPubSub, PubThrottled) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kPubThrottled, partition});
 
-  reset();
+    reset();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-  transport::Node node;
-  EXPECT_TRUE(node.Subscribe(g_topic, cb));
+    transport::Node node;
+    EXPECT_TRUE(node.Subscribe(g_topic, cb));
 
-  // Wait for receive some messages.
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+    // Wait for receive some messages.
+    std::this_thread::sleep_for(std::chrono::milliseconds(2500));
 
-  // Node published 25 messages in ~2.5 sec. We should only receive 2 messages.
-  EXPECT_LT(counter, 5);
+    // Node published 25 messages in ~2.5 sec. We should only receive 2
+    // messages.
+    EXPECT_LT(counter, 5);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief Check that a message is received after Advertise->Subscribe->Publish
 /// using a callback that accepts message information.
-TEST(twoProcPubSub, PubSubMessageInfo)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
-  reset();
+TEST(twoProcPubSub, PubSubMessageInfo) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
+    reset();
 
-  transport::Node node;
-  EXPECT_TRUE(node.Subscribe(g_topic, cbInfo));
+    transport::Node node;
+    EXPECT_TRUE(node.Subscribe(g_topic, cbInfo));
 
-  // Wait some time before publishing.
-  std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    // Wait some time before publishing.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
-  // Check that the message was not received.
-  EXPECT_FALSE(cbInfoExecuted);
+    // Check that the message was not received.
+    EXPECT_FALSE(cbInfoExecuted);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a topic and the other uses TopicList() for getting the list of
 /// available topics.
-TEST(twoProcPubSub, TopicList)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, TopicList) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  transport::Node node;
-  std::vector<std::string> topics;
+    transport::Node node;
+    std::vector<std::string> topics;
 
-  ASSERT_TRUE(transport::waitForTopic(node, g_topic));
+    ASSERT_TRUE(transport::waitForTopic(node, g_topic));
 
-  node.TopicList(topics);
-  ASSERT_EQ(topics.size(), 1u);
-  EXPECT_EQ(topics.at(0), g_topic);
-  topics.clear();
+    node.TopicList(topics);
+    ASSERT_EQ(topics.size(), 1u);
+    EXPECT_EQ(topics.at(0), g_topic);
+    topics.clear();
 
-  // The second call should never block since discovery already completed.
-  auto start2 = std::chrono::steady_clock::now();
-  node.TopicList(topics);
-  auto end2 = std::chrono::steady_clock::now();
-  EXPECT_EQ(topics.size(), 1u);
-  EXPECT_EQ(topics.at(0), g_topic);
+    // The second call should never block since discovery already completed.
+    auto start2 = std::chrono::steady_clock::now();
+    node.TopicList(topics);
+    auto end2 = std::chrono::steady_clock::now();
+    EXPECT_EQ(topics.size(), 1u);
+    EXPECT_EQ(topics.at(0), g_topic);
 
-  auto elapsed2 = std::chrono::duration_cast<std::chrono::milliseconds>
-    (end2 - start2).count();
-  EXPECT_LT(elapsed2, 2);
+    auto elapsed2 =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start2)
+            .count();
+    EXPECT_LT(elapsed2, 2);
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
 /// \brief This test spawns two nodes on different processes. One of the nodes
 /// advertises a topic and the other uses TopicInfo() for getting information
 /// about the topic.
-TEST(twoProcPubSub, TopicInfo)
-{
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPublisher, partition});
+TEST(twoProcPubSub, TopicInfo) {
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPublisher, partition});
 
-  reset();
+    reset();
 
-  transport::Node node;
-  std::vector<transport::MessagePublisher> publishers;
-  std::vector<transport::MessagePublisher> subscribers;
+    transport::Node node;
+    std::vector<transport::MessagePublisher> publishers;
+    std::vector<transport::MessagePublisher> subscribers;
 
-  ASSERT_TRUE(transport::waitForTopic(node, g_topic));
+    ASSERT_TRUE(transport::waitForTopic(node, g_topic));
 
-  EXPECT_FALSE(node.TopicInfo("@", publishers, subscribers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_FALSE(node.TopicInfo("@", publishers, subscribers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_TRUE(node.TopicInfo("/bogus", publishers, subscribers));
-  EXPECT_EQ(publishers.size(), 0u);
+    EXPECT_TRUE(node.TopicInfo("/bogus", publishers, subscribers));
+    EXPECT_EQ(publishers.size(), 0u);
 
-  EXPECT_TRUE(node.TopicInfo("/foo", publishers, subscribers));
-  EXPECT_EQ(publishers.size(), 1u);
-  EXPECT_EQ(publishers.front().MsgTypeName(), "gz.msgs.Vector3d");
+    EXPECT_TRUE(node.TopicInfo("/foo", publishers, subscribers));
+    EXPECT_EQ(publishers.size(), 1u);
+    EXPECT_EQ(publishers.front().MsgTypeName(), "gz.msgs.Vector3d");
 
-  reset();
+    reset();
 }
 
 //////////////////////////////////////////////////
@@ -404,36 +385,34 @@ TEST(twoProcPubSub, TopicInfo)
 /// is able to correctly remove its remote subscribers in the case that the
 /// publisher is destroyed before the subscriber so that HasConnections()
 /// check returns the correct result.
-TEST(twoProcPubSub, PubSubTwoProcsScopedPub)
-{
-  transport::Node node;
+TEST(twoProcPubSub, PubSubTwoProcsScopedPub) {
+    transport::Node node;
 
-  for (auto j = 0; j < 2; ++j)
-  {
-    // Start subscriber process before a publisher is created
-    auto pi = testing::SubprocessJoinWrapper(
-       {test_executables::kTwoProcsPubSubSingleSubscriber, partition});
+    for (auto j = 0; j < 2; ++j) {
+        // Start subscriber process before a publisher is created
+        auto pi = testing::SubprocessJoinWrapper(
+            {test_executables::kTwoProcsPubSubSingleSubscriber, partition});
 
-    // Reduce the publisher scope so that it is destroyed before the subscriber
-    // process ends.
-    {
-      auto pub = node.Advertise<msgs::Vector3d>(g_topic);
-      EXPECT_TRUE(pub);
+        // Reduce the publisher scope so that it is destroyed before the
+        // subscriber process ends.
+        {
+            auto pub = node.Advertise<msgs::Vector3d>(g_topic);
+            EXPECT_TRUE(pub);
 
-      ASSERT_TRUE(transport::waitUntil([&]{ return pub.HasConnections(); }))
-          << "No subscriber connections within timeout";
+            ASSERT_TRUE(transport::waitUntil([&] {
+                return pub.HasConnections();
+            })) << "No subscriber connections within timeout";
 
+            msgs::Vector3d msg;
+            msg.set_x(1.0);
+            msg.set_y(2.0);
+            msg.set_z(3.0);
 
-      msgs::Vector3d msg;
-      msg.set_x(1.0);
-      msg.set_y(2.0);
-      msg.set_z(3.0);
+            EXPECT_TRUE(pub.Publish(msg));
+        }
 
-      EXPECT_TRUE(pub.Publish(msg));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
 }
 
 //////////////////////////////////////////////////
@@ -441,44 +420,41 @@ TEST(twoProcPubSub, PubSubTwoProcsScopedPub)
 /// subscriber process there are three subscribers created using different
 /// APIs. All should receive the message. After some time twoo them unsubscribe.
 /// After that check that only one remaining subscriber receives the message.
-TEST(twoProcPubSub, PubSubTwoProcsMixedSubscribers)
-{
-  transport::Node node;
-  auto pub = node.Advertise<msgs::Vector3d>(g_topic);
-  EXPECT_TRUE(pub);
+TEST(twoProcPubSub, PubSubTwoProcsMixedSubscribers) {
+    transport::Node node;
+    auto pub = node.Advertise<msgs::Vector3d>(g_topic);
+    EXPECT_TRUE(pub);
 
-  // No subscribers yet.
-  EXPECT_FALSE(pub.HasConnections());
+    // No subscribers yet.
+    EXPECT_FALSE(pub.HasConnections());
 
-  auto pi = testing::SubprocessJoinWrapper(
-    {test_executables::kTwoProcsPubSubMixedSubscribers, partition});
+    auto pi = testing::SubprocessJoinWrapper(
+        {test_executables::kTwoProcsPubSubMixedSubscribers, partition});
 
-  msgs::Vector3d msg;
-  msg.set_x(1.0);
-  msg.set_y(2.0);
-  msg.set_z(3.0);
+    msgs::Vector3d msg;
+    msg.set_x(1.0);
+    msg.set_y(2.0);
+    msg.set_z(3.0);
 
-  ASSERT_TRUE(transport::waitUntil([&]{ return pub.HasConnections(); }))
-      << "No subscriber connections within timeout";
+    ASSERT_TRUE(transport::waitUntil([&] { return pub.HasConnections(); }))
+        << "No subscriber connections within timeout";
 
-  // Publish messages for a few seconds
-  for (auto i = 0; i < 10; ++i)
-  {
-    EXPECT_TRUE(pub.Publish(msg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }
+    // Publish messages for a few seconds
+    for (auto i = 0; i < 10; ++i) {
+        EXPECT_TRUE(pub.Publish(msg));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  partition = testing::getRandomNumber();
-  g_FQNPartition = std::string("/") + partition;
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    partition = testing::getRandomNumber();
+    g_FQNPartition = std::string("/") + partition;
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", partition);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

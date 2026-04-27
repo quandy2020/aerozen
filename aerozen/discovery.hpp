@@ -1307,8 +1307,8 @@ private:
         }
 
         if (this->verbose) {
-            std::cout << "\t* Sending " << msgs::Discovery_Type_Name(_type) << " msg ["
-                      << _pub.Topic() << "]" << std::endl;
+            std::cout << "\t* Sending " << msgs::Discovery_Type_Name(_type)
+                      << " msg [" << _pub.Topic() << "]" << std::endl;
         }
     }
 

@@ -1,0 +1,8 @@
+--- # Subcommands available inside aerozen-param.
+format: 1.0.0
+library_name: aerozen-param
+library_version: @PROJECT_VERSION_FULL@
+library_path: @aerozen_param_ruby_path@
+commands:
+    - param   : List, get or set parameters.
+---

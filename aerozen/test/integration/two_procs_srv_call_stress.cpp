@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -32,47 +32,44 @@
 
 using namespace gz;
 
-static std::string partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string partition;         // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
-TEST(twoProcSrvCall, ThousandCalls)
-{
-  auto pi = gz::utils::Subprocess(
-    {test_executables::kTwoProcsSrvCallReplierInc, partition});
+TEST(twoProcSrvCall, ThousandCalls) {
+    auto pi = gz::utils::Subprocess(
+        {test_executables::kTwoProcsSrvCallReplierInc, partition});
 
-  msgs::Int32 req;
-  msgs::Int32 response;
-  bool result;
-  unsigned int timeout = 1000;
-  transport::Node node;
+    msgs::Int32 req;
+    msgs::Int32 response;
+    bool result;
+    unsigned int timeout = 1000;
+    transport::Node node;
 
-  ASSERT_TRUE(transport::waitForService(node, g_topic))
-      << "Service not discovered within timeout";
+    ASSERT_TRUE(transport::waitForService(node, g_topic))
+        << "Service not discovered within timeout";
 
-  for (int i = 0; i < 15000; i++)
-  {
-    req.set_data(i);
-    ASSERT_TRUE(node.Request(g_topic, req, timeout, response, result));
+    for (int i = 0; i < 15000; i++) {
+        req.set_data(i);
+        ASSERT_TRUE(node.Request(g_topic, req, timeout, response, result));
 
-    // Check the service response.
-    ASSERT_TRUE(result);
-    EXPECT_EQ(i, response.data());
-  }
+        // Check the service response.
+        ASSERT_TRUE(result);
+        EXPECT_EQ(i, response.data());
+    }
 
-  pi.Terminate();
-  pi.Join();
+    pi.Terminate();
+    pi.Join();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", partition);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

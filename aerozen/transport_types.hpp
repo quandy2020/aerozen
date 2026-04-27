@@ -229,6 +229,6 @@ namespace msgs = ::aerozen::msgs;
 namespace gz {
 namespace transport = ::aerozen;
 namespace msgs = ::aerozen::msgs;
-}
+}  // namespace gz
 
 #endif  // AEROZEN_TRANSPORT_TYPES_HPP_

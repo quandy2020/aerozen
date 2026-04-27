@@ -47,7 +47,7 @@ std::string DetermineHost();
 std::vector<std::string> DetermineInterfaces();
 
 inline std::vector<std::string> determineInterfaces() {
-  return DetermineInterfaces();
+    return DetermineInterfaces();
 }
 
 /// \brief Determine the computer's hostname.

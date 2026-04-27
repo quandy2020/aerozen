@@ -50,28 +50,33 @@ AssertionResult::AssertionResult(const AssertionResult& other)
 
 // Swaps two AssertionResults.
 void AssertionResult::swap(AssertionResult& other) {
-  using std::swap;
-  swap(success_, other.success_);
-  swap(message_, other.message_);
+    using std::swap;
+    swap(success_, other.success_);
+    swap(message_, other.message_);
 }
 
 // Returns the assertion's negation. Used with EXPECT/ASSERT_FALSE.
 AssertionResult AssertionResult::operator!() const {
-  AssertionResult negation(!success_);
-  if (message_.get() != nullptr) negation << *message_;
-  return negation;
+    AssertionResult negation(!success_);
+    if (message_.get() != nullptr)
+        negation << *message_;
+    return negation;
 }
 
 // Makes a successful assertion result.
-AssertionResult AssertionSuccess() { return AssertionResult(true); }
+AssertionResult AssertionSuccess() {
+    return AssertionResult(true);
+}
 
 // Makes a failed assertion result.
-AssertionResult AssertionFailure() { return AssertionResult(false); }
+AssertionResult AssertionFailure() {
+    return AssertionResult(false);
+}
 
 // Makes a failed assertion result with the given failure message.
 // Deprecated; use AssertionFailure() << message.
 AssertionResult AssertionFailure(const Message& message) {
-  return AssertionFailure() << message;
+    return AssertionFailure() << message;
 }
 
 }  // namespace testing

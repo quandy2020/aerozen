@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -28,35 +28,32 @@
 
 using namespace gz;
 
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
 /// \brief Provide a service.
-bool srvEcho(const msgs::Int32 &_req, msgs::Int32 &_rep)
-{
-  _rep.set_data(_req.data());
-  return true;
+bool srvEcho(const msgs::Int32& _req, msgs::Int32& _rep) {
+    _rep.set_data(_req.data());
+    return true;
 }
 
 //////////////////////////////////////////////////
-void runReplier()
-{
-  transport::Node node;
-  EXPECT_TRUE(node.Advertise(g_topic, srvEcho));
-  std::this_thread::sleep_for(std::chrono::milliseconds(6000));
+void runReplier() {
+    transport::Node node;
+    EXPECT_TRUE(node.Advertise(g_topic, srvEcho));
+    std::this_thread::sleep_for(std::chrono::milliseconds(6000));
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc != 2)
-  {
-    std::cerr << "Partition name has not be passed as argument" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Partition name has not be passed as argument"
+                  << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  runReplier();
+    runReplier();
 }

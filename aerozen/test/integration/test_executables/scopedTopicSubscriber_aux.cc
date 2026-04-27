@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <chrono>
@@ -29,55 +29,50 @@
 using namespace gz;
 
 static bool cbExecuted;
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 static int data = 5;
 
 //////////////////////////////////////////////////
 /// \brief Function is called every time a topic update is received.
-void cb(const msgs::Int32 &_msg)
-{
-  EXPECT_EQ(_msg.data(), data);
-  cbExecuted = true;
+void cb(const msgs::Int32& _msg) {
+    EXPECT_EQ(_msg.data(), data);
+    cbExecuted = true;
 }
 
 //////////////////////////////////////////////////
-void subscriber()
-{
-  cbExecuted = false;
-  transport::Node node;
+void subscriber() {
+    cbExecuted = false;
+    transport::Node node;
 
-  EXPECT_TRUE(node.Subscribe(g_topic, cb));
+    EXPECT_TRUE(node.Subscribe(g_topic, cb));
 
-  int i = 0;
-  while (i < 100 && !cbExecuted)
-  {
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    ++i;
-  }
+    int i = 0;
+    while (i < 100 && !cbExecuted) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        ++i;
+    }
 
-  // Check that the message was not received because the scope was Process.
-  EXPECT_FALSE(cbExecuted);
-  cbExecuted = false;
+    // Check that the message was not received because the scope was Process.
+    EXPECT_FALSE(cbExecuted);
+    cbExecuted = false;
 }
 
 //////////////////////////////////////////////////
-TEST(ScopedTopicTest, SubscriberTest)
-{
-  subscriber();
+TEST(ScopedTopicTest, SubscriberTest) {
+    subscriber();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc != 2)
-  {
-    std::cerr << "Partition name has not be passed as argument" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Partition name has not be passed as argument"
+                  << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
+#include <gz/msgs/int32.pb.h>
 #include <chrono>
 #include <string>
-#include <gz/msgs/int32.pb.h>
 
 #include "gtest/gtest.h"
 #include "gz/transport/Node.hh"
@@ -31,57 +31,54 @@
 
 using namespace gz;
 
-static std::string partition; // NOLINT(*)
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string partition;         // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 
 //////////////////////////////////////////////////
-TEST(authPubSub, InvalidAuth)
-{
-  // Setup the username and password for this test
-  ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_USERNAME", "admin"));
-  ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_PASSWORD", "test"));
+TEST(authPubSub, InvalidAuth) {
+    // Setup the username and password for this test
+    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_USERNAME", "admin"));
+    ASSERT_TRUE(gz::utils::setenv("GZ_TRANSPORT_PASSWORD", "test"));
 
-  transport::Node node;
-  auto pub = node.Advertise<msgs::Int32>(g_topic);
-  EXPECT_TRUE(pub);
+    transport::Node node;
+    auto pub = node.Advertise<msgs::Int32>(g_topic);
+    EXPECT_TRUE(pub);
 
-  // No subscribers yet.
-  EXPECT_FALSE(pub.HasConnections());
+    // No subscribers yet.
+    EXPECT_FALSE(pub.HasConnections());
 
-  auto pi = gz::utils::Subprocess(
-      {test_executables::kAuthPubSubSubscriberInvalid,
-      partition, "bad", "invalid"});
+    auto pi =
+        gz::utils::Subprocess({test_executables::kAuthPubSubSubscriberInvalid,
+                               partition, "bad", "invalid"});
 
-  msgs::Int32 msg;
-  msg.set_data(1);
+    msgs::Int32 msg;
+    msg.set_data(1);
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-  // \todo: Fix this when Node::Publisher::HasConnections takes into account
-  // authentication.
-  // We should still have no subscribers.
-  // EXPECT_FALSE(pub.HasConnections());
+    // \todo: Fix this when Node::Publisher::HasConnections takes into account
+    // authentication.
+    // We should still have no subscribers.
+    // EXPECT_FALSE(pub.HasConnections());
 
-  // Publish messages for a few seconds
-  for (auto i = 0; i < 5; ++i)
-  {
-    EXPECT_TRUE(pub.Publish(msg));
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }
+    // Publish messages for a few seconds
+    for (auto i = 0; i < 5; ++i) {
+        EXPECT_TRUE(pub.Publish(msg));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
 
-  pi.Terminate();
-  pi.Join();
+    pi.Terminate();
+    pi.Join();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  // Get a random partition name.
-  partition = testing::getRandomNumber();
+int main(int argc, char** argv) {
+    // Get a random partition name.
+    partition = testing::getRandomNumber();
 
-  // Set the partition name for this process.
-  gz::utils::setenv("GZ_PARTITION", partition);
+    // Set the partition name for this process.
+    gz::utils::setenv("GZ_PARTITION", partition);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

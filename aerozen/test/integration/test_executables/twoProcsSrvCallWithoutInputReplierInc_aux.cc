@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 #include <gz/msgs/int32.pb.h>
 
 #include <limits>
@@ -28,45 +28,41 @@
 
 using namespace gz;
 
-static std::string g_topic = "/foo"; // NOLINT(*)
+static std::string g_topic = "/foo";  // NOLINT(*)
 static int g_data = 5;
 
 //////////////////////////////////////////////////
 /// \brief Provide a service without input.
-bool srvWithoutInput(msgs::Int32 &_rep)
-{
-  _rep.set_data(g_data);
-  return true;
+bool srvWithoutInput(msgs::Int32& _rep) {
+    _rep.set_data(g_data);
+    return true;
 }
 
 //////////////////////////////////////////////////
-void runReplier()
-{
-  transport::Node node;
-  EXPECT_TRUE(node.Advertise(g_topic, srvWithoutInput));
+void runReplier() {
+    transport::Node node;
+    EXPECT_TRUE(node.Advertise(g_topic, srvWithoutInput));
 
-  // Run the node until we get an input in stdin indicating we should exit
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max());
+    // Run the node until we get an input in stdin indicating we should exit
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max());
 }
 
 //////////////////////////////////////////////////
-TEST(twoProcSrvCallWithoutInputReplierAux, SrvProcReplier)
-{
-  runReplier();
+TEST(twoProcSrvCallWithoutInputReplierAux, SrvProcReplier) {
+    runReplier();
 }
 
 //////////////////////////////////////////////////
-int main(int argc, char **argv)
-{
-  if (argc != 2)
-  {
-    std::cerr << "Partition name has not be passed as argument" << std::endl;
-    return -1;
-  }
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Partition name has not be passed as argument"
+                  << std::endl;
+        return -1;
+    }
 
-  // Set the partition name for this test.
-  gz::utils::setenv("GZ_PARTITION", argv[1]);
+    // Set the partition name for this test.
+    gz::utils::setenv("GZ_PARTITION", argv[1]);
 
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -36,90 +36,92 @@ class DynamicFactory;
 /// This class will also try to load all Protobuf descriptors in paths
 /// provided in LoadDescriptors as well as the GZ_DESCRIPTOR_PATH
 /// environment variable.
-class MessageFactory {
-  /// \brief Base message type
+class MessageFactory
+{
+    /// \brief Base message type
 public:
-  using Message = google::protobuf::Message;
+    using Message = google::protobuf::Message;
 
-  /// \brief Unique pointer to base message type
+    /// \brief Unique pointer to base message type
 public:
-  using MessagePtr = std::unique_ptr<Message>;
+    using MessagePtr = std::unique_ptr<Message>;
 
-  /// \brief Function that returns unique pointer to base message type
+    /// \brief Function that returns unique pointer to base message type
 public:
-  using FactoryFn = std::function<MessagePtr(void)>;
+    using FactoryFn = std::function<MessagePtr(void)>;
 
-  /// \brief A map of message types as strings to factory functions
+    /// \brief A map of message types as strings to factory functions
 public:
-  using FactoryFnCollection = std::map<std::string, FactoryFn>;
+    using FactoryFnCollection = std::map<std::string, FactoryFn>;
 
-  /// \brief Constructor
+    /// \brief Constructor
 public:
-  MessageFactory();
+    MessageFactory();
 
-  /// \brief Destructor
+    /// \brief Destructor
 public:
-  ~MessageFactory();
+    ~MessageFactory();
 
-  /// \brief Register a message.
-  /// \param[in] _msgType Type of message to register.
-  /// \param[in] _factoryFn Function that generates the message.
+    /// \brief Register a message.
+    /// \param[in] _msgType Type of message to register.
+    /// \param[in] _factoryFn Function that generates the message.
 public:
-  void Register(const std::string &_msgType, FactoryFn _factoryFn);
+    void Register(const std::string& _msgType, FactoryFn _factoryFn);
 
-  /// \brief Create a new instance of a message.
-  /// \param[in] _msgType Type of message to create.
-  /// \return Pointer to a google protobuf message. Null if the message
-  /// type could not be handled.
+    /// \brief Create a new instance of a message.
+    /// \param[in] _msgType Type of message to create.
+    /// \return Pointer to a google protobuf message. Null if the message
+    /// type could not be handled.
 public:
-  template <typename T> std::unique_ptr<T> New(const std::string &_msgType) {
-    return detail::dynamic_message_cast<T>(New(_msgType));
-  }
+    template <typename T>
+    std::unique_ptr<T> New(const std::string& _msgType) {
+        return detail::dynamic_message_cast<T>(New(_msgType));
+    }
 
-  /// \brief Create a new instance of a message.
-  /// \param[in] _msgType Type of message to create.
-  /// \param[in] _args Message arguments. This will populate the message.
-  /// \return Pointer to a google protobuf message. Null if the message
-  /// type could not be handled.
+    /// \brief Create a new instance of a message.
+    /// \param[in] _msgType Type of message to create.
+    /// \param[in] _args Message arguments. This will populate the message.
+    /// \return Pointer to a google protobuf message. Null if the message
+    /// type could not be handled.
 public:
-  template <typename T>
-  std::unique_ptr<T> New(const std::string &_msgType,
-                         const std::string &_args) {
-    return detail::dynamic_message_cast<T>(New(_msgType, _args));
-  }
+    template <typename T>
+    std::unique_ptr<T> New(const std::string& _msgType,
+                           const std::string& _args) {
+        return detail::dynamic_message_cast<T>(New(_msgType, _args));
+    }
 
-  /// \brief Create a new instance of a message.
-  /// \param[in] _msgType Type of message to create.
-  /// \return Pointer to a google protobuf message. Null if the message
-  /// type could not be handled.
+    /// \brief Create a new instance of a message.
+    /// \param[in] _msgType Type of message to create.
+    /// \return Pointer to a google protobuf message. Null if the message
+    /// type could not be handled.
 public:
-  MessagePtr New(const std::string &_msgType);
+    MessagePtr New(const std::string& _msgType);
 
-  /// \brief Create a new instance of a message.
-  /// \param[in] _msgType Type of message to create.
-  /// \param[in] _args Message arguments. This will populate the message.
-  /// \return Pointer to a google protobuf message. Null if the message
-  /// type could not be handled.
+    /// \brief Create a new instance of a message.
+    /// \param[in] _msgType Type of message to create.
+    /// \param[in] _args Message arguments. This will populate the message.
+    /// \return Pointer to a google protobuf message. Null if the message
+    /// type could not be handled.
 public:
-  MessagePtr New(const std::string &_msgType, const std::string &_args);
+    MessagePtr New(const std::string& _msgType, const std::string& _args);
 
-  /// \brief Get all the message types
-  /// \param[out] _types Vector of strings of the message types.
+    /// \brief Get all the message types
+    /// \param[out] _types Vector of strings of the message types.
 public:
-  void Types(std::vector<std::string> &_types);
+    void Types(std::vector<std::string>& _types);
 
-  /// \brief Load a collection of descriptor .desc files.
-  /// \param[in] _paths A set of directories containing .desc descriptor
-  /// files. Each directory should be separated by ":".
+    /// \brief Load a collection of descriptor .desc files.
+    /// \param[in] _paths A set of directories containing .desc descriptor
+    /// files. Each directory should be separated by ":".
 public:
-  void LoadDescriptors(const std::string &_paths);
+    void LoadDescriptors(const std::string& _paths);
 
-  /// \brief A list of registered message types
+    /// \brief A list of registered message types
 private:
-  FactoryFnCollection msgMap;
+    FactoryFnCollection msgMap;
 
-  /// \brief Pointer to dynamic factory implementation
-  std::unique_ptr<DynamicFactory> dynamicFactory;
+    /// \brief Pointer to dynamic factory implementation
+    std::unique_ptr<DynamicFactory> dynamicFactory;
 };
-} // namespace aerozen
-#endif // AEROZEN_MESSAGE_FACTORY_HPP_
+}  // namespace aerozen
+#endif  // AEROZEN_MESSAGE_FACTORY_HPP_

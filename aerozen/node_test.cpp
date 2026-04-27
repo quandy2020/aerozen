@@ -99,7 +99,8 @@ void cb2(const msgs::Int32& _msg) {
 void cbInfo(const msgs::Int32& _msg, const transport::MessageInfo& _info) {
     EXPECT_EQ(_info.Topic(), g_topic);
     EXPECT_EQ(_msg.data(), data);
-    EXPECT_TRUE(_info.Partition().empty() || _info.Partition() == g_FQNPartition);
+    EXPECT_TRUE(_info.Partition().empty() ||
+                _info.Partition() == g_FQNPartition);
     EXPECT_EQ(_msg.GetTypeName(), _info.Type());
     EXPECT_TRUE(_info.IntraProcess());
     cbExecuted = true;
@@ -109,7 +110,8 @@ void cbInfo(const msgs::Int32& _msg, const transport::MessageInfo& _info) {
 void rawCbInfo(const char* _msgData, const size_t _size,
                const transport::MessageInfo& _info) {
     EXPECT_EQ(_info.Topic(), g_topic);
-    EXPECT_TRUE(_info.Partition().empty() || _info.Partition() == g_FQNPartition);
+    EXPECT_TRUE(_info.Partition().empty() ||
+                _info.Partition() == g_FQNPartition);
     EXPECT_TRUE(_info.IntraProcess());
     cbExecuted = true;
 
@@ -370,9 +372,9 @@ public:
             g_topic, reqStr, std::string(req.GetTypeName()),
             std::string(rep.GetTypeName()), timeout, repStr, result);
         if (!requestRawOk) {
-            requestRawOk = this->node.RequestRaw(
-                g_topic, reqStr, "gz.msgs.Int32", "gz.msgs.Int32", timeout,
-                repStr, result);
+            requestRawOk =
+                this->node.RequestRaw(g_topic, reqStr, "gz.msgs.Int32",
+                                      "gz.msgs.Int32", timeout, repStr, result);
         }
         if (requestRawOk) {
             ASSERT_TRUE(rep.ParseFromString(repStr));
@@ -2453,8 +2455,8 @@ TEST(NodeTest, TopicListRemap) {
     ASSERT_FALSE(topics.empty());
 
     // The advertised topic should include the remapped topic.
-    EXPECT_TRUE(
-        std::find(topics.begin(), topics.end(), g_topic_remap) != topics.end());
+    EXPECT_TRUE(std::find(topics.begin(), topics.end(), g_topic_remap) !=
+                topics.end());
 }
 
 /**
