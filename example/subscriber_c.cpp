@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@
 #include "aerozen/proto/stringmsg.pb.h"
 #include "aerozen/ciface.hpp"
 
-//////////////////////////////////////////////////
-/// \brief Function called each time a topic update is received.
+/**
+ * @brief Function called each time a topic update is received.
+ */
 void cb(const char *_data, const size_t _size, const char *_msgType,
         void *_userData)
 {
@@ -37,7 +38,9 @@ void cb(const char *_data, const size_t _size, const char *_msgType,
   printf("Partition[%s] Msg contents: %s\n", partition, msg.data().c_str());
 }
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   const char *partName = "red";

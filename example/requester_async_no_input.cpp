@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 duyongquan 
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ void responseCb(const aerozen::msgs::StringMsg &_rep, const bool _result)
     std::cerr << "Service call failed" << std::endl;
 }
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   // Create a transport node.

@@ -21,7 +21,6 @@
  * Launch the gz-transport publisher example so this example has
  * something to record.
  */
-
 #include <cstdint>
 #include <iostream>
 #include <regex>

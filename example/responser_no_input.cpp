@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@
 #include "aerozen/node.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
-/// \brief Provide a "quote" service.
-/// Well OK, it's just single-quote service but do you really need more?
+/**
+ * @brief Provide a "quote" service.
+ * Well OK, it's just single-quote service but do you really need more?
+ */
 bool srvQuote(aerozen::msgs::StringMsg &_rep)
 {
   std::string awesomeQuote = "This is it! This is the answer. It says here..."
@@ -39,7 +40,6 @@ bool srvQuote(aerozen::msgs::StringMsg &_rep)
   return true;
 }
 
-//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Create a transport node.

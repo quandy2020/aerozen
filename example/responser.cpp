@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@
 #include "aerozen/net_utils.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
-/// \brief Provide an "echo" service.
+/**
+ * @brief Provide an "echo" service.
+ */
 bool srvEcho(const aerozen::msgs::StringMsg &_req,
   aerozen::msgs::StringMsg &_rep)
 {
@@ -34,7 +35,6 @@ bool srvEcho(const aerozen::msgs::StringMsg &_req,
   return true;
 }
 
-//////////////////////////////////////////////////
 int main(int argc, char **argv)
 {
   // Let's print the list of our network interfaces.

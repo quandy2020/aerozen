@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,11 @@
 #include "aerozen/node.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
-/// \brief Function called each time a topic update is received.
-/// Note that this callback uses the generic signature, hence it may receive
-/// messages with different types.
+/**
+ * @brief Function called each time a topic update is received.
+ * Note that this callback uses the generic signature, hence it may receive
+ * messages with different types.
+ */
 void cb(const google::protobuf::Message &_msg,
         const aerozen::MessageInfo &_info)
 {
@@ -40,7 +41,9 @@ void cb(const google::protobuf::Message &_msg,
     std::cerr << "Error printing message" << std::endl;
 }
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   aerozen::Node node;

@@ -30,7 +30,6 @@
  */
 static std::atomic<bool> g_terminatePub(false);
 
-//////////////////////////////////////////////////
 /**
  * @brief Function callback executed when a SIGINT or SIGTERM signals are
  * captured. This is used to break the infinite loop that publishes messages

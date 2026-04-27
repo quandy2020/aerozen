@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <iostream>
 #include "aerozen/proto/stringmsg.pb.h"
 #include "aerozen/node.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   // Create a transport node.

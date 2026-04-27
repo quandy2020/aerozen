@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,17 @@
 #include "aerozen/node.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
+/**
+ * @brief Provide a oneway service.
+ */
 void srvOneway(const aerozen::msgs::StringMsg &_req)
 {
   std::cout << "Request received: [" << _req.data() << "]" << std::endl;
 }
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   // Create a transport node.

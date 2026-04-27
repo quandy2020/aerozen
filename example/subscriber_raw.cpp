@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Open Source Robotics Foundation
+ * Copyright (C) 2026 duyongquan <quandy2020@126.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@
 #include "aerozen/node.hpp"
 #include "aerozen/wait_helpers.hpp"
 
-//////////////////////////////////////////////////
-/// \brief Function called each time a topic update is received.
+/**
+ * @brief Function called each time a topic update is received.
+ */
 void cb(const char *_data, const size_t _size,
         const aerozen::MessageInfo &_info)
 {
@@ -33,7 +34,9 @@ void cb(const char *_data, const size_t _size,
   std::cout << "Msg contents: " << msg.data() << std::endl;
 }
 
-//////////////////////////////////////////////////
+/**
+ * @brief Main function.
+ */
 int main(int argc, char **argv)
 {
   aerozen::Node node;
